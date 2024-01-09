@@ -1,0 +1,213 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    scrollbar-width: thin;
+}
+
+.unstyle {
+    all: unset;
+}
+
+hr {
+    margin: 0;
+    height: 2px;
+    background-color: rgb(255, 255, 255);
+}
+
+/* CreatePay.css */
+
+.button {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 10%;
+    left: 45%;
+}
+
+/* Home.css */
+
+.bar {
+    display: flex;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #304c9b;
+    /* Cambia este color al que prefieras */
+    padding: 20px 0;
+    /* Ajusta el padding para cambiar el grosor de la barra */
+}
+
+.link {
+    color: white;
+    /* Cambia este color al que prefieras */
+    text-decoration: none;
+}
+
+.create-pay {
+    color: white;
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    border-radius: 5px;
+    font-size: 16px;
+    top: 20%;
+    background-color: #5a7ad1;
+    /* Cambia este color al que prefieras */
+    padding: 10px 20px;
+    /* Ajusta el padding para cambiar el grosor de la barra */
+    left: 45%;
+}
+
+/* Form.css */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    background-color: #f0f0f0;
+}
+
+/* Estilos para los campos de entrada */
+.input-field {
+    width: 30%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 15px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Estilos para el botón */
+.submit-button {
+    width: 30%;
+    padding: 10px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #45a049;
+}
+
+/* Item.css*/  
+
+/* Estilos generales para contenedores */
+.container-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.items-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+/* Estilos para cada ítem */
+.item {
+    width: calc(50% - 1rem);
+    text-align: center;
+    border: 1px solid #eaeaea;
+    padding: 2rem;
+    font-size: 16px;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    width: calc(50% - 1rem);
+    text-align: center;
+    border: 1px solid #eaeaea;
+    padding: 2rem ; 
+    font-size: 16px;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 14rem;
+}
+
+.item h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+}
+
+.item p {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+}
+
+.item button {
+    font-size: 1rem;
+    margin-left: 6px;
+    margin-right: 6px;
+    background-color: #b1d5ff;
+}
+
+/* .container-item {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+    gap: 2rem;
+    align-items: center; 
+    padding: 2rem; 
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    width: calc(50% - 1rem);
+    text-align: center;
+    border: 1px solid #eaeaea;
+    padding: 2rem ; 
+    font-size: 16px;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.item h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+}
+
+.item p {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+}
+
+.item button {
+    font-size: 1rem;
+    margin-left: 6px;
+    margin-right: 6px;
+    background-color: #b1d5ff;
+} */
+
+/* Shop.css */
+
+/* .items-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    justify-content: center; 
+    align-items: center; 
+    padding: 2rem;
+} */

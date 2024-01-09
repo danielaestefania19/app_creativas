@@ -1,0 +1,31 @@
+.
+├── dfx.json
+├── dist
+│   ├── assets
+│   │   ├── dfinity.554e266e.svg
+│   │   ├── index.2a616fa8.css
+│   │   └── index.80ec0771.js
+│   └── index.html
+├── estructura_proyecto.txt
+├── frontend
+│   ├── App.jsx
+│   ├── assets
+│   │   ├── dfinity.svg
+│   │   ├── favicon.png
+│   │   └── logo-dark.svg
+│   ├── components
+│   │   ├── Counter.jsx
+│   │   ├── Profile.jsx
+│   │   └── Transfer.jsx
+│   ├── index.css
+│   └── main.jsx
+├── index.html
+├── package.json
+├── package-lock.json
+├── utils
+│   ├── abi
+│   │   └── Crypay.json
+│   └── constans.js
+└── vite.config.js
+
+7 directories, 21 files
