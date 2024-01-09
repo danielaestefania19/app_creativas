@@ -35,7 +35,7 @@ const PaymentDetails = ({ externalPaymentId }) => {
     }
   };
 
-
+console.log(externalPaymentId)
   useEffect(() => {
     fetchPaymentDetails();
   }, [externalPaymentId]);

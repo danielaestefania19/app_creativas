@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
@@ -24,19 +24,37 @@ const Item = ({ name, price }) => {
   const [paymentStarted, setPaymentStarted] = useState(false);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
 
+  useEffect(() => {
+    const fetchPaymentCount = async () => {
+      const paymentCount = await contract.paymentCount();
+      setExternalPaymentId(parseInt(paymentCount));
+      console.log(paymentCount)
+    };
+
+    fetchPaymentCount();
+  }, []);
+
+  const checkIfPaymentExists = async (id) => {
+    return await contract.checkIfPaymentExists(id);
+  };
+
   const startNewPayment = async () => {
     try {
-      const newExternalPaymentId = 1239;
+      const paymentExists = await checkIfPaymentExists(externalPaymentId);
+      if (paymentExists) {
+        console.log("El pago ya existe.");
+        return;
+      }
+
       console.log("Iniciando un nuevo pago con los siguientes valores:");
-      console.log("externalPaymentId: ", newExternalPaymentId);
+      console.log("externalPaymentId: ", externalPaymentId);
       console.log("price: ", ethers.utils.formatEther(localPrice));
 
-      const tx = await contract.startNewPayment(newExternalPaymentId, localPrice, { gasLimit: 2000000 });
+      const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: 2000000 });
       console.log("El hash de tu transacción es: ", tx.hash, "\n ¡Verifica en Infura o Etherscan para ver el estado de tu transacción!");
       console.log(localPrice)
       console.log(localPrice.toString)
 
-      setExternalPaymentId(newExternalPaymentId);
       setPaymentStarted(true);
       setShowPaymentDetails(true);
     } catch (error) {

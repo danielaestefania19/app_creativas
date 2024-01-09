@@ -16,6 +16,7 @@ const WalletPay = ({ id, amount }) => { // Recibe id y amount como props
           console.error('Por favor, ingresa un ID y una cantidad');
           return;
       }
+
   
       // Obtén el firmante de window.ethereum
       const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();

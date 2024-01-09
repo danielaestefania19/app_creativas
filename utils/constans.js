@@ -15,5 +15,5 @@ export const BITFINITY_CHAIN = {
     //blockExplorerUrls: []
   };
   
-  export const contractAddress = "0x09A3CA0D0A26f1e0aFC71BBF7d0bED37dFD8BC25";
+  export const contractAddress = "0x2CedB9c20700dd74ee784078A0Ba5F77d38BF327";
   
