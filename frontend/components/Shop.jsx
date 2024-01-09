@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
- import { eccomerce } from "../../src/declarations/eccomerce/";// Asegúrate de que la ruta del archivo sea correcta
+  import { eccomerce } from "../../src/declarations/eccomerce/";// Asegúrate de que la ruta del archivo sea correcta
 import Item from "./Item";
 import '../styles/styles.css';
 
