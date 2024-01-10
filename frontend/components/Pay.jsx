@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Button } from '@material-ui/core';
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
 import { contractAddress } from "../../utils/constans.js";
@@ -42,12 +41,11 @@ const WalletPay = ({ id, amount }) => {
 
     return (
         <div className="WalletCard">
-            <Button
-                style={{ background: "#A5CC82" }}
+            <button className='bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white'
                 onClick={payHandler}
                 disabled={isLoading}>
                 {isLoading ? 'Realizando transacción...' : 'Pay'}
-            </Button>
+                </button>
             {paymentId && <CompletePayment id={paymentId} />} {/* Aquí se renderiza el componente CompletePayment si paymentId es verdadero */}
         </div>
     )

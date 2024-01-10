@@ -43,11 +43,11 @@ const WalletConnect = () => {
             <h3 className="h4">
                Disfruta pagar con crypto
             </h3>
-            <Button
-                style={{ background: defaultAccount ? "#A5CC82" : "white" }}
+            <button
+                className='bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white'
                 onClick={connectwalletHandler}>
                 {defaultAccount ? "Connected!!" : "Connect"}
-            </Button>
+            </button>
             <div className="displayAccount">
                 <h4 className="walletAddress">Address:{defaultAccount}</h4>
                 <div className="balanceDisplay">
