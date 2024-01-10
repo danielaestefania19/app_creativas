@@ -1,6 +1,0 @@
-service : (opt text) -> {
-  get_items : () -> (vec record { text; nat }) query;
-  set_item : (text, nat) -> ();
-  remove_item : (text) -> ();
-}
-
