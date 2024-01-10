@@ -8,7 +8,6 @@ import PaymentDetails from "./PaymentDetails";
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-console.log(PRIVATE_KEY)
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, Crypay, wallet);
@@ -16,6 +15,7 @@ const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 const Item = ({ name, price }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   let decimalString = price + ".0";
   let wei = ethers.utils.parseEther(decimalString);
@@ -23,12 +23,16 @@ const Item = ({ name, price }) => {
   const [localPrice, setLocalPrice] = useState(wei);
   const [paymentStarted, setPaymentStarted] = useState(false);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPaymentCount = async () => {
-      const paymentCount = await contract.paymentCount();
-      setExternalPaymentId(parseInt(paymentCount));
-      console.log(paymentCount)
+      try {
+        const paymentCount = await contract.paymentCount();
+        setExternalPaymentId(parseInt(paymentCount));
+      } catch (error) {
+        console.log("Error al obtener el conteo de pagos: " + error.message);
+      }
     };
 
     fetchPaymentCount();
@@ -39,27 +43,23 @@ const Item = ({ name, price }) => {
   };
 
   const startNewPayment = async () => {
+    setIsLoading(true);
     try {
-      const paymentExists = await checkIfPaymentExists(externalPaymentId);
-      if (paymentExists) {
-        console.log("El pago ya existe.");
-        return;
+      let paymentExists = await checkIfPaymentExists(externalPaymentId);
+      while (paymentExists) {
+        setExternalPaymentId(prevId => prevId + 1);
+        paymentExists = await checkIfPaymentExists(externalPaymentId);
       }
 
-      console.log("Iniciando un nuevo pago con los siguientes valores:");
-      console.log("externalPaymentId: ", externalPaymentId);
-      console.log("price: ", ethers.utils.formatEther(localPrice));
-
-      const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: 2000000 });
-      console.log("El hash de tu transacción es: ", tx.hash, "\n ¡Verifica en Infura o Etherscan para ver el estado de tu transacción!");
-      console.log(localPrice)
-      console.log(localPrice.toString)
+      const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
+      const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
 
       setPaymentStarted(true);
       setShowPaymentDetails(true);
     } catch (error) {
-      console.log("Algo salió mal al enviar tu transacción:", error);
+      setError("Algo salió mal al enviar tu transacción: " + error.message);
     }
+    setIsLoading(false);
   };
 
   const handleBuyClick = async () => {
@@ -69,7 +69,7 @@ const Item = ({ name, price }) => {
         navigate(`/pay/${externalPaymentId}`);
       }
     } catch (err) {
-      console.error(err);
+      setError("Error al iniciar el pago: " + err.message);
     }
   };
 
@@ -77,9 +77,12 @@ const Item = ({ name, price }) => {
     <div className="container-item">
       <div className="item">
         <h3>{name}</h3>
-        <div>{ethers.utils.formatEther(localPrice)} BFT (su equivalente en wei: {localPrice.toString()})</div>
-        <button onClick={handleBuyClick}>Comprar {name}</button>
+        <div>{ethers.utils.formatEther(localPrice)} BFT </div>
+        <button onClick={handleBuyClick} disabled={isLoading}>
+          {isLoading ? 'Procesando la transacción...' : `Comprar ${name}`}
+        </button>
         {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} />}
+        {error && <div className="error">{error}</div>}
       </div>
     </div>
   );

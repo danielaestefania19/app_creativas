@@ -1,4 +1,3 @@
-// WalletPay.js
 import React, { useState } from 'react';
 import { Button } from '@material-ui/core';
 import { ethers } from 'ethers';
@@ -14,12 +13,15 @@ const contract = new ethers.Contract(contractAddress, Crypay, provider);
 
 const WalletPay = ({ id, amount }) => {
     const [paymentId, setPaymentId] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const payHandler = async () => {
         if (!id || !amount) {
-            console.error('Por favor, ingresa un ID y una cantidad');
+            alert('Por favor, ingresa un ID y una cantidad');
             return;
         }
+
+        setIsLoading(true);
 
         // Obtén el firmante de window.ethereum
         const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
@@ -29,23 +31,22 @@ const WalletPay = ({ id, amount }) => {
             const tx = await contractWithSigner.pay(parseInt(id), { value: amount });
             await tx.wait();
 
-            console.log(`Pago realizado con éxito. Detalles de la transacción: ${tx.hash}`);
+            alert(`Pago realizado con éxito. Detalles de la transacción: ${tx.hash}`);
             setPaymentId(id); // Aquí estableces el ID del pago
         } catch (error) {
-            console.error('Error al realizar el pago:', error);
+            alert('Error al realizar el pago: ' + error.message);
         }
-    }
 
-    console.log(ethers.utils.parseEther(amount))
-    console.log(id)
-    console.log(amount)
+        setIsLoading(false);
+    }
 
     return (
         <div className="WalletCard">
             <Button
                 style={{ background: "#A5CC82" }}
-                onClick={payHandler}>
-                Pay
+                onClick={payHandler}
+                disabled={isLoading}>
+                {isLoading ? 'Realizando transacción...' : 'Pay'}
             </Button>
             {paymentId && <CompletePayment id={paymentId} />} {/* Aquí se renderiza el componente CompletePayment si paymentId es verdadero */}
         </div>

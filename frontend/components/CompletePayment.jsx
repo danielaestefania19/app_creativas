@@ -1,5 +1,4 @@
-// CompletePayment.js
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@material-ui/core';
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
@@ -14,28 +13,32 @@ const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
 const CompletePayment = ({ id }) => {
+    const [isLoading, setIsLoading] = useState(false);
+
     const completeHandler = async () => {
         if (!id) {
-            console.error('Por favor, ingresa un ID');
+            alert('Por favor, ingresa un ID');
             return;
         }
 
+        setIsLoading(true);
         try {
             const tx = await contract.complete(parseInt(id));
             await tx.wait();
-
-            console.log(`Pago completado con éxito. Detalles de la transacción: ${tx.hash}`);
+            alert(`Pago completado con éxito. Detalles de la transacción: ${tx.hash}`);
         } catch (error) {
-            console.error('Error al completar el pago:', error);
+            alert('Error al completar el pago: ' + error.message);
         }
+        setIsLoading(false);
     }
 
     return (
         <div className="CompletePayment" style={{ position: 'fixed', bottom: '50px', width: '100%', display: 'flex', justifyContent: 'center' }}>
             <Button
                 style={{ background: "#000000", color: "#FFFFFF" }}
-                onClick={completeHandler}>
-                Envío Recibido
+                onClick={completeHandler}
+                disabled={isLoading}>
+                {isLoading ? 'Completando Transacción' : 'Envío Recibido'}
             </Button>
         </div>
     )
