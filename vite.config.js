@@ -86,5 +86,7 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify(
       isDev ? "development" : "production",
     ),
+    "process.env.VITE_BACKEND_URL": JSON.stringify(process.env.VITE_BACKEND_URL),
+    "process.env.VITE_PRIVATE_KEY": JSON.stringify(process.env.VITE_PRIVATE_KEY),
   },
 })

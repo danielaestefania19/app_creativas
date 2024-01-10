@@ -5,9 +5,10 @@ import { contractAddress } from "../../utils/constans.js";
 import WalletConnect from './WalletConnect.jsx'; // Importa el componente WalletConnect
 import WalletPay from './Pay'; // Importa el componente WalletPay
 
-const PRIVATE_KEY = "40e9c60a01bf78d942efa906b56ee28c49bbb51258e65825edee7545940a5f8e"
-const PUBLIC_KEY = "0x8Af24521Ef46D6203c0633DC34ec32d558F3BEFA"
-const API_URL = "https://testnet.bitfinity.network"
+
+const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);

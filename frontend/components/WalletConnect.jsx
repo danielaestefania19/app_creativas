@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@material-ui/core';
 import { ethers } from 'ethers';
 
-const API_URL = "https://testnet.bitfinity.network"
+
+const API_URL = import.meta.env.VITE_BACKEND_URL
 
 // Configuración de ethers
 const provider = new ethers.providers.JsonRpcProvider(API_URL);

@@ -6,7 +6,8 @@ import Shop from "./components/Shop.jsx"
 import PaymentDetails from "./components/PaymentDetails.jsx";
 import PaymentButton from "./components/Pay.jsx"
 import { ChakraProvider } from "@chakra-ui/react";
-import Item from "./components/Item.jsx"
+import  GetBillingAddressButton from "./components/GetStatus.jsx"
+
 
 function App() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ function App() {
   const seestatus = () => {
     navigate('pay');
   };
-  
+
 
   return (
     <div className="App">
