@@ -74,18 +74,15 @@ const Item = ({ name, price }) => {
   };
 
   return (
-    <div className="container-item">
-      <div className="item">
-        <h3>{name}</h3>
-        <div>{ethers.utils.formatEther(localPrice)} BFT </div>
-        <button onClick={handleBuyClick} disabled={isLoading}>
+    <div className="bg-[#f7e8f0] p-4 rounded-lg max-w-sm">
+        <h3 className="text-xl font-bold mb-1s">{name}</h3>
+        <div className="mb-3">{ethers.utils.formatEther(localPrice)} BFT </div>
+        <button className="bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white" onClick={handleBuyClick} disabled={isLoading}>
           {isLoading ? 'Procesando la transacción...' : `Comprar ${name}`}
         </button>
         {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} />}
         {error && <div className="error">{error}</div>}
-      </div>
     </div>
   );
 };
-
 export default Item;

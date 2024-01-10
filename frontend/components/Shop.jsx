@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { eccomerce } from "../../src/declarations/eccomerce/";// Asegúrate de que la ruta del archivo sea correcta
+import { eccomerce } from "../../src/declarations/eccomerce/";
 import Item from "./Item";
 import '../styles/styles.css';
 
@@ -23,7 +23,7 @@ const Shop = () => {
   }, []);
 
   return (
-    <div className="item-container">
+    <div className="grid grid-cols-3 gap-1 justify-center items-center">
       {loading ? (
         <div>Loading...</div>
       ) : (

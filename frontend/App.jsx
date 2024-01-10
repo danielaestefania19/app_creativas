@@ -19,16 +19,16 @@ function App() {
 
   return (
     <div className="App">
+      <Home/>
       <Routes>
-      <Route path="/" element={<Home/>} />
+        <Route path="/" element={<Body onCreatePayment={handleCreatePayment} />} />
         <Route path="/other/shop" element={<Shop />} />
         <Route path="/status" element={<PaymentDetails />} />
         <Route path="/pay" element={<PaymentButton />} />
       </Routes>
-      <Body onCreatePayment={handleCreatePayment} />
     </div>
   );
-}
+};
 
 export default () => (
   <ChakraProvider>
