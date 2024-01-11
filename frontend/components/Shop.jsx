@@ -27,8 +27,8 @@ const Shop = () => {
       {loading ? (
         <div>Loading...</div>
       ) : (
-        items?.map(([name, price]) => {
-          return <Item name={name} price={price} key={name} />;
+        items?.map(([id, item]) => {
+          return <Item id={id} name={item.item} price={item.price} description={item.description} key={id} />;
         })
       )}
     </div>

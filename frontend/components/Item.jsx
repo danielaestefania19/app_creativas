@@ -12,7 +12,7 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
-const Item = ({ name, price }) => {
+const Item = ({ id, name, price, description }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +77,7 @@ const Item = ({ name, price }) => {
     <div className="bg-[#f7e8f0] p-4 rounded-lg max-w-sm">
         <h3 className="text-xl font-bold mb-1s">{name}</h3>
         <div className="mb-3">{ethers.utils.formatEther(localPrice)} BFT </div>
+        <p>{description}</p>
         <button className="bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white" onClick={handleBuyClick} disabled={isLoading}>
           {isLoading ? 'Procesando la transacción...' : `Comprar ${name}`}
         </button>
@@ -85,4 +86,5 @@ const Item = ({ name, price }) => {
     </div>
   );
 };
+
 export default Item;
