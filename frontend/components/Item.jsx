@@ -12,7 +12,7 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
-const Item = ({ name, price }) => {
+const Item = ({ name, price, addToCart }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,16 +73,33 @@ const Item = ({ name, price }) => {
     }
   };
 
+  const handleAddToCart = () => {
+    addToCart({ name, price, externalPaymentId, localPrice });
+  };
+
   return (
-    <div className="bg-[#f7e8f0] p-4 rounded-lg max-w-sm">
-        <h3 className="text-xl font-bold mb-1s">{name}</h3>
-        <div className="mb-3">{ethers.utils.formatEther(localPrice)} BFT </div>
-        <button className="bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white" onClick={handleBuyClick} disabled={isLoading}>
-          {isLoading ? 'Procesando la transacción...' : `Comprar ${name}`}
+    <div className="bg-[#f7e8f0] p-4 rounded-lg max-w-sm flex flex-col items-center">
+      <h3 className="text-xl font-bold mb-1">{name}</h3>
+      <div className="mb-3">{ethers.utils.formatEther(localPrice)} BFT </div>
+      <div className="flex">
+        <button
+          className="bg-[#c9398a] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white"
+          onClick={handleBuyClick}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Procesando la transacción...' : 'Comprar'}
         </button>
-        {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} />}
-        {error && <div className="error">{error}</div>}
+        <button
+          className="bg-[#3490dc] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white"
+          onClick={handleAddToCart}
+        >
+          Añadir al carrito
+        </button>
+      </div>
+      {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} />}
+      {error && <div className="error">{error}</div>}
     </div>
   );
 };
+
 export default Item;
