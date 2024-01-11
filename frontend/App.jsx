@@ -8,7 +8,7 @@ import PaymentDetails from "./components/PaymentDetails.jsx";
 import PaymentButton from "./components/Pay.jsx"
 import { ChakraProvider } from "@chakra-ui/react";
 import Login from "./components/Login.jsx"
-
+import SetItem from "./components/Providers/Set_items.jsx"
 
 
 function App() {

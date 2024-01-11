@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { eccomerce } from "../../src/declarations/eccomerce/";
+import { eccomerce } from "../../src/declarations/eccomerce";
 import Item from "./Item";
 import '../styles/styles.css';
 

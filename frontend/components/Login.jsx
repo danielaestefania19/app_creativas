@@ -47,8 +47,13 @@ const local_ii_url = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8080`;
           agent,
       });
 
+// if (Principal.anonymous() ==  await actor.whoami()) {
 
-  const principal = await actor.whoami();
+      //   console.log("Es anonymous")
+
+      // }
+
+const principal = await actor.whoami();
   console.log(principal.toString());
   setWhoami(principal.toString());
 };
