@@ -30,7 +30,7 @@ dependencies = [
  "easy-hasher",
  "hex",
  "ic-cdk",
- "ic-stable-structures",
+ "ic-stable-structures 0.6.1",
  "serde",
  "serde_bytes",
 ]
@@ -268,6 +268,7 @@ dependencies = [
  "b3_utils",
  "candid",
  "ic-cdk",
+ "ic-stable-structures 0.5.6",
  "serde",
  "serde_derive",
  "serde_json",
@@ -349,6 +350,12 @@ dependencies = [
  "serde_tokenstream",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "ic-stable-structures"
+version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95dce29e3ceb0e6da3e78b305d95365530f2efd2146ca18590c0ef3aa6038568"
 
 [[package]]
 name = "ic-stable-structures"

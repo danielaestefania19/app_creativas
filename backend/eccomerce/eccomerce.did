@@ -1,6 +1,13 @@
+type Item = record {
+  item: text;
+  price: nat64;
+  description: text;  
+
+}
 service : (opt text) -> {
-  get_items : () -> (vec record { text; nat }) query;
-  set_item : (text, nat) -> ();
-  remove_item : (text) -> ();
+  get_items : () -> (vec record { nat64; Item }) query;
+  set_item : (nat64, Item) -> ();
+  remove_item : (nat64) -> ();
+  whoami : () -> (principal) query;
 }
 

@@ -12,7 +12,7 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
-const Item = ({ name, price, addToCart }) => {
+const Item = ({ name, price, description,addToCart }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,33 +73,45 @@ const Item = ({ name, price, addToCart }) => {
     }
   };
 
-  const handleAddToCart = () => {
-    addToCart({ name, price, externalPaymentId, localPrice });
-  };
-
   return (
-    <div className="bg-[#f7e8f0] p-4 rounded-lg max-w-sm flex flex-col items-center">
-      <h3 className="text-xl font-bold mb-1">{name}</h3>
-      <div className="mb-3">{ethers.utils.formatEther(localPrice)} BFT </div>
-      <div className="flex">
+    <div>
+      <div className='w-full shadow-xl flex flex-col p-4 my-4 rounded-lg hover:scale-105 duration-300 bg-white'>
+        <h2 className='text-2xl font-bold text-center py-8'>{name}</h2>
+        <p className='text-center text-4xl font-bold'>{ethers.utils.formatEther(localPrice)}BFT</p>
+        <div className='text-center font-medium'>
+          <p className='py-2 border-b mx-8 mt-8'>{description}</p>
+        </div>
         <button
-          className="bg-[#c9398a] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white"
-          onClick={handleBuyClick}
-          disabled={isLoading}
-        >
+          className="bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto px-6 py-3" onClick={handleBuyClick} disabled={isLoading}>
           {isLoading ? 'Procesando la transacción...' : 'Comprar'}
         </button>
         <button
-          className="bg-[#3490dc] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white"
-          onClick={handleAddToCart}
+          className="bg-[#3490dc] w-[200px] rounded-md font-medium my-6 mx-auto px-6 py-3"
+          onClick={() => addToCart()}
         >
+          Añadir al carrito
+        </button>
+      </div>
+      {/*     <div className="bg-[#f7e8f0] p-4 rounded-lg max-w-sm">
+      <h3 className="text-xl font-bold mb-1">{name}</h3>
+      <div className="mb-3">{ethers.utils.formatEther(localPrice)} BFT </div>
+      <div className="flex">
+        <p>{description}</p>
+        <button
+          className="bg-[#c9398a] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white" onClick={handleBuyClick} disabled={isLoading}>
+        {isLoading ? 'Procesando la transacción...' : 'Comprar'}
+        </button>
+        <button
+          className="bg-[#3490dc] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white">
           Añadir al carrito
         </button>
       </div>
       {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} />}
       {error && <div className="error">{error}</div>}
+    </div> */}
     </div>
   );
 };
 
 export default Item;
+
