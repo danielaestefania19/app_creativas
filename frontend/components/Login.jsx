@@ -12,6 +12,8 @@ let actor = eccomerce;
 // console.log(API_URL)
 
 
+Principal.anonymous()
+
 // console.log(API_URL)
 
 const Login = () => {
