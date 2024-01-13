@@ -3,8 +3,7 @@ import { eccomerce } from "../../src/declarations/eccomerce/";
 import Item from "./Item";
 import Cart from "./Card.jsx";
 import '../styles/styles.css';
-
-// ...
+import { FiShoppingCart } from "react-icons/fi";
 
 const Shop = () => {
   const [items, setItems] = useState([]);
@@ -28,11 +27,9 @@ const Shop = () => {
   }, []);
 
   const addToCart = (item) => {
-    // Verificar si el artículo ya está en el carrito
     const existingItemIndex = cart.findIndex((cartItem) => cartItem.id === item.id);
   
     if (existingItemIndex !== -1) {
-      // Si ya existe, actualizar la cantidad
       setCart((prevCart) =>
         prevCart.map((cartItem, index) =>
           index === existingItemIndex
@@ -41,7 +38,6 @@ const Shop = () => {
         )
       );
     } else {
-      // Si no existe, agregarlo al carrito
       setCart((prevCart) => [...prevCart, { ...item, quantity: 1 }]);
     }
   };
@@ -67,7 +63,7 @@ const Shop = () => {
         <div>Loading...</div>
       ) : (
         items?.map(([id, item]) => {
-          return <Item id={id} name={item.item} price={item.price} description={item.description} key={id} addToCart={() => addToCart({ ...item })} />;
+          return <Item id={id} name={item.item} price={item.price} description={item.description} key={id} addToCart={() => addToCart({ ...item, id })} />;
         })
       )}
       {cartVisible && cart.length > 0 && <Cart cart={cart} removeFromCart={removeFromCart} onHideCart={handleToggleCart} />}
@@ -75,13 +71,10 @@ const Shop = () => {
         className="fixed bottom-4 right-4 bg-[#3490dc] text-white px-4 py-2 rounded-md"
         onClick={handleToggleCart}
       >
-        {cartVisible ? 'Ocultar Carrito' : 'Mostrar Carrito'}
+        {cartVisible ? 'Ocultar Carrito' : <FiShoppingCart className="mr-2" />}
       </button>
     </div>
   );
 };
 
 export default Shop;
-
-
-
