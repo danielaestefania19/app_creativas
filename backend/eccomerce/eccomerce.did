@@ -1,13 +1,51 @@
+type Rating = variant {
+    zero;
+    one;
+    two;
+    three;
+    four;
+    five;
+};
+
+type CreateItem = record {
+    item: text;
+    price: nat64;
+    description: text;
+};
+
 type Item = record {
-  item: text;
-  price: nat64;
-  description: text;  
+    item: text;
+    price: nat64;
+    description: text;
+    rating: opt Rating;
+    owner: opt principal;
+};
 
-}
+type ItemError = variant {
+    AlreadyExist;
+    ItemNotAllowed;
+    NotExist;
+    Unauthorized;
+    UpdateError;
+    NoItemsAssociated;
+};
+
+type Result = variant {
+    Ok;
+    Err: ItemError;
+};
+
+type ResultItems = variant {
+    Ok: vec record { nat64; Item };
+    Err: ItemError;
+};
+
+
 service : (opt text) -> {
-  get_items : () -> (vec record { nat64; Item }) query;
-  set_item : (nat64, Item) -> ();
-  remove_item : (nat64) -> ();
-  whoami : () -> (principal) query;
-}
-
+    get_items : () -> (vec record { nat64; Item }) query;
+    set_item : (CreateItem) -> ();
+    update_item : (nat64, CreateItem) -> (Result);
+    remove_item : (nat64) -> (Result);
+    get_items_owner : () -> (ResultItems) query;
+    whoami : () -> (principal) query;
+};

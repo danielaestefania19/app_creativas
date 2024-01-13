@@ -12,6 +12,8 @@ let actor = eccomerce;
 // console.log(API_URL)
 
 
+Principal.anonymous()
+
 // console.log(API_URL)
 
 const Login = () => {
@@ -47,8 +49,13 @@ const local_ii_url = `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:8000`;
           agent,
       });
 
+// if (Principal.anonymous() ==  await actor.whoami()) {
 
-  const principal = await actor.whoami();
+      //   console.log("Es anonymous")
+
+      // }
+
+const principal = await actor.whoami();
   console.log(principal.toString());
   setWhoami(principal.toString());
 };
