@@ -11,12 +11,14 @@ type CreateItem = record {
     item: text;
     price: nat64;
     description: text;
+    image: text;
 };
 
 type Item = record {
     item: text;
     price: nat64;
     description: text;
+    image: text;
     rating: opt Rating;
     owner: opt principal;
 };

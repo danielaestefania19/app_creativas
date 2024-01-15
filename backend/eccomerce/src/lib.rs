@@ -5,8 +5,8 @@ use ic_stable_structures::{BoundedStorable, DefaultMemoryImpl, StableBTreeMap, S
 use serde_derive::Serialize;
 use std::{borrow::Cow, cell::RefCell};
 
-// Definición de tipos y constantes
 
+// Definición de tipos y constantes
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 const MAX_VALUE_SIZE_ITEM: u32 = 200;
@@ -64,17 +64,17 @@ struct Item {
     item: String,
     price: u64,
     description: String,
+    image: String,  // Cambiado a String
     rating: Option<Rating>,
     owner: Option<candid::Principal>,
 }
-
-// Definición de la estructura para la creación de un ítem
 
 #[derive(CandidType, Deserialize)]
 pub struct CreateItem {
     item: String,
     price: u64,
     description: String,
+    image: String,  // Cambiado a String
 }
 
 // Implementación de trait para la serialización y deserialización de Item
@@ -138,22 +138,22 @@ fn caller() -> Result<Principal, ItemError> {
     }
 }
 
-
 #[ic_cdk::update]
 fn set_item(item: CreateItem) -> Result<ItemSuccess, ItemError> {
     let id = ID_MANAGER.with(|manager| manager.get_id());
     print!("{}", id);
-    let caller = caller()?;
     let value: Item = Item {
         item: item.item,
         price: item.price,
         description: item.description,
+        image: item.image,  // No necesitas envolverlo en Some()
         rating: None,
-        owner: Some(caller),
+        owner: Some(ic_cdk::api::caller()),
     };
     ITEMS.with(|p| p.borrow_mut().insert(id, value.clone()));
     Ok(ItemSuccess::CreatedItem)
 }
+
 
 #[ic_cdk::query]
 fn check_if_item_exists(id: u64) -> bool {
@@ -191,6 +191,7 @@ fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
             item: item.item,
             price: item.price,
             description: item.description,
+            image: item.image,
             rating: old_item.rating,
             owner: Some(caller),
         };
@@ -205,36 +206,53 @@ fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
 }
 
 
+// #[ic_cdk::update]
+// fn remove_item(id: u64) -> Result<(), ItemError> {
+//     let caller = caller()?;
+//     ITEMS.with(|p| {
+//         let old_item_opt = p.borrow().get(&id);
+//         let old_item: Item;
+
+//         match old_item_opt {
+//             Some(value) => old_item = value,
+//             None => return Err(ItemError::NotExist),
+//         }
+
+//         if let Some(owner) = old_item.owner {
+//             if caller != owner {
+//                 return Err(ItemError::Unauthorized);
+//             }
+//         }
+//         p.borrow_mut().remove(&id);
+//         Ok(())
+//     })
+// }
+
+
 #[ic_cdk::update]
 fn remove_item(id: u64) -> Result<(), ItemError> {
-    let caller = caller()?;
     ITEMS.with(|p| {
         let old_item_opt = p.borrow().get(&id);
-        let old_item: Item;
 
         match old_item_opt {
-            Some(value) => old_item = value,
-            None => return Err(ItemError::NotExist),
+            Some(_) => {
+                p.borrow_mut().remove(&id);
+                Ok(())
+            },
+            None => Err(ItemError::NotExist),
         }
-
-        if let Some(owner) = old_item.owner {
-            if caller != owner {
-                return Err(ItemError::Unauthorized);
-            }
-        }
-        p.borrow_mut().remove(&id);
-        Ok(())
     })
 }
 
+
 #[ic_cdk::query]
 fn get_items_owner() -> Result<Vec<(u64, Item)>, ItemError> {
-    let caller = caller()?; // Envuelve el caller en Some()
+   // Envuelve el caller en Some()
     let mut items_owned = Vec::new();
 
     ITEMS.with(|p| {
         for (id, item) in p.borrow().iter() {
-            if item.owner == Some(caller) {
+            if item.owner == Some(ic_cdk::caller()) {
                 // Ahora puedes comparar correctamente
                 items_owned.push((id.clone(), item.clone()));
             }

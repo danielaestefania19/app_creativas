@@ -1,0 +1,11 @@
+/home/alfredo/app_creativas/target/debug/deps/libpinata_sdk-2af8957220cd6c13.rmeta: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/mod.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/metadata.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/data.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/internal.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/utils.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/errors.rs
+
+/home/alfredo/app_creativas/target/debug/deps/pinata_sdk-2af8957220cd6c13.d: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/mod.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/metadata.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/data.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/internal.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/utils.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/errors.rs
+
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/lib.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/mod.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/metadata.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/data.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/api/internal.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/utils.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pinata-sdk-1.1.0/src/errors.rs:

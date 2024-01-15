@@ -39,5 +39,4 @@ export const createActor = (canisterId, options = {}) => {
     ...options.actorOptions,
   });
 };
-
 export const eccomerce = createActor(canisterId);

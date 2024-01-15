@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
@@ -12,10 +13,11 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
-const Item = ({ name, price, description,addToCart }) => {
+const Item = ({ name, price, description, image, addToCart }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
 
   let decimalString = price + ".0";
   let wei = ethers.utils.parseEther(decimalString);
@@ -37,6 +39,26 @@ const Item = ({ name, price, description,addToCart }) => {
 
     fetchPaymentCount();
   }, []);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        const response = await axios.get(`http://192.168.1.9:5000/fetch/${image}`, {
+          responseType: 'blob' // Indicamos que esperamos una respuesta de tipo blob
+        });
+
+        const url = URL.createObjectURL(response.data); // Creamos una URL de objeto a partir del blob
+        setImageUrl(url); // Actualizamos la URL de la imagen
+      } catch (error) {
+        console.error(error);
+        if (error.response) {
+          console.error(error.response.data);
+        }
+      }
+    };
+
+    fetchImage();
+  }, [image]);
 
   const checkIfPaymentExists = async (id) => {
     return await contract.checkIfPaymentExists(id);
@@ -81,6 +103,7 @@ const Item = ({ name, price, description,addToCart }) => {
         <div className='text-center font-medium'>
           <p className='py-2 border-b mx-8 mt-8'>{description}</p>
         </div>
+        {imageUrl && <img src={imageUrl} alt={name} className="mx-auto my-4 rounded-lg" />}
         <button
           className="bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto px-6 py-3" onClick={handleBuyClick} disabled={isLoading}>
           {isLoading ? 'Procesando la transacción...' : 'Comprar'}

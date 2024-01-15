@@ -63,7 +63,7 @@ const Shop = () => {
         <div>Loading...</div>
       ) : (
         items?.map(([id, item]) => {
-          return <Item id={id} name={item.item} price={item.price} description={item.description} key={id} addToCart={() => addToCart({ ...item, id })} />;
+          return <Item id={id} name={item.item} price={item.price} description={item.description} image={item.image} key={id} addToCart={() => addToCart({ ...item, id })} />;
         })
       )}
       {cartVisible && cart.length > 0 && <Cart cart={cart} removeFromCart={removeFromCart} onHideCart={handleToggleCart} />}

@@ -4,6 +4,7 @@ import type { ActorMethod } from '@dfinity/agent';
 export interface CreateItem {
   'item' : string,
   'description' : string,
+  'image' : string,
   'price' : bigint,
 }
 export interface Item {
@@ -11,6 +12,7 @@ export interface Item {
   'item' : string,
   'description' : string,
   'rating' : [] | [Rating],
+  'image' : string,
   'price' : bigint,
 }
 export type ItemError = { 'ItemNotAllowed' : null } |

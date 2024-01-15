@@ -8,8 +8,7 @@ import PaymentDetails from "./components/PaymentDetails.jsx";
 import PaymentButton from "./components/Pay.jsx"
 import { ChakraProvider } from "@chakra-ui/react";
 import Login from "./components/Login.jsx"
-import SetItem from "./components/Providers/Set_items.jsx"
-
+import ItemsUploader from "./components/Providers.jsx"
 
 function App() {
   const navigate = useNavigate();
@@ -17,13 +16,17 @@ function App() {
   const handleCreatePayment = () => {
     navigate('/other/shop');
   };
+  const handleuploaderClick = () => {
+    navigate('/other/items');
+  };
 
   return (
     <div className="App">
       <Home/>
       <Routes>
         <Route path="/" element={<Body onCreatePayment={handleCreatePayment} />} />
-        <Route path="/other/shop" element={<Shop />} />
+        <Route path="/other/shop" element={<Shop/>} />
+        <Route path="/other/items" element={<ItemsUploader/>} />
         <Route path="/status" element={<PaymentDetails />} />
         <Route path="/pay" element={<PaymentButton />} />
       </Routes>
