@@ -68,11 +68,16 @@ const Shop = () => {
       )}
       {cartVisible && cart.length > 0 && <Cart cart={cart} removeFromCart={removeFromCart} onHideCart={handleToggleCart} />}
       <button
-        className="fixed bottom-4 right-4 bg-[#3490dc] text-white px-4 py-2 rounded-md"
-        onClick={handleToggleCart}
-      >
-        {cartVisible ? 'Ocultar Carrito' : <FiShoppingCart className="mr-2" />}
-      </button>
+    className="fixed bottom-4 right-4 bg-[#3490dc] text-white px-4 py-2 rounded-md "
+    onClick={handleToggleCart}
+>
+    {cartVisible ? 'Ocultar Carrito' : <>
+        <FiShoppingCart className="mr-2" />
+        <span className="bg-yellow-500 text-black p-1 rounded-10 absolute -top-4 ">
+            {cart.reduce((total, item) => total + item.quantity, 0)}
+        </span>
+    </>}
+</button>
     </div>
   );
 };

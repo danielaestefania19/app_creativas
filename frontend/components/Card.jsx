@@ -29,7 +29,7 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
           {cart.map((item, index) => (
             <div key={index} className="mb-4">
               <p className="text-lg font-bold">{item.name}</p>
-              <p className="text-gray-600">{item.description}</p>
+              <p className="text-gray-600">{item.item}</p>
               <p className="text-blue-600">${item.price}</p>
               <div className="flex items-center">
                 <button
