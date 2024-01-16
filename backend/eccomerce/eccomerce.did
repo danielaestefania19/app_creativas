@@ -51,3 +51,4 @@ service : (opt text) -> {
     get_items_owner : () -> (ResultItems) query;
     whoami : () -> (principal) query;
 };
+

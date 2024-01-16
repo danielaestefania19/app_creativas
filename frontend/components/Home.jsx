@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import styled from '@emotion/styled';
+import Login from './Login';
 
 const Home = () => {
   const [nav, setNav] = useState(false);
@@ -19,6 +20,7 @@ const Home = () => {
         <li className='p-4'>Resources</li>
         <li className='p-4'>About</li>
         <li className='p-4'>Contact</li>
+        <button className='bg-[#c9398a] w-[100px] rounded-md mx-auto p-4 text-white' onClick={Login}>Login</button>
       </ul>
       <div onClick={handleNav} className='block md:hidden'>
           {nav ? <AiOutlineClose size={20}/> : <AiOutlineMenu size={20} />}
@@ -30,6 +32,7 @@ const Home = () => {
           <li className='p-4 border-b border-pink-600'>Resources</li>
           <li className='p-4 border-b border-pink-600'>About</li>
           <li className='p-4'>Contact</li>
+
       </ul>
     </div>
   );

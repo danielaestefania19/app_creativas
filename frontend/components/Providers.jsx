@@ -13,7 +13,7 @@ const ItemsUploader = () => {
     formData.append('file', file)
 
     try {
-      const response = await axios.post('http://192.168.1.9:5000/upload', formData, {
+      const response = await axios.post('http://192.168.1.7:5000/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

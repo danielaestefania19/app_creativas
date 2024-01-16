@@ -24,10 +24,12 @@ const Body = ({ onCreatePayment }) => {
           />
         </div>
         <p className='md:text-2xl text-xl font-bold text-black'>Monitor your finances to grow in a barrier-free space by:</p>
+        <div className='flex justify-between'>
+        <button className='bg-[#c9398a] w-[200px] rounded font-medium my-6 mx-auto py-3 text-white'>Ecommerce</button>
         <button onClick={onCreatePayment} className='bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white'>Marketplace</button>
+        </div>
       </div>
     </div>
   );
-};
-
+  }
 export default Body;

@@ -270,3 +270,4 @@ fn get_items_owner() -> Result<Vec<(u64, Item)>, ItemError> {
 fn whoami() -> Principal {
     ic_cdk::api::caller()
 }
+

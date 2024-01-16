@@ -43,7 +43,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.9:5000/fetch/${image}`, {
+        const response = await axios.get(`http://192.168.1.7:5000/fetch/${image}`, {
           responseType: 'blob' // Indicamos que esperamos una respuesta de tipo blob
         });
 
@@ -94,46 +94,29 @@ const Item = ({ name, price, description, image, addToCart }) => {
       setError("Error al iniciar el pago: " + err.message);
     }
   };
-
   return (
-    <div>
-      <div className='w-full shadow-xl flex flex-col p-4 my-4 rounded-lg hover:scale-105 duration-300 bg-white'>
-        <h2 className='text-2xl font-bold text-center py-8'>{name}</h2>
-        <p className='text-center text-4xl font-bold'>{ethers.utils.formatEther(localPrice)}BFT</p>
-        <div className='text-center font-medium'>
-          <p className='py-2 border-b mx-8 mt-8'>{description}</p>
-        </div>
-        {imageUrl && <img src={imageUrl} alt={name} className="mx-auto my-4 rounded-lg" />}
+    <div className="relative bg-cover bg-center w-full h-96 flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4">
+      <h2 className='text-center text-xl font-bold text-black'>{name}</h2>
+      <img src={imageUrl} alt={name} className="w-32 h-32 rounded-full mx-auto mb-2" />
+      <p className='text-center text-gray-600'>{ethers.utils.formatEther(localPrice)}BFT</p>
+      <p className='mx-4 text-center'>{description}</p>
+      <div className='flex justify-center mt-2 mb-4'>
         <button
-          className="bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto px-6 py-3" onClick={handleBuyClick} disabled={isLoading}>
+          className="bg-[#c9398a] text-white px-3 py-1 rounded mr-2" onClick={handleBuyClick} disabled={isLoading}>
           {isLoading ? 'Procesando la transacción...' : 'Comprar'}
         </button>
         <button
-          className="bg-[#3490dc] w-[200px] rounded-md font-medium my-6 mx-auto px-6 py-3"
+          className="bg-blue-500 text-white px-3 py-1 rounded"
           onClick={() => addToCart()}
         >
           Añadir al carrito
         </button>
       </div>
-      {/*     <div className="bg-[#f7e8f0] p-4 rounded-lg max-w-sm">
-      <h3 className="text-xl font-bold mb-1">{name}</h3>
-      <div className="mb-3">{ethers.utils.formatEther(localPrice)} BFT </div>
-      <div className="flex">
-        <p>{description}</p>
-        <button
-          className="bg-[#c9398a] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white" onClick={handleBuyClick} disabled={isLoading}>
-        {isLoading ? 'Procesando la transacción...' : 'Comprar'}
-        </button>
-        <button
-          className="bg-[#3490dc] w-[150px] rounded-md font-medium my-2 mx-1 py-2 text-white">
-          Añadir al carrito
-        </button>
-      </div>
       {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} />}
       {error && <div className="error">{error}</div>}
-    </div> */}
     </div>
   );
+  
 };
 
 export default Item;
