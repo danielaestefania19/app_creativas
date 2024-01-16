@@ -75,6 +75,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
 
       const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
       const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
+      console.log(`Transaction hash: ${txResponse.hash}`); // Imprime el hash de la transacción
 
       setPaymentStarted(true);
       setShowPaymentDetails(true);
