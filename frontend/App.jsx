@@ -29,7 +29,7 @@ function App() {
       <Home/>
       <Routes>
         <Route path="/" element={<Body onCreatePayment={handleCreatePayment} />} />
-        <Route path="/other/shop" element={<FetchAllAssets/>} />
+        <Route path="/other/shop" element={<Shop/>} />
         <Route path="/other/items" element={<ItemsUploader/>} />
         <Route path="/status" element={<PaymentDetails />} />
         <Route path="/pay" element={<PaymentButton />} />
