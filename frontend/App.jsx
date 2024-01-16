@@ -9,6 +9,10 @@ import PaymentButton from "./components/Pay.jsx"
 import { ChakraProvider } from "@chakra-ui/react";
 import Login from "./components/Login.jsx"
 import ItemsUploader from "./components/Providers.jsx"
+import AddAsset from "./components_NFT/CreateToken.jsx"
+import FetchAllAssets from "./components_NFT/Gettokens.jsx"
+import Balance from "./components_NFT/balance.jsx"
+
 
 function App() {
   const navigate = useNavigate();
@@ -25,7 +29,7 @@ function App() {
       <Home/>
       <Routes>
         <Route path="/" element={<Body onCreatePayment={handleCreatePayment} />} />
-        <Route path="/other/shop" element={<Shop/>} />
+        <Route path="/other/shop" element={<FetchAllAssets/>} />
         <Route path="/other/items" element={<ItemsUploader/>} />
         <Route path="/status" element={<PaymentDetails />} />
         <Route path="/pay" element={<PaymentButton />} />

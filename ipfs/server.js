@@ -38,8 +38,8 @@ async function createNode() {
 async function run() {
 const fs = await createNode();
 
-// Definimos una ruta POST para cargar archivos
-app.post('/upload', upload.single('file'), async (req, res) => {
+// Definimos una ruta POST para cargar archivos de imagen
+app.post('/uploadImage', upload.single('file'), async (req, res) => {
     // Obtenemos los datos del archivo cargado
     const data = req.file.buffer;
 
@@ -53,14 +53,15 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     res.status(201).send(cid)
 })
 
-// Definimos una ruta GET para recuperar archivos por CID
-app.get('/fetch/:cid', async (req, res) => {
+// Definimos una ruta GET para recuperar archivos de imagen por CID
+app.get('/fetchImage/:cid', async (req, res) => {
     // Obtenemos el CID del archivo de la solicitud
     const cid = req.params.cid;
 
     // Si no encontramos el CID, enviamos una respuesta de error
     if (!cid) {
         res.status(404).send('No se pudo encontrar el archivo')
+        return;
     }
 
     // Intentamos recuperar el archivo del sistema de archivos
@@ -77,6 +78,89 @@ app.get('/fetch/:cid', async (req, res) => {
 
     // Enviamos el buffer de la imagen en la respuesta
     res.status(200).send(imageBuffer)
+})
+
+// Definimos una ruta POST para cargar archivos de texto
+app.post('/uploadTextFile', upload.single('file'), async (req, res) => {
+    // Obtenemos los datos del archivo cargado
+    const data = req.file.buffer.toString('utf8'); // Convertimos el buffer a string
+
+    // Añadimos los datos al sistema de archivos y obtenemos su CID
+    const cid = await fs.addBytes(Buffer.from(data, 'utf8'))
+
+    // Almacenamos el CID en nuestro Mapa con el nombre original del archivo como clave
+    hashMap.set(req.file.originalname, cid)
+
+    // Enviamos una respuesta al cliente indicando que el archivo ha sido cargado
+    res.status(201).send(cid)
+})
+
+// Definimos una ruta GET para recuperar archivos de texto por CID
+app.get('/fetchTextFile/:cid', async (req, res) => {
+    // Obtenemos el CID del archivo de la solicitud
+    const cid = req.params.cid;
+
+    // Si no encontramos el CID, enviamos una respuesta de error
+    if (!cid) {
+        res.status(404).send('No se pudo encontrar el archivo')
+        return;
+    }
+
+    // Intentamos recuperar el archivo del sistema de archivos
+    let textBuffer = Buffer.alloc(0)
+    try {
+        for await (const chunk of fs.cat(cid)) {
+            textBuffer = Buffer.concat([textBuffer, Buffer.from(chunk)])
+        }
+    } catch (error) {
+        // Si ocurre un error al recuperar el archivo, enviamos una respuesta de error
+        res.status(500).send('Ocurrió un error al recuperar el archivo')
+        return;
+    }
+
+    // Convertimos el buffer a string y lo enviamos en la respuesta
+    res.status(200).send(textBuffer.toString('utf8'))
+})
+// Definimos una ruta POST para cargar archivos PDF
+app.post('/uploadPDF', upload.single('file'), async (req, res) => {
+    // Obtenemos los datos del archivo cargado
+    const data = req.file.buffer;
+
+    // Añadimos los datos al sistema de archivos y obtenemos su CID
+    const cid = await fs.addBytes(data)
+
+    // Almacenamos el CID en nuestro Mapa con el nombre original del archivo como clave
+    hashMap.set(req.file.originalname, cid)
+
+    // Enviamos una respuesta al cliente indicando que el archivo ha sido cargado
+    res.status(201).send(cid)
+})
+
+// Definimos una ruta GET para recuperar archivos PDF por CID
+app.get('/fetchPDF/:cid', async (req, res) => {
+    // Obtenemos el CID del archivo de la solicitud
+    const cid = req.params.cid;
+
+    // Si no encontramos el CID, enviamos una respuesta de error
+    if (!cid) {
+        res.status(404).send('No se pudo encontrar el archivo')
+        return;
+    }
+
+    // Intentamos recuperar el archivo del sistema de archivos
+    let pdfBuffer = Buffer.alloc(0)
+    try {
+        for await (const chunk of fs.cat(cid)) {
+            pdfBuffer = Buffer.concat([pdfBuffer, Buffer.from(chunk)])
+        }
+    } catch (error) {
+        // Si ocurre un error al recuperar el archivo, enviamos una respuesta de error
+        res.status(500).send('Ocurrió un error al recuperar el archivo')
+        return;
+    }
+
+    // Enviamos el buffer del PDF en la respuesta
+    res.status(200).send(pdfBuffer)
 })
 
 
