@@ -18,6 +18,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   let decimalString = price + ".0";
   let wei = ethers.utils.parseEther(decimalString);
@@ -43,7 +44,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.7:5000/fetch/${image}`, {
+        const response = await axios.get(`http://192.168.1.7:8000/fetchImage/${image}`, {
           responseType: 'blob' // Indicamos que esperamos una respuesta de tipo blob
         });
 
@@ -75,7 +76,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
 
       const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
       const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
-      console.log(`Transaction hash: ${txResponse.hash}`); // Imprime el hash de la transacción
+      console.log(`Transaction hash: ${tx.hash}`); // Imprime el hash de la transacción
 
       setPaymentStarted(true);
       setShowPaymentDetails(true);
@@ -96,14 +97,20 @@ const Item = ({ name, price, description, image, addToCart }) => {
     }
   };
   return (
-    <div className="relative bg-cover bg-center w-full h-96 flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4">
+    <div className={`relative bg-cover bg-center w-full ${expanded ? 'h-auto' : 'h-96'} flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4`}>
       <h2 className='text-center text-xl font-bold text-black'>{name}</h2>
       <img src={imageUrl} alt={name} className="w-32 h-32 rounded-full mx-auto mb-2" />
       <p className='text-center text-gray-600'>{ethers.utils.formatEther(localPrice)}BFT</p>
       <p className='mx-4 text-center'>{description}</p>
       <div className='flex justify-center mt-2 mb-4'>
         <button
-          className="bg-[#c9398a] text-white px-3 py-1 rounded mr-2" onClick={handleBuyClick} disabled={isLoading}>
+          className="bg-[#c9398a] text-white px-3 py-1 rounded mr-2"
+          onClick={() => {
+            handleBuyClick();
+            setExpanded(!expanded);
+          }}
+          disabled={isLoading}
+        >
           {isLoading ? 'Procesando la transacción...' : 'Comprar'}
         </button>
         <button
@@ -117,7 +124,6 @@ const Item = ({ name, price, description, image, addToCart }) => {
       {error && <div className="error">{error}</div>}
     </div>
   );
-  
 };
 
 export default Item;

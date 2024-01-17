@@ -32,14 +32,18 @@ const FetchAllAssets = () => {
     }, []);
 
     return (
-        <div className="flex justify-end -mt-2 mb-2 mr-2 h-full">
-            {/* Otro contenido del componente FetchAllAssets */}
-            <div>
+        <div className="flex flex-col items-end mt-4 mb-2 mr-2 h-full">
+            {/* Contenedor del botón Ir a CreateTokens */}
+            <div className="mb-4">
                 <Link to="/other/createtokens">
                     <button className='bg-[#c9398a] rounded-md p-2 text-white' >Ir a CreateTokens</button>
                 </Link>
             </div>
-            <Marketplace assets={assets} />
+
+            {/* Contenedor del componente Marketplace */}
+            <div className="flex flex-wrap justify-center">
+                <Marketplace assets={assets} />
+            </div>
         </div>
     );
 };
