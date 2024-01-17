@@ -12,7 +12,7 @@ const Marketplace = ({ assets }) => {
                 useEffect(() => {
                     const fetchImage = async () => {
                         try {
-                            const response = await axios.get(`http://192.168.1.9:5000/fetchImage/${asset.tokenHash}`, {
+                            const response = await axios.get(`http://192.168.1.7:7000/fetchImage/${asset.tokenHash}`, {
                                 responseType: 'blob'
                             });
 
@@ -39,7 +39,7 @@ const Marketplace = ({ assets }) => {
                                     <h6 className="block mt-1 text-lg leading-tight font-medium text-black">Obra/Pza # {ethers.utils.formatUnits(asset.assetId, 0)}</h6>
                                     <p className="mt-2 text-gray-500">Titulo: {asset.titulo}</p>
                                     <p className="mt-2 text-gray-500">Descripción: {asset.small_description}</p>
-                                    <p className="mt-2 text-gray-500">Precio: {ethers.utils.formatEther(asset.price)} ETH</p>
+                                    <p className="mt-2 text-gray-500">Precio: {ethers.utils.formatUnits(asset.price, 0)} ETH</p>
                                     {showMore && (
                                         <>
                                             <p className="mt-2 text-gray-500">Autor: {asset.autor}</p>

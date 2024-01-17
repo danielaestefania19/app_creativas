@@ -165,8 +165,8 @@ app.get('/fetchPDF/:cid', async (req, res) => {
 
 
 // Iniciamos el servidor en la dirección IP 192.168.1.9 y el puerto 5000
-app.listen(5000, '192.168.1.9', () => {
-    console.log('El servidor está escuchando en http://192.168.1.7:5000');
+app.listen(7000, '192.168.1.7', () => {
+    console.log('El servidor está escuchando en http://192.168.1.7:7000');
 })};
 
 run();

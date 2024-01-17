@@ -36,7 +36,7 @@ function App() {
       <Home/>
       <Routes>
         <Route path="/" element={<Body onCreatePayment={handleCreatePayment} getTokens={ItemsUploader} onCreateTokens={handleCreateTokens} />} />
-        <Route path="/other/shop" element={<Shop/>} />
+        <Route path="/other/shop" element={<Balance/>} />
         <Route path="/other/createtokens" element={<AddAsset/>} />
         <Route path="/other/items" element={<ItemsUploader/>} />
         <Route path="/other/gettokens" element={<FetchAllAssets />} /> {/* Agrega esta línea */}

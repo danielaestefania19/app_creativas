@@ -37,13 +37,17 @@ const AddAsset = () => {
     const addAsset = async () => {
         setIsLoading(true);
         try {
-            let decimalString = price + ".0";
+            let decimalString = parseInt(price).toString(); // Convierte el precio a un número entero
             let wei = ethers.utils.parseEther(decimalString);
-            setLocalPrice(wei);
+            let ether = ethers.utils.formatEther(wei); // Convierte el wei de vuelta a ether
+            let localPriceEther = ether; // Usa una variable local para almacenar el valor de ether
+            setLocalPrice(ether); // Actualiza el estado con el valor de ether
+            console.log(`El precio en ether es: ${localPriceEther}`); // Imprime el precio en ether usando la variable local
+
 
             const formData = new FormData();
             formData.append('file', file);
-            const response = await axios.post('http://192.168.1.9:5000/uploadImage', formData, {
+            const response = await axios.post('http://192.168.1.7:7000/uploadImage', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -55,7 +59,7 @@ const AddAsset = () => {
 
                 const pdfFormData = new FormData();
                 pdfFormData.append('file', pdfFile);
-                const pdfResponse = await axios.post('http://192.168.1.9:5000/uploadPDF', pdfFormData, {
+                const pdfResponse = await axios.post('http://192.168.1.7:7000/uploadPDF', pdfFormData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -65,12 +69,15 @@ const AddAsset = () => {
                     console.log(pdfHash);
                     setBusinessPlanHash(pdfHash);
 
-                    const tx = await contract.addAsset(localPrice, autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash, to, { gasLimit: 3000000 });
+                    // Resto del código...
+                    const tx = await contract.addAsset(parseInt(localPriceEther), autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash, to, { gasLimit: 3000000 });
                     console.log(`Transaction hash: ${tx.hash}`);
                     console.log('Reclama tu NFT en tu cuenta en Metamask:  ');
                     console.log('La dirección del contrato es: ', contractAddressRES4);
-                    console.log(localPrice, autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash)
-                    console.log(pdfHash, imageHash)
+                    console.log(localPriceEther, autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash)
+
+                    // Resto del código...
+                    console.log(`El precio en ether es: ${localPriceEther.toString()}`); // Imprime el precio en ether usando la variable local
                     getAssetsCount();
                 }
             }
