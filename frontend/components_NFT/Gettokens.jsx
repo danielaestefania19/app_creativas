@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ethers } from 'ethers';
 import RES4 from "../../utils/abi/RES4.json";
 import { contractAddressRES4 } from "../../utils/constans.js";
@@ -18,7 +19,7 @@ const FetchAllAssets = () => {
         const fetchAllAssets = async () => {
             const length = await contract.assetsCount();
             const newAssets = [];
-            for(let i = 0; i < length; i++) {
+            for (let i = 0; i < length; i++) {
                 const asset = await contract.assetMap(i);
                 const owner = await contract.ownerOf(asset.assetId);
                 const approval = await contract.assetApprovals(asset.assetId);
@@ -30,7 +31,16 @@ const FetchAllAssets = () => {
         fetchAllAssets();
     }, []);
 
-    return <Marketplace assets={assets} />;
+    return (
+        <div className="flex justify-end -mt-2 mb-2 mr-2 h-full">
+            {/* Otro contenido del componente FetchAllAssets */}
+            <div>
+                <Link to="/other/createtokens">
+                    <button className='bg-[#c9398a] rounded-md p-2 text-white' >Ir a CreateTokens</button>
+                </Link>
+            </div>
+            <Marketplace assets={assets} />
+        </div>
+    );
 };
-
 export default FetchAllAssets;

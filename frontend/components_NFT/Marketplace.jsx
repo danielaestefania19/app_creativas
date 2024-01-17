@@ -7,7 +7,7 @@ const Marketplace = ({ assets }) => {
         <div>
             {assets.map((asset, index) => {
                 const [imageUrl, setImageUrl] = useState(null);
-                const [pdfUrl, setPdfUrl] = useState(null);
+                const [showMore, setShowMore] = useState(false);
 
                 useEffect(() => {
                     const fetchImage = async () => {
@@ -25,47 +25,34 @@ const Marketplace = ({ assets }) => {
                             }
                         }
                     };
-
-                    const fetchPdf = async () => {
-                        try {
-                            const response = await axios.get(`http://192.168.1.9:5000/fetchPDF/${asset.businessPlanHash}`, {
-                                responseType: 'blob'
-                            });
-
-                            const blob = new Blob([response.data], { type: 'application/pdf' });
-                            const url = URL.createObjectURL(blob);
-                            setPdfUrl(url);
-                        } catch (error) {
-                            console.error(error);
-                            if (error.response) {
-                                console.error(error.response.data);
-                            }
-                        }
-                    };
-
                     fetchImage();
-                    fetchPdf();
                 }, [asset]);
 
                 return (
-                    <div key={index} className="col-lg-4">
-                        <div className="card" style={{color: 'black'}}>
-                            <img className="card-img-top" src={imageUrl} alt="Card image" />
-                            <div className="card-body">
-                                <h6 className="card-title">Obra/Pza # {ethers.utils.formatUnits(asset.assetId, 0)}</h6>
-                                <p className="card-title">Autor: {asset.autor}</p>
-                                <p className="card-title">Titulo: {asset.titulo}</p>
-                                <p className="card-text">Descripción: {asset.small_description}</p>
-                                <p className="card-title">Fecha de inicio del proyecto: {asset.projectStartDate}</p>
-                                <p className="card-title">Fecha de finalización del proyecto: {asset.projectEndDate}</p>
-                                <p className="card-text">Fracciones NFT: {ethers.utils.formatUnits(asset.NFTFractional, 0)}</p>
-                                <p className="card-text">Cláusulas de garantía de pago: {asset.paymentGuaranteeClauses}</p>
-                                <p className="card-text">Precio: {ethers.utils.formatEther(asset.price)} ETH</p>
-                            </div>
-                            <a href={imageUrl} className="btn btn-primary stretched-link">Ampliar</a>
-                            <a href={pdfUrl} className="btn btn-primary stretched-link">Ver PDF</a>
-                            <div className="card-footer">
-                                <small><b>Propietario:</b> {asset.owner}<br /><b>Aprobado:</b> {asset.approval}</small>
+                    <div key={index} className="col-lg-4  mt-16 mb-16 mx-auto">
+                        <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-3 mt-6">
+                            <div className="md:flex">
+                                <div className="md:flex-shrink-0">
+                                    <img className="h-48 w-full object-cover md:w-48" src={imageUrl} alt="Card image" />
+                                </div>
+                                <div className="p-8">
+                                    <h6 className="block mt-1 text-lg leading-tight font-medium text-black">Obra/Pza # {ethers.utils.formatUnits(asset.assetId, 0)}</h6>
+                                    <p className="mt-2 text-gray-500">Titulo: {asset.titulo}</p>
+                                    <p className="mt-2 text-gray-500">Descripción: {asset.small_description}</p>
+                                    <p className="mt-2 text-gray-500">Precio: {ethers.utils.formatEther(asset.price)} ETH</p>
+                                    {showMore && (
+                                        <>
+                                            <p className="mt-2 text-gray-500">Autor: {asset.autor}</p>
+                                            <p className="mt-2 text-gray-500">Fecha de inicio del proyecto: {asset.projectStartDate}</p>
+                                            <p className="mt-2 text-gray-500">Fecha de finalización del proyecto: {asset.projectEndDate}</p>
+                                            <p className="mt-2 text-gray-500">Fracciones NFT: {ethers.utils.formatUnits(asset.NFTFractional, 0)}</p>
+                                            <p className="mt-2 text-gray-500">Cláusulas de garantía de pago: {asset.paymentGuaranteeClauses}</p>
+                                        </>
+                                    )}
+                                    <button className="mt-4 px-4 py-2 text-white font-light tracking-wider bg-gray-900 rounded" onClick={() => setShowMore(!showMore)}>
+                                        {showMore ? 'Ver menos' : 'Ver más'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import Typed from 'react-typed';
 
-const Body = ({ onCreatePayment }) => {
+const Body = ({ onCreatePayment, getTokens }) => {
   return (
     <div className='text-black bg-[#f7e8f0]'>
       <div className='max-w-[800px] mt-[-96px] w-full h-screen mx-auto text-center flex flex-col justify-center'>
@@ -25,8 +25,8 @@ const Body = ({ onCreatePayment }) => {
         </div>
         <p className='md:text-2xl text-xl font-bold text-black'>Monitor your finances to grow in a barrier-free space by:</p>
         <div className='flex justify-between'>
-        <button className='bg-[#c9398a] w-[200px] rounded font-medium my-6 mx-auto py-3 text-white'>Ecommerce</button>
-        <button onClick={onCreatePayment} className='bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white'>Marketplace</button>
+        <button onClick={onCreatePayment} className='bg-[#c9398a] w-[200px] rounded font-medium my-6 mx-auto py-3 text-white'>Ecommerce</button>
+        <button onClick={getTokens}className='bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white'>Marketplace</button>
         </div>
       </div>
     </div>

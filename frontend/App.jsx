@@ -20,6 +20,13 @@ function App() {
   const handleCreatePayment = () => {
     navigate('/other/shop');
   };
+
+  const ItemsUploader = () => {
+    navigate('/other/gettokens');
+  };
+  const handleCreateTokens = () => {
+    navigate('/other/createtokens');
+  };
   const handleuploaderClick = () => {
     navigate('/other/items');
   };
@@ -28,9 +35,11 @@ function App() {
     <div className="App">
       <Home/>
       <Routes>
-        <Route path="/" element={<Body onCreatePayment={handleCreatePayment} />} />
+        <Route path="/" element={<Body onCreatePayment={handleCreatePayment} getTokens={ItemsUploader} onCreateTokens={handleCreateTokens} />} />
         <Route path="/other/shop" element={<Shop/>} />
+        <Route path="/other/createtokens" element={<AddAsset/>} />
         <Route path="/other/items" element={<ItemsUploader/>} />
+        <Route path="/other/gettokens" element={<FetchAllAssets />} /> {/* Agrega esta línea */}
         <Route path="/status" element={<PaymentDetails />} />
         <Route path="/pay" element={<PaymentButton />} />
       </Routes>

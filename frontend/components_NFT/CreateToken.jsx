@@ -90,20 +90,22 @@ const AddAsset = () => {
     };
 
     return (
-        <div>
-            <input type="text" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price" />
-            <input type="text" value={autor} onChange={e => setAutor(e.target.value)} placeholder="Autor" />
-            <input type="text" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Titulo" />
-            <input type="text" value={small_description} onChange={e => setSmallDescription(e.target.value)} placeholder="Small Description" />
-            <input type="text" value={projectStartDate} onChange={e => setProjectStartDate(e.target.value)} placeholder="Project Start Date" />
-            <input type="text" value={projectEndDate} onChange={e => setProjectEndDate(e.target.value)} placeholder="Project End Date" />
-            <input type="text" value={NFTFractional} onChange={e => setNFTFractional(e.target.value)} placeholder="NFT Fractional" />
-            <input type="text" value={paymentGuaranteeClauses} onChange={e => setPaymentGuaranteeClauses(e.target.value)} placeholder="Payment Guarantee Clauses" />
-            <input type="file" onChange={e => setFile(e.target.files[0])} placeholder="Token Hash" />
-            <input type="file" onChange={handleFileChange} placeholder="Business Plan Hash" />
-            <input type="text" value={to} onChange={e => setTo(e.target.value)} placeholder="To" />
-            <button onClick={addAsset} disabled={isLoading}>Agregar Activo</button>
-            {error ? <p>{error}</p> : null}
+        <div className="flex items-center justify-center min-h-screen bg-[#f7e8f0] ">
+            <div className="bg-white p-8 rounded-lg w-96 space-y-4">
+                <input className="border border-black p-2 w-full" type="text" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price" />
+                <input className="border border-black p-2 w-full" type="text" value={autor} onChange={e => setAutor(e.target.value)} placeholder="Autor" />
+                <input className="border border-black p-2 w-full" type="text" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Titulo" />
+                <input className="border border-black p-2 w-full" type="text" value={small_description} onChange={e => setSmallDescription(e.target.value)} placeholder="Small Description" />
+                <input className="border border-black p-2 w-full" type="text" value={projectStartDate} onChange={e => setProjectStartDate(e.target.value)} placeholder="Project Start Date" />
+                <input className="border border-black p-2 w-full" type="text" value={projectEndDate} onChange={e => setProjectEndDate(e.target.value)} placeholder="Project End Date" />
+                <input className="border border-black p-2 w-full" type="text" value={NFTFractional} onChange={e => setNFTFractional(e.target.value)} placeholder="NFT Fractional" />
+                <input className="border border-black p-2 w-full" type="text" value={paymentGuaranteeClauses} onChange={e => setPaymentGuaranteeClauses(e.target.value)} placeholder="Payment Guarantee Clauses" />
+                <input className="border border-black p-2 w-full" type="file" onChange={e => setFile(e.target.files[0])} placeholder="Token Hash" />
+                <input className="border border-black p-2 w-full" type="file" onChange={handleFileChange} placeholder="Business Plan Hash" />
+                <input className="border border-black p-2 w-full" type="text" value={to} onChange={e => setTo(e.target.value)} placeholder="To" />
+                <button className="bg-blue-500 text-white p-2 rounded w-full" onClick={addAsset} disabled={isLoading}>Agregar Activo</button>
+                {error ? <p className="text-red-500 mt-4">{error}</p> : null}
+            </div>
         </div>
     );
 };
