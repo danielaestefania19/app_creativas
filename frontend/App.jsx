@@ -12,7 +12,7 @@ import ItemsUploader from "./components/Providers.jsx"
 import AddAsset from "./components_NFT/CreateToken.jsx"
 import FetchAllAssets from "./components_NFT/Gettokens.jsx"
 import Balance from "./components_NFT/balance.jsx"
-
+import { AuthProvider } from './components/AuthContext.jsx'; // importa el AuthProvider
 
 function App() {
   const navigate = useNavigate();
@@ -21,9 +21,6 @@ function App() {
     navigate('/other/shop');
   };
 
-  const ItemsUploader = () => {
-    navigate('/other/gettokens');
-  };
   const handleCreateTokens = () => {
     navigate('/other/createtokens');
   };
@@ -32,18 +29,20 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <Home/>
-      <Routes>
-        <Route path="/" element={<Body onCreatePayment={handleCreatePayment} getTokens={ItemsUploader} onCreateTokens={handleCreateTokens} />} />
-        <Route path="/other/shop" element={<Shop/>} />
-        <Route path="/other/createtokens" element={<AddAsset/>} />
-        <Route path="/other/items" element={<ItemsUploader/>} />
-        <Route path="/other/gettokens" element={<FetchAllAssets />} /> {/* Agrega esta línea */}
-        <Route path="/status" element={<PaymentDetails />} />
-        <Route path="/pay" element={<PaymentButton />} />
-      </Routes>
-    </div>
+    <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
+      <div className="App">
+        <Home/>
+        <Routes>
+          <Route path="/" element={<Body onCreatePayment={handleCreatePayment} getTokens={ItemsUploader} onCreateTokens={handleCreateTokens} />} />
+          <Route path="/other/shop" element={<ItemsUploader/>} />
+          <Route path="/other/createtokens" element={<AddAsset/>} />
+          <Route path="/other/items" element={<ItemsUploader/>} />
+          <Route path="/other/gettokens" element={<FetchAllAssets />} /> {/* Agrega esta línea */}
+          <Route path="/status" element={<PaymentDetails />} />
+          <Route path="/pay" element={<PaymentButton />} />
+        </Routes>
+      </div>
+    </AuthProvider>
   );
 };
 

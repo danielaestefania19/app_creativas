@@ -1,7 +1,9 @@
 use candid::Principal;
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
-use ic_stable_structures::{BoundedStorable, DefaultMemoryImpl, StableBTreeMap, Storable};
+use ic_stable_structures::{
+    storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable,
+};
 use serde_derive::Serialize;
 use std::{borrow::Cow, cell::RefCell};
 
@@ -9,7 +11,7 @@ use std::{borrow::Cow, cell::RefCell};
 // Definición de tipos y constantes
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
-const MAX_VALUE_SIZE_ITEM: u32 = 200;
+const MAX_VALUE_SIZE_ITEM: u32 = 5000;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Hash, PartialEq)]
 enum RatingError {
@@ -80,21 +82,19 @@ pub struct CreateItem {
 // Implementación de trait para la serialización y deserialización de Item
 
 impl Storable for Item {
-    fn to_bytes(&self) -> Cow<[u8]> {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
-    fn from_bytes(bytes: Cow<[u8]>) -> Self {
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         Decode!(bytes.as_ref(), Self).unwrap()
     }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_ITEM,
+        is_fixed_size: false,
+    };
 }
-
-// Implementación de trait para el almacenamiento de ítems
-
-impl BoundedStorable for Item {
-    const MAX_SIZE: u32 = MAX_VALUE_SIZE_ITEM;
-    const IS_FIXED_SIZE: bool = false;
-}
-
 pub struct IDManager {
     next_id: std::cell::Cell<u64>,
 }
