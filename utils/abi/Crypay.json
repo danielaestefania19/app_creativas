@@ -1,4 +1,4 @@
-[    
+[
   {
     "inputs": [
       {
@@ -167,5 +167,4 @@
     "stateMutability": "payable",
     "type": "receive"
   }
-    ]
-    
+]

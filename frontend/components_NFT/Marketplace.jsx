@@ -12,7 +12,7 @@ const Marketplace = ({ assets }) => {
                 useEffect(() => {
                     const fetchImage = async () => {
                         try {
-                            const response = await axios.get(`http://192.168.1.7:8000/fetchImage/${asset.tokenHash}`, {
+                            const response = await axios.get(`http://192.168.1.9:8000/fetchImage/${asset.tokenHash}`, {
                                 responseType: 'blob'
                             });
 
