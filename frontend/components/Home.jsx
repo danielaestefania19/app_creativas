@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import { Login } from './Login'; // importa la función
 import { AuthContext } from './AuthContext'; // importa el contexto
+import { Img } from '@chakra-ui/react';
+import favicon from '../assets/favicon.png'
 
 const Home = () => {
   const [nav, setNav] = useState(false);
@@ -23,13 +25,15 @@ const Home = () => {
       <ul className='hidden md:flex'>
         <Link to="/" className='p-4'>Home</Link>
         <li className='p-4'>Company</li>
-        <li className='p-4'>Resources</li>
         <li className='p-4'>About</li>
         <li className='p-4'>Contact</li>
-        <button className='bg-[#c9398a] w-[100px] rounded-md mx-auto p-4 text-white' onClick={handleLogin}>LogIn with Internet Identity ∞</button>
+        <button className="bg-[#c9398a] rounded-md mx-auto w-24 p-2 text-white" onClick={handleLogin}>
+      <div className="flex items-center">LogIn <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" />
+      </div>
+    </button>
       </ul>
       <div onClick={handleNav} className='block md:hidden'>
-        {nav ? <AiOutlineClose size={20}/> : <AiOutlineMenu size={20} />}
+        {nav ? <AiOutlineClose size={20} /> : <AiOutlineMenu size={20} />}
       </div>
       <ul className={nav ? 'fixed left-0 top-0 w-[60%] h-full border-r border-r-gray-900 bg-[#FFEBF6] ease-in-out duration-500' : 'ease-in-out duration-500 fixed left-[-100%]'}>
         <h1 className='w-full text-3xl font-bold text-[#FF0091] m-4'>Creativas</h1>
