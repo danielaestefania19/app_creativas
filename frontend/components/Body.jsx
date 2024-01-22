@@ -3,8 +3,8 @@ import Typed from 'react-typed';
 
 const Body = ({ onCreatePayment, getTokens }) => {
   return (
-    <div className='text-black bg-white pt-16 pb-8'>
-      <div className='max-w-[800px] mt-[-96px] w-full h-screen mx-auto text-center flex flex-col justify-center'>
+    <div className='text-black bg-white pt-20 pb-8'>
+      <div className='max-w-[800px] mt-[80px] w-full h-[500px] mx-auto text-center flex flex-col justify-center'>
         <p className='text-[#FF0091] font-bold p-2'>
           GROWING WITH FINANCIAL FREEDOM
         </p>

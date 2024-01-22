@@ -16,6 +16,7 @@ import FetchAllAssets from "./components_NFT/Gettokens.jsx"
 import Balance from "./components_NFT/balance.jsx"
 import { WalletProvider } from './components/WalletContext.jsx';
 import { AuthProvider } from './components/AuthContext.jsx'; // importa el AuthProvider
+import Mediun from './landing/Mediun.jsx';
 
 function App() {
   const navigate = useNavigate();
@@ -38,7 +39,6 @@ function App() {
   return (
     <WalletProvider>
     <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
-      <div className="App">
         <Home className="bg-white"/>
         <Routes>
         <Route
@@ -50,6 +50,7 @@ function App() {
                     getTokens={ItemsUploader}
                     onCreateTokens={handleCreateTokens}
                   />
+                  <Mediun/>
                   <Card/>
                   <Footer />
                 </>
@@ -62,7 +63,6 @@ function App() {
           <Route path="/status" element={<PaymentDetails />} />
           <Route path="/pay" element={<PaymentButton />} />
         </Routes>
-      </div>
     </AuthProvider>
     </WalletProvider>
   );

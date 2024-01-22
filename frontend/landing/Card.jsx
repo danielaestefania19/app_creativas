@@ -5,26 +5,45 @@ import '../styles/styles.css'
 
 const Card = () => {
     return (
-        <div className="w-full max-w-7xl mx-auto rounded overflow-hidden shadow-lg bg-white p-6 mb-8 flex">
-            <div className="flex-1">
-                <div className="flex items-center mb-4">
-                    <div className="p-2 mr-4">
-                        <img src={cube} alt="Cube" className='w-24 h-24 rounded' />
+        <div className="py-2">
+            <div className="w-full max-w-screen-xl h-96 mx-auto rounded-2xl overflow-hidden shadow-lg bg-white p-6 mb-8 flex hover:scale-105 duration-300">
+                <div className="flex-1">
+                    <div className="mb-4">
+                        <div className="p-2 mr-4">
+                            <img src={cube} alt="Cube" className='w-24 h-24 rounded' />
+                        </div>
+                        <h1 className="text-xl font-bold">IPFS</h1>
                     </div>
-                    <h1 className="text-xl font-bold">IPFS</h1>
+                    <p className="text-gray-700 text-base mb-4">
+                        The blazing fast, unlimited scale web3 media and data storage platform.
+                    </p>
+                    <button type="button" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 rounded font-bold px-4 py-2 text-center">Learn More</button>
                 </div>
-                <p className="text-gray-700 text-base mb-4">
-                    The blazing fast, unlimited scale web3 media and data storage platform.
-                </p>
-                <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                    Learn more
-                </button>
+                <div className="mr-8">
+                    <img src={block} alt="Block" className="w-64 h-64 rounded mt-6" />
+                </div>
             </div>
-            <div className="w-1/2"> {/* Ajuste de ml-8 para mover la imagen al lado derecho */}
-                <img src={block} alt="Block" className="w-64 h-64 rounded" />
+            <div className="w-full max-w-screen-xl h-96 mx-auto rounded-2xl overflow-hidden shadow-lg bg-white p-6 mb-8 flex hover:scale-105 duration-300">
+                <div className="flex-1">
+                    <div className="mb-4">
+                        <div className="p-2 mr-4">
+                            <img src={cube} alt="Cube" className='w-24 h-24 rounded' />
+                        </div>
+                        <h1 className="text-xl font-bold">IPFS</h1>
+                    </div>
+                    <p className="text-gray-700 text-base mb-4">
+                        The blazing fast, unlimited scale web3 media and data storage platform.
+                    </p>
+                    <button type="button" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 rounded font-bold px-4 py-2 mt-6 text-center">Learn More</button>
+                </div>
+                <div className="mr-8">
+                    <img src={block} alt="Block" className="w-64 h-64 rounded mt-6" />
+                </div>
             </div>
+
         </div>
     );
 }
 
 export default Card;
+
