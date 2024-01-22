@@ -18,7 +18,7 @@ const handleFileChange = useCallback(async (event) => {
     formData.append('file', file)
 
     try {
-      const response = await axios.post('http://192.168.1.7:1234/uploadImage', formData, {
+      const response = await axios.post('http://192.168.1.9:1234/uploadImage', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -28,7 +28,8 @@ const handleFileChange = useCallback(async (event) => {
         console.log(response.data)
         const image = response.data['/'] // Accede a la propiedad '/' del objeto
         console.log(image)
-        eccomerce.set_item({item, price, description, image, owner: principalText});// Aquí se llama a la función set_item
+        console.log(whoami)
+        eccomerce.set_item({item, price, description, image, owner: whoami});// Aquí se llama a la función set_item
         console.log(image)
     }
     

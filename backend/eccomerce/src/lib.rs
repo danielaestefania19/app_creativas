@@ -1,12 +1,9 @@
 use candid::Principal;
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
-use ic_stable_structures::{
-    storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable,
-};
+use ic_stable_structures::{storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable};
 use serde_derive::Serialize;
 use std::{borrow::Cow, cell::RefCell};
-
 
 // Definición de tipos y constantes
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -28,6 +25,7 @@ enum ItemError {
     Unauthorized,
     UpdateError,
     NoItemsAssociated,
+    InvalidOwner,
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Hash, PartialEq)]
@@ -66,9 +64,9 @@ struct Item {
     item: String,
     price: u64,
     description: String,
-    image: String,  // Cambiado a String
+    image: String, // Cambiado a String
     rating: Option<Rating>,
-    owner: Option<candid::Principal>,
+    owner: Option<Principal>,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -76,7 +74,8 @@ pub struct CreateItem {
     item: String,
     price: u64,
     description: String,
-    image: String,  // Cambiado a String
+    image: String,
+    owner: String, // Haz que el campo owner sea opcional
 }
 
 // Implementación de trait para la serialización y deserialización de Item
@@ -127,33 +126,31 @@ thread_local! {
     static ID_MANAGER: IDManager = IDManager::new();
 }
 
-// Métodos de actualización (update) y consulta (query) de la canister
-fn caller() -> Result<Principal, ItemError> {
-    let caller = ic_cdk::api::caller();
-    // El principal anónimo no está permitido para interactuar con el canister.
-    if caller == Principal::anonymous() {
-        Err(ItemError::Unauthorized)
-    } else {
-        Ok(caller)
-    }
+// Función para convertir un String a un Principal
+fn string_a_principal(s: String) -> Result<Principal, ItemError> {
+    Principal::from_text(&s).map_err(|_| ItemError::InvalidOwner)
 }
 
 #[ic_cdk::update]
 fn set_item(item: CreateItem) -> Result<ItemSuccess, ItemError> {
     let id = ID_MANAGER.with(|manager| manager.get_id());
     print!("{}", id);
+
+    // Usa la función string_a_principal para convertir el String owner a un Principal
+    let owner_principal = string_a_principal(item.owner)?;
+
     let value: Item = Item {
         item: item.item,
         price: item.price,
         description: item.description,
-        image: item.image,  // No necesitas envolverlo en Some()
+        image: item.image,
         rating: None,
-        owner: Some(ic_cdk::api::caller()),
+        owner: Some(owner_principal), // Usa el owner_principal que acabas de convertir
     };
+
     ITEMS.with(|p| p.borrow_mut().insert(id, value.clone()));
     Ok(ItemSuccess::CreatedItem)
 }
-
 
 #[ic_cdk::query]
 fn check_if_item_exists(id: u64) -> bool {
@@ -172,7 +169,7 @@ fn get_items() -> Vec<(u64, Item)> {
 
 #[ic_cdk::update]
 fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
-    let caller = caller()?;
+    let caller_principal = string_a_principal(item.owner)?; // Usa la función string_a_principal para convertir el String owner a un Principal
     ITEMS.with(|p| {
         let old_item_opt = p.borrow().get(&id);
         let old_item: Item;
@@ -183,7 +180,7 @@ fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
         }
 
         if let Some(owner) = old_item.owner {
-            if caller != owner {
+            if caller_principal != owner {
                 return Err(ItemError::Unauthorized);
             }
         }
@@ -193,7 +190,7 @@ fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
             description: item.description,
             image: item.image,
             rating: old_item.rating,
-            owner: Some(caller),
+            owner: Some(caller_principal),
         };
 
         let result = p.borrow_mut().insert(id, value);
@@ -205,55 +202,36 @@ fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
     })
 }
 
-
-// #[ic_cdk::update]
-// fn remove_item(id: u64) -> Result<(), ItemError> {
-//     let caller = caller()?;
-//     ITEMS.with(|p| {
-//         let old_item_opt = p.borrow().get(&id);
-//         let old_item: Item;
-
-//         match old_item_opt {
-//             Some(value) => old_item = value,
-//             None => return Err(ItemError::NotExist),
-//         }
-
-//         if let Some(owner) = old_item.owner {
-//             if caller != owner {
-//                 return Err(ItemError::Unauthorized);
-//             }
-//         }
-//         p.borrow_mut().remove(&id);
-//         Ok(())
-//     })
-// }
-
-
 #[ic_cdk::update]
-fn remove_item(id: u64) -> Result<(), ItemError> {
+fn remove_item(id: u64, owner: String) -> Result<(), ItemError> {
+    let caller_principal = string_a_principal(owner)?; // Usa la función string_a_principal para convertir el String owner a un Principal
     ITEMS.with(|p| {
         let old_item_opt = p.borrow().get(&id);
+        let old_item: Item;
 
         match old_item_opt {
-            Some(_) => {
-                p.borrow_mut().remove(&id);
-                Ok(())
-            },
-            None => Err(ItemError::NotExist),
+            Some(value) => old_item = value,
+            None => return Err(ItemError::NotExist),
         }
+
+        if let Some(owner) = old_item.owner {
+            if caller_principal != owner {
+                return Err(ItemError::Unauthorized);
+            }
+        }
+        p.borrow_mut().remove(&id);
+        Ok(())
     })
 }
 
-
 #[ic_cdk::query]
-fn get_items_owner() -> Result<Vec<(u64, Item)>, ItemError> {
-   // Envuelve el caller en Some()
+fn get_items_owner(owner: String) -> Result<Vec<(u64, Item)>, ItemError> {
+    let caller_principal = string_a_principal(owner)?; // Usa la función string_a_principal para convertir el String owner a un Principal
     let mut items_owned = Vec::new();
 
     ITEMS.with(|p| {
         for (id, item) in p.borrow().iter() {
-            if item.owner == Some(ic_cdk::caller()) {
-                // Ahora puedes comparar correctamente
+            if item.owner == Some(caller_principal) {
                 items_owned.push((id.clone(), item.clone()));
             }
         }
@@ -270,4 +248,3 @@ fn get_items_owner() -> Result<Vec<(u64, Item)>, ItemError> {
 fn whoami() -> Principal {
     ic_cdk::api::caller()
 }
-

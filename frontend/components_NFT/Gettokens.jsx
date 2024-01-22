@@ -32,11 +32,11 @@ const FetchAllAssets = () => {
     }, []);
 
     return (
-        <div className="flex flex-col items-end mt-4 mb-2 mr-2 h-full">
+        <div className="flex flex-col  mt-4 mb-2 mr-2 h-full">
             {/* Contenedor del botón Ir a CreateTokens */}
             <div className="mb-4">
                 <Link to="/other/createtokens">
-                    <button className='bg-[#c9398a] rounded-md p-2 text-white' >Ir a CreateTokens</button>
+                    <button className='bg-[#c9398a] rounded-md p-2 text-white items-end' >Ir a CreateTokens</button>
                 </Link>
             </div>
 

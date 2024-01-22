@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import axios from 'axios';
+import ShowdetailsTokensFrac from './showFracNFT';
+
 
 const Marketplace = ({ assets }) => {
   return (
-    <div className='className="marketplace-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"'> 
+    <div className='marketplace-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"'>
       {assets.map((asset, index) => {
         const [imageUrl, setImageUrl] = useState(null);
         const [pdfUrl, setPdfUrl] = useState(null);
@@ -13,7 +15,7 @@ const Marketplace = ({ assets }) => {
         useEffect(() => {
           const fetchImage = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.7:1234/fetchImage/${asset.tokenHash}`, {
+              const response = await axios.get(`http://192.168.1.9:1234/fetchImage/${asset.tokenHash}`, {
                 responseType: 'blob',
               });
 
@@ -29,7 +31,7 @@ const Marketplace = ({ assets }) => {
 
           const fetchPdf = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.7:1234/fetchImage/${asset.businessPlanHash}`, {
+              const response = await axios.get(`http://192.168.1.9:1234/fetchImage/${asset.businessPlanHash}`, {
                 responseType: 'blob',
               });
 
@@ -68,18 +70,13 @@ const Marketplace = ({ assets }) => {
                   <a href={imageUrl} className="btn btn-primary stretched-link">Ampliar</a>
                   {pdfUrl && <a href={pdfUrl} className="btn btn-primary stretched-link">Ver PDF</a>}
                   <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    {[...Array(parseInt(asset.NFTFractional))].map((_, i) => (
-                      <button
-                        key={i}
-                        style={{ width: 50, height: 50, backgroundColor: 'blue', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: 5 }}
-                        onClick={() => {
-                          console.log(`Botón ${i + 1} presionado`);
-                        }}
-                      >
-                        {ethers.utils.formatUnits(asset.price, 0) / asset.NFTFractional}
-                      </button>
-                    ))}
                   </div>
+                  <ShowdetailsTokensFrac
+                    id={ethers.utils.formatUnits(asset.assetId, 0)}
+                    precio={ethers.utils.formatUnits(asset.price, 0)}
+                    NFTFractional={ethers.utils.formatUnits(asset.NFTFractional, 0)}
+                    propietario={asset.owner}
+                  />
                 </>
               )}
 

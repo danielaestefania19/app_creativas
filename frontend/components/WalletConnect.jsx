@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Button } from '@material-ui/core';
 import { ethers } from 'ethers';
+import { WalletContext } from './WalletContext.jsx';
 
 
 const API_URL = import.meta.env.VITE_BACKEND_URL
@@ -10,7 +11,7 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 
 const WalletConnect = () => {
     const [errorMessage, setErrorMessage] = useState(null);
-    const [defaultAccount, setDefaultAccount] = useState(null);
+    const { defaultAccount, setDefaultAccount } = useContext(WalletContext);
     const [userBalance, setUserBalance] = useState(null);
 
     const connectwalletHandler = () => {
