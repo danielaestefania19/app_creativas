@@ -1,10 +1,10 @@
 type Rating = variant {
-    zero;
-    one;
-    two;
-    three;
-    four;
-    five;
+   Zero;
+    One;
+    Two;
+    Three;
+    Four;
+    Five;
 };
 
 type CreateItem = record {
@@ -12,6 +12,12 @@ type CreateItem = record {
     price: nat64;
     description: text;
     image: text;
+    owner: text;
+};
+
+type Vote = record { 
+    voter: opt principal; 
+    rating: Rating 
 };
 
 type Item = record {
@@ -21,7 +27,10 @@ type Item = record {
     image: text;
     rating: opt Rating;
     owner: opt principal;
+    votes: opt vec Vote;
 };
+
+
 
 type ItemError = variant {
     AlreadyExist;
@@ -30,7 +39,12 @@ type ItemError = variant {
     Unauthorized;
     UpdateError;
     NoItemsAssociated;
+    InvalidOwner;
+    AlreadyVoted; // Agrega este error
+    NoVotes; // Agrega este error
+    ItemNotFound; // Agrega este error
 };
+
 
 type Result = variant {
     Ok;
@@ -50,5 +64,7 @@ service : (opt text) -> {
     remove_item : (nat64, text) -> (Result);
     get_items_owner : (text) -> (ResultItems) query;
     whoami : () -> (principal) query;
+    vote : (nat64, Rating, text) -> (Result); // Nueva función vote
+    update_rating : (nat64) -> (Result); // Nueva función update_rating
 };
 
