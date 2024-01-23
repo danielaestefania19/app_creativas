@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import axios from 'axios';
-// import ShowdetailsTokensFrac from './showFracNFT';
+import ShowdetailsTokensFrac from './showFracNFT';
 
 const Marketplace = ({ assets }) => {
   return (
@@ -97,12 +97,12 @@ const Marketplace = ({ assets }) => {
                         <a href={imageUrl} className="btn btn-primary stretched-link">Ampliar</a>
                         {pdfUrl && <a href={pdfUrl} className="btn btn-primary stretched-link">Ver PDF</a>}
                         <div style={{ display: 'flex', flexDirection: 'row' }}></div>
-                        {/* <ShowdetailsTokensFrac
+                        <ShowdetailsTokensFrac
                           id={ethers.utils.formatUnits(asset.assetId, 0)}
                           precio={ethers.utils.formatUnits(asset.price, 0)}
                           NFTFractional={ethers.utils.formatUnits(asset.NFTFractional, 0)}
                           propietario={asset.owner}
-                        /> */}
+                        />
                       </div>
                     </div>
                   </div>

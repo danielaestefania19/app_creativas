@@ -4,6 +4,7 @@ import RES4 from "../../utils/abi/RES4.json";
 import { contractAddressRES4 } from "../../utils/constans.js";
 import FractionalNFT from "../../utils/abi/FractionalNFT.json"
 import { WalletContext } from '../components/WalletContext.jsx'; // Asegúrate de ajustar la ruta de importación
+import { assert } from "chai";
 
 const PRIVATE_KEY_NFT = import.meta.env.VITE_PRIVATE_KEY_NFT;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -11,12 +12,14 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY_NFT, provider);
 const contract_RES4 = new ethers.Contract(contractAddressRES4, RES4, wallet);
-const contract_FracNFT = new ethers.Contract(contractAddressTransfer, TransferEther, provider);
+// // const contract_FracNFT = new ethers.Contract(contractAddressTransfer, TransferEther, provider);
 
 const ShowdetailsTokensFrac = ({ id, precio, NFTFractional, propietario }) => {
     const [tokenAmount, setTokenAmount] = useState(1);
     const [purchasedTokens, setPurchasedTokens] = useState({});
     const { defaultAccount } = useContext(WalletContext);
+
+    console.log(id)
   
     const handleTokenAmountChange = (event) => {
       setTokenAmount(event.target.value);
@@ -25,20 +28,21 @@ const ShowdetailsTokensFrac = ({ id, precio, NFTFractional, propietario }) => {
     // Calcula el total a pagar para este activo
     const amount = parseFloat(precio) / parseFloat(NFTFractional) * tokenAmount;
 
-        const transferEther = async (receiver, amount) => {
-        try {
-            let wei = ethers.utils.parseEther(amount.toString());
-            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-            const contractWithSigner = contract_FracNFT.connect(signer);
-            const gasLimit = ethers.utils.hexlify(100000);
-            const transaction = await contractWithSigner.transferEther(receiver, wei, { gasLimit, value: wei });
-            const receipt = await transaction.wait();
-            console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
-            setPurchasedTokens({ ...purchasedTokens, [receiver]: true });
-        } catch (error) {
-            console.error(`Failed to send transaction: ${error}`);
-        }
-    };
+    const invest = async (assetId, amount) => {
+      try {
+          let wei = ethers.utils.parseEther(amount.toString());
+          const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+          const contractWithSigner = contract_RES4.connect(signer);
+          const gasLimit = ethers.utils.hexlify(300000);
+          console.log(assetId)
+          const transaction = await contractWithSigner.invest(assetId, wei, { gasLimit, value: wei });
+          const receipt = await transaction.wait();
+          console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
+          setPurchasedTokens({ ...purchasedTokens, [assetId]: true });
+      } catch (error) {
+          console.error(`Failed to send transaction: ${error}`);
+      }
+  };
 
     const activos = async (activoId, receiver, amount) => {
         const dirtoken = await contract_RES4.FCTV(activoId);
@@ -69,10 +73,15 @@ const ShowdetailsTokensFrac = ({ id, precio, NFTFractional, propietario }) => {
               disabled={purchasedTokens[propietario] || tokenAmount > NFTFractional}
               onClick={async () => {
                 const amount = parseFloat(precio) / parseFloat(NFTFractional) * tokenAmount;
-                await transferEther(propietario, amount.toString());
-                console.log(tokenAmount)
-                const txHash = await activos(id, defaultAccount, tokenAmount);
-                console.log(`Transaction hash: ${txHash}`);
+               
+                  await invest(id, amount.toString());
+                  console.log(tokenAmount)
+                  const txHash = await activos(id, defaultAccount, tokenAmount);
+                  console.log(`Transaction hash: ${txHash}`);
+
+                  console.error(`Investment failed: ${error}`);
+              
+              
               }}
             >
               Transfer {parseFloat(precio) / parseFloat(NFTFractional) * tokenAmount}
