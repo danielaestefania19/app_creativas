@@ -29,10 +29,10 @@ const Card = () => {
                         <div className="p-2 mr-4">
                             <img src={cube} alt="Cube" className='w-24 h-24 rounded' />
                         </div>
-                        <h1 className="text-xl font-bold">IPFS</h1>
+                        <h1 className="text-xl font-bold">Web3</h1>
                     </div>
                     <p className="text-gray-700 text-base mb-4">
-                        The blazing fast, unlimited scale web3 media and data storage platform.
+                         Una nueva era de creatividad.
                     </p>
                     <button type="button" class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 rounded font-bold px-4 py-2 mt-6 text-center">Learn More</button>
                 </div>

@@ -1,8 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { Button } from '@material-ui/core';
 import { ethers } from 'ethers';
 import { WalletContext } from './WalletContext.jsx';
-
 
 const API_URL = import.meta.env.VITE_BACKEND_URL
 
@@ -11,8 +9,7 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 
 const WalletConnect = () => {
     const [errorMessage, setErrorMessage] = useState(null);
-    const { defaultAccount, setDefaultAccount } = useContext(WalletContext);
-    const [userBalance, setUserBalance] = useState(null);
+    const { setDefaultAccount } = useContext(WalletContext);
 
     const connectwalletHandler = () => {
       if (window.ethereum) {
@@ -30,8 +27,6 @@ const WalletConnect = () => {
     const accountChangedHandler = async (newAccount) => {
         const address = await newAccount.getAddress();
         setDefaultAccount(address);
-        const balance = await newAccount.getBalance()
-        setUserBalance(ethers.utils.formatEther(balance));
         await getuserBalance(address)
     }
 
@@ -40,23 +35,10 @@ const WalletConnect = () => {
     }
 
     return (
-        <div className="WalletCard">
-            <h3 className="h4">
-               Disfruta pagar con crypto
-            </h3>
-            <button
-                className='bg-[#c9398a] w-[200px] rounded-md font-medium my-6 mx-auto py-3 text-white'
-                onClick={connectwalletHandler}>
-                {defaultAccount ? "Connected!!" : "Connect"}
+        <div className="WalletCard" onClick={connectwalletHandler}>
+            <button className='flex-1 ms-3 whitespace-nowrap'>
+                Metamask
             </button>
-            <div className="displayAccount">
-                <h4 className="walletAddress">Address:{defaultAccount}</h4>
-                <div className="balanceDisplay">
-                    <h3>
-                        Wallet Amount: {userBalance}
-                    </h3>
-                </div>
-            </div>
             {errorMessage}
         </div>
     )
