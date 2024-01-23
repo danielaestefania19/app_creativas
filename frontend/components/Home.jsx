@@ -1,24 +1,32 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
-import { Login } from './Login';
-import { AuthContext } from './AuthContext';
+import { useAuth } from './Login'; // Importa useAuth aquí
+import { AuthContext } from './AuthContext.jsx';
 import { Img } from '@chakra-ui/react';
 import favicon from '../assets/favicon.png';
 import WalletConnect from './WalletConnect';
 
 const Home = () => {
   const [nav, setNav] = useState(false);
-  const { whoami, setWhoami } = useContext(AuthContext);
+  const { isUserAuthenticated, login, logout, whoami, setWhoami } = useContext(AuthContext);
+
+
 
   const handleNav = () => {
     setNav(!nav);
   };
-
+  // En Home
   const handleLogin = async () => {
-    const principal = await Login();
-    setWhoami(principal);
+    const principal = await login(); // Obtiene el principal del usuario de login
+    setWhoami(principal); // Actualiza whoami en AuthContext
   };
+
+  const handleLogout = async () => {
+    await logout();
+    setWhoami(null);
+  };
+
 
   const handleModalToggle = () => {
     const modal = document.getElementById("crypto-modal");
@@ -103,9 +111,16 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <button className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={handleLogin}>
-              <div className="flex items-center">LogIn <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
-            </button>
+            {isUserAuthenticated ? (
+              <button className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={handleLogout}>
+                <div className="flex items-center">Logout <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
+              </button>
+            ) : (
+              <button className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={handleLogin}>
+                <div className="flex items-center">Login <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
+              </button>
+            )}
+
           </div>
         </div>
       </div>
@@ -122,7 +137,7 @@ const Home = () => {
         <li className="p-4">Contact</li>
       </ul>
       <div>
-        {/*  <p>Principal: {whoami}</p> */}
+        {<p>Principal: {whoami}</p>}
       </div>
     </header>
   );

@@ -1,5 +1,7 @@
-import React, { useCallback, useState, useContext } from 'react'
+import React, { useCallback, useState, useContext, useEffect } from 'react'
 import axios from 'axios'
+import { AuthClient } from "@dfinity/auth-client";
+import { HttpAgent, Actor } from "@dfinity/agent"
 import { eccomerce } from "../../src/declarations/eccomerce";
 import { AuthContext } from './AuthContext'; // importa el contexto
 import { Principal } from '@dfinity/principal';
@@ -9,6 +11,10 @@ const ItemsUploader = () => {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const { whoami } = useContext(AuthContext); // usa el contexto
+
+  useEffect(() => {
+    console.log("Hola", whoami);
+  }, [whoami]); // agrega whoami a las dependencias del useEffect
 
 
 

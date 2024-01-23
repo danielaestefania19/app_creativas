@@ -11,10 +11,10 @@ const Card = () => {
                     <div className="p-2 mr-4">
                         <img src={cube} alt="Cube" className='w-24 h-24 rounded' />
                     </div>
-                    <h1 className="text-xl font-bold">IPFS</h1>
+                    <h1 className="text-xl font-bold">Blockchain</h1>
                 </div>
                 <p className="text-gray-700 text-base mb-4">
-                    The blazing fast, unlimited scale web3 media and data storage platform.
+                Comerciar con inversores usando tecnologia Blockchain. Transfiere inversión y comisión con contratos inteligentes.
                 </p>
                 <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                     Learn more

@@ -34,7 +34,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
         const paymentCount = await contract.paymentCount();
         setExternalPaymentId(parseInt(paymentCount));
       } catch (error) {
-        console.log("Error al obtener el conteo de pagos: " + error.message);
+        return error.message;
       }
     };
 
@@ -76,7 +76,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
 
       const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
       const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
-      console.log(`Transaction hash: ${tx.hash}`); // Imprime el hash de la transacción
+      alert(`Transaction Exitosa detalles de la transación: ${tx.hash}`); // Imprime el hash de la transacción
 
       setPaymentStarted(true);
       setShowPaymentDetails(true);

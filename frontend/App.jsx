@@ -9,22 +9,31 @@ import PaymentDetails from "./components/PaymentDetails.jsx";
 import Card from './landing/Card.jsx';
 import PaymentButton from "./components/Pay.jsx"
 import { ChakraProvider } from "@chakra-ui/react";
-import Login from "./components/Login.jsx"
+import LoggedOut  from './components/LoggetOut.jsx';
 import ItemsUploader from "./components/Providers.jsx"
 import AddAsset from "./components_NFT/CreateToken.jsx"
 import FetchAllAssets from "./components_NFT/Gettokens.jsx"
 import Balance from "./components_NFT/balance.jsx"
 import { WalletProvider } from './components/WalletContext.jsx';
 import { AuthProvider } from './components/AuthContext.jsx'; // importa el AuthProvider
+import withAuthentication from './components/withAuthentication.jsx';
+
+
+
 
 function App() {
+
+
+  const AddAssetWithAuth = withAuthentication(AddAsset);
+  const ItemsUploaderWithAuth = withAuthentication(ItemsUploader);
+
   const navigate = useNavigate();
 
   const handleCreatePayment = () => {
     navigate('/other/shop');
   };
 
-  const ItemsUploader = () => {
+  const GetTokens = () => {
     navigate('/other/gettokens');
   };
 
@@ -32,38 +41,41 @@ function App() {
     navigate('/other/createtokens');
   };
   const handleuploaderClick = () => {
-    navigate('/other/items');
+    navigate('/other/createitems');
   };
 
   return (
     <WalletProvider>
-    <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
-      <div className="App">
-        <Home className="bg-white"/>
-        <Routes>
-        <Route
+      <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
+        <div className="App">
+          <Home className="bg-white"/>
+          <Routes>
+            <Route
               path="/"
               element={
                 <>
                   <Body
                     onCreatePayment={handleCreatePayment}
-                    getTokens={ItemsUploader}
+                    getTokens={GetTokens}
                     onCreateTokens={handleCreateTokens}
+                    onCreateItems={handleuploaderClick}
                   />
                   <Card/>
                   <Footer />
                 </>
               }
             />
-          <Route path="/other/shop" element={<Shop/>} />
-          <Route path="/other/createtokens" element={<AddAsset/>} />
-          <Route path="/other/items" element={<ItemsUploader/>} />
-          <Route path="/other/gettokens" element={<FetchAllAssets />} /> {/* Agrega esta línea */}
-          <Route path="/status" element={<PaymentDetails />} />
-          <Route path="/pay" element={<PaymentButton />} />
-        </Routes>
-      </div>
-    </AuthProvider>
+            <Route path="/other/shop" element={<Shop/>} />
+            <Route path="/other/createtokens" element={<AddAssetWithAuth/>} /> {/* Usa AddAssetWithAuth aquí */}
+            <Route path="/other/createitems" element={<ItemsUploaderWithAuth />} /> {/* Y aquí */}
+            <Route path="/other/items" element={<ItemsUploader/>} />
+            <Route path="/other/gettokens" element={<FetchAllAssets />} /> {/* Agrega esta línea */}
+            <Route path="/login" element={<LoggedOut />} />
+            <Route path="/status" element={<PaymentDetails />} />
+            <Route path="/pay" element={<PaymentButton />} />
+          </Routes>
+        </div>
+      </AuthProvider>
     </WalletProvider>
   );
 };
