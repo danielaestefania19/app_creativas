@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import RES4 from "../../utils/abi/RES4.json";
 import { contractAddressRES4 } from "../../utils/constans.js";
 import Marketplace from "./Marketplace.jsx"
-
+// import WalletContext from "./walletconext"
 const PRIVATE_KEY_NFT = import.meta.env.VITE_PRIVATE_KEY_NFT;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -32,11 +32,11 @@ const FetchAllAssets = () => {
     }, []);
 
     return (
-        <div className="flex flex-col  mt-4 mb-2 mr-2 h-full">
+        <div className="flex flex-col items-end mt-32 mb-2 mr-5 h-full">
             {/* Contenedor del botón Ir a CreateTokens */}
             <div className="mb-4">
                 <Link to="/other/createtokens">
-                    <button className='bg-[#c9398a] rounded-md p-2 text-white items-end' >Ir a CreateTokens</button>
+                    <button className='bg-[#c9398a] rounded-md p-2 text-white' >Ir a CreateTokens</button>
                 </Link>
             </div>
 

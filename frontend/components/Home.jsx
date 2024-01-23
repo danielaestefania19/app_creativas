@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import { useAuth } from './Login'; // Importa useAuth aquí
@@ -9,9 +9,10 @@ import WalletConnect from './WalletConnect';
 
 const Home = () => {
   const [nav, setNav] = useState(false);
-  const { isUserAuthenticated, login, logout, whoami, setWhoami } = useContext(AuthContext);
-
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const { whoami, setWhoami, isUserAuthenticated, login, logout} = useContext(AuthContext);
 
   const handleNav = () => {
     setNav(!nav);
@@ -29,12 +30,26 @@ const Home = () => {
 
 
   const handleModalToggle = () => {
-    const modal = document.getElementById("crypto-modal");
-    modal.classList.toggle("hidden");
+    setModalVisible(!modalVisible);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+
+      setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [prevScrollPos, visible]);
   return (
-    <header className="fixed inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-3 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg"> {/* Agregué una clase de fondo */}
+    // <header className="fixed inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-3 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg"> {/* Agregué una clase de fondo */}
+    <header className={`${visible ? 'fixed' : 'hidden'} inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-3 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg`}>
       <div className="px-4">
         <div className='flex items-center justify-between'>
           <h1 className="h-7 w-auto text-[#FF0091]">Creativas</h1>
@@ -47,7 +62,7 @@ const Home = () => {
               <svg aria-hidden="true" className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
               Connect wallet
             </button>
-            <div id="crypto-modal" tabIndex="-1" aria-hidden="true" className="fixed inset-0 z-50 flex items-center justify-center hidden mt-16">
+            <div id="crypto-modal" tabIndex="-1" aria-hidden="true" className={`fixed inset-0 z-50 flex items-center justify-center ${modalVisible ? '' : 'hidden'} mt-16`}>
               <div className="relative p-4 w-full max-w-md max-h-full">
 
                 <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">

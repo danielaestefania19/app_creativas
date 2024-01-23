@@ -47,8 +47,8 @@ service : (opt text) -> {
     get_items : () -> (vec record { nat64; Item }) query;
     set_item : (CreateItem) -> ();
     update_item : (nat64, CreateItem) -> (Result);
-    remove_item : (nat64) -> (Result);
-    get_items_owner : () -> (ResultItems) query;
+    remove_item : (nat64, text) -> (Result);
+    get_items_owner : (text) -> (ResultItems) query;
     whoami : () -> (principal) query;
 };
 

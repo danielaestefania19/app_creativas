@@ -16,7 +16,6 @@ const WalletPay = ({ id, amount }) => {
 
     const payHandler = async () => {
         if (!id || !amount) {
-            alert('Por favor, ingresa un ID y una cantidad');
             return;
         }
 

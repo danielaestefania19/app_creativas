@@ -4,6 +4,7 @@ import Item from "./Item";
 import Cart from "./Card.jsx";
 import '../styles/styles.css';
 import { FiShoppingCart } from "react-icons/fi";
+import { Link } from 'react-router-dom';
 
 const Shop = () => {
   const [items, setItems] = useState([]);
@@ -59,6 +60,11 @@ const Shop = () => {
 
   return (
     <div className="h-screen w-screen p-8 bg-[#f7e8f0] relative">
+        <div className="mb-4">
+                <Link to="/other/createitems">
+                    <button className='bg-[#c9398a] rounded-md p-2 text-white items-end' >Creativas Seller</button>
+                </Link>
+            </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {loading ? (
           <div>Loading...</div>

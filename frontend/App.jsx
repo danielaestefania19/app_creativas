@@ -17,9 +17,7 @@ import Balance from "./components_NFT/balance.jsx"
 import { WalletProvider } from './components/WalletContext.jsx';
 import { AuthProvider } from './components/AuthContext.jsx'; // importa el AuthProvider
 import withAuthentication from './components/withAuthentication.jsx';
-
-
-
+import Mediun from './landing/Mediun.jsx';
 
 function App() {
 
@@ -46,11 +44,10 @@ function App() {
 
   return (
     <WalletProvider>
-      <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
-        <div className="App">
-          <Home className="bg-white"/>
-          <Routes>
-            <Route
+    <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
+        <Home className="bg-white"/>
+        <Routes>
+        <Route
               path="/"
               element={
                 <>
@@ -60,22 +57,22 @@ function App() {
                     onCreateTokens={handleCreateTokens}
                     onCreateItems={handleuploaderClick}
                   />
+                  <Mediun/>
                   <Card/>
                   <Footer />
                 </>
               }
             />
-            <Route path="/other/shop" element={<Shop/>} />
-            <Route path="/other/createtokens" element={<AddAssetWithAuth/>} /> {/* Usa AddAssetWithAuth aquí */}
-            <Route path="/other/createitems" element={<ItemsUploaderWithAuth />} /> {/* Y aquí */}
-            <Route path="/other/items" element={<ItemsUploader/>} />
-            <Route path="/other/gettokens" element={<FetchAllAssets />} /> {/* Agrega esta línea */}
-            <Route path="/login" element={<LoggedOut />} />
-            <Route path="/status" element={<PaymentDetails />} />
-            <Route path="/pay" element={<PaymentButton />} />
-          </Routes>
-        </div>
-      </AuthProvider>
+          <Route path="/other/shop" element={<Shop/>} />
+          <Route path="/other/createtokens" element={<AddAssetWithAuth/>} />
+          <Route path="/other/createitems" element={<ItemsUploaderWithAuth />} />
+          <Route path="/other/items" element={<ItemsUploader/>} />
+          <Route path="/other/gettokens" element={<FetchAllAssets />} /> 
+          <Route path="/login" element={<LoggedOut />} />
+          <Route path="/status" element={<PaymentDetails />} />
+          <Route path="/pay" element={<PaymentButton />} />
+        </Routes>
+    </AuthProvider>
     </WalletProvider>
   );
 };

@@ -1,43 +1,67 @@
-// auth.js
+import { useState, useEffect } from 'react';
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { eccomerce, createActor } from "../../src/declarations/eccomerce";
 
 let actor = eccomerce;
 
-export const Login = async () => {
-  const local_ii_url = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8000`;
-  let iiUrl;
-  if (process.env.DFX_NETWORK === "local") {
-    iiUrl = local_ii_url;
-  } else if (process.env.DFX_NETWORK === "ic") {
-    iiUrl = `https://identity.ic0.app`;
-  } else {
-    iiUrl = local_ii_url;
-  }
-  const authClient = await AuthClient.create();
+export const useAuth = () => {
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [userIdentity, setUserIdentity] = useState(null);
+  const [userPrincipal, setUserPrincipal] = useState(null);
+  const [authClient, setAuthClient] = useState(null); // Nuevo estado para authClient
+  
 
-  await new Promise((resolve) => {
-    authClient.login({
-      identityProvider: iiUrl,
-      onSuccess: resolve,
-      onError: () => {
-        alert("Login error");
-      },
+  const login = async () => {
+    const local_ii_url = `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:8000`;
+    let iiUrl;
+    if (process.env.DFX_NETWORK === "local") {
+      iiUrl = local_ii_url;
+    } else if (process.env.DFX_NETWORK === "ic") {
+      iiUrl = `https://identity.ic0.app`;
+    } else {
+      iiUrl = local_ii_url;
+    }
+    const newAuthClient = await AuthClient.create();
+    setAuthClient(newAuthClient); // Guarda authClient en el estado
+
+    await new Promise((resolve) => {
+      newAuthClient.login({
+        identityProvider: iiUrl,
+        onSuccess: resolve,
+        onError: () => {
+          alert("Login error");
+        },
+      });
     });
-  });
 
-  const identity = await authClient.getIdentity();
-  const agent = new HttpAgent({ identity });
+    const identity = await newAuthClient.getIdentity();
+    const agent = new HttpAgent({ identity });
 
-  actor = createActor('bd3sg-teaaa-aaaaa-qaaba-cai', {
-    agent,
-  });
+    actor = createActor('bd3sg-teaaa-aaaaa-qaaba-cai', {
+      agent,
+    });
 
-  const principal = await actor.whoami();
-  console.log(principal.toText());
-  return principal.toText();
+    const principal = await actor.whoami();
+    console.log(principal.toText());
+
+    // Actualizar estado
+    setIsUserAuthenticated(await newAuthClient.isAuthenticated());
+    setUserIdentity(identity);
+    setUserPrincipal(principal.toText());
+    return principal.toText();
+  };
+
+  const logout = async () => {
+    await authClient?.logout(); // Ahora authClient está disponible aquí
+    // Actualizar estado
+    setIsUserAuthenticated(false);
+    setUserIdentity(null);
+    setUserPrincipal(null);
+  };
+
+  useEffect(() => {
+  }, []);
+
+  return { isUserAuthenticated, userIdentity, userPrincipal, login, logout }; // Devuelve login y logout aquí
 };
-
-
-export default Login;

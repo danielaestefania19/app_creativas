@@ -17,7 +17,6 @@ const CompletePayment = ({ id }) => {
 
     const completeHandler = async () => {
         if (!id) {
-            alert('Por favor, ingresa un ID');
             return;
         }
 

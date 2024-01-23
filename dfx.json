@@ -10,7 +10,8 @@
     },
     "assets": {
       "dependencies": [
-        "eccomerce"
+        "eccomerce",
+        "internet_identity"
       ],
       "frontend": {
         "entrypoint": "dist/index.html"
