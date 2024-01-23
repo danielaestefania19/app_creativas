@@ -152,7 +152,7 @@ const Home = () => {
         <li className="p-4">Contact</li>
       </ul>
       <div>
-        {<p>Principal: {whoami}</p>}
+        {/* {<p>Principal: {whoami}</p>} */}
       </div>
     </header>
   );

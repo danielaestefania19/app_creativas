@@ -3,8 +3,6 @@ import { ethers } from 'ethers';
 import RES4 from "../../utils/abi/RES4.json";
 import { contractAddressRES4 } from "../../utils/constans.js";
 import FractionalNFT from "../../utils/abi/FractionalNFT.json"
-import TransferEther from "../../utils/abi/TransferEther.json"
-import { contractAddressTransfer } from "../../utils/constans.js";
 import { WalletContext } from '../components/WalletContext.jsx'; // Asegúrate de ajustar la ruta de importación
 
 const PRIVATE_KEY_NFT = import.meta.env.VITE_PRIVATE_KEY_NFT;

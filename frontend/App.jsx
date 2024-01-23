@@ -64,8 +64,8 @@ function App() {
               }
             />
           <Route path="/other/shop" element={<Shop/>} />
-          <Route path="/other/createtokens" element={<AddAssetWithAuth/>} />
-          <Route path="/other/createitems" element={<ItemsUploaderWithAuth />} />
+          <Route path="/other/createtokens" element={<AddAsset/>} />
+          <Route path="/other/createitems" element={<ItemsUploader />} />
           <Route path="/other/items" element={<ItemsUploader/>} />
           <Route path="/other/gettokens" element={<FetchAllAssets />} /> 
           <Route path="/login" element={<LoggedOut />} />

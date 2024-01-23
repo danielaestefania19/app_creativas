@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import axios from 'axios';
-import ShowdetailsTokensFrac from './showFracNFT';
+// import ShowdetailsTokensFrac from './showFracNFT';
 
 const Marketplace = ({ assets }) => {
   return (
@@ -18,7 +18,7 @@ const Marketplace = ({ assets }) => {
         useEffect(() => {
           const fetchImage = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.9:1234/fetchImage/${asset.tokenHash}`, {
+              const response = await axios.get(`http://192.168.1.7:1234/fetchImage/${asset.tokenHash}`, {
                 responseType: 'blob',
               });
 
@@ -31,7 +31,7 @@ const Marketplace = ({ assets }) => {
 
           const fetchPdf = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.9:1234/fetchImage/${asset.businessPlanHash}`, {
+              const response = await axios.get(`http://192.168.1.7:1234/fetchImage/${asset.businessPlanHash}`, {
                 responseType: 'blob',
               });
 
@@ -50,7 +50,7 @@ const Marketplace = ({ assets }) => {
         return (
           <div key={index} className="card-container col-span-1">
             <div className="h-[300px] relative bg-cover bg-center w-full flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4">
-              <img className="aspect-w-16 aspect-h-9 object-cover mx-auto mb-2 rounded" src={imageUrl} alt="Card image" />
+              <img className="aspect-w-16 aspect-h-9 object-cover h-20 mx-auto mb-2 rounded" src={imageUrl} alt="Card image" />
               <h2 className="text-center text-xl font-bold text-black">NFT ID #{ethers.utils.formatUnits(asset.assetId, 0)}</h2>
               <p className="text-center text-gray-600">Titulo: {asset.titulo}</p>
               <p className="text-center text-gray-600">Precio: {ethers.utils.formatUnits(asset.price, 0)} BFT</p>
@@ -87,19 +87,22 @@ const Marketplace = ({ assets }) => {
                       </div>
                       <div className="p-4">
                         <p className="mt-2 text-gray-500">Autor: {asset.autor}</p>
-                        <p className="mt-2 text-gray-500">Fecha de inicio del proyecto: {asset.projectStartDate}</p>
-                        <p className="mt-2 text-gray-500">Fecha de finalización del proyecto: {asset.projectEndDate}</p>
+                        <p className="mt-2 text-gray-500">Fecha de inicio del proyecto: {new Date(asset.projectStartDate * 1000).toLocaleDateString()}</p>
+                        <p className="mt-2 text-gray-500">Fecha de finalización del proyecto: {new Date(asset.projectEndDate * 1000).toLocaleDateString()}</p>
                         <p className="mt-2 text-gray-500">Fracciones NFT: {ethers.utils.formatUnits(asset.NFTFractional, 0)}</p>
                         <p className="mt-2 text-gray-500">Cláusulas de garantía de pago: {asset.paymentGuaranteeClauses}</p>
+                        <p className="text-center text-gray-600">Objetivo de Inversion: {ethers.utils.formatUnits(asset.investmentObjective, 0)} BFT</p>
+                        <p className="text-center text-gray-600">Día final de la inversión: {new Date(asset.end_crowfunding * 1000).toLocaleDateString()}</p>
+                        
                         <a href={imageUrl} className="btn btn-primary stretched-link">Ampliar</a>
                         {pdfUrl && <a href={pdfUrl} className="btn btn-primary stretched-link">Ver PDF</a>}
                         <div style={{ display: 'flex', flexDirection: 'row' }}></div>
-                        <ShowdetailsTokensFrac
+                        {/* <ShowdetailsTokensFrac
                           id={ethers.utils.formatUnits(asset.assetId, 0)}
                           precio={ethers.utils.formatUnits(asset.price, 0)}
                           NFTFractional={ethers.utils.formatUnits(asset.NFTFractional, 0)}
                           propietario={asset.owner}
-                        />
+                        /> */}
                       </div>
                     </div>
                   </div>
