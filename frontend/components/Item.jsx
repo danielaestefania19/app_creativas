@@ -97,7 +97,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
     }
   };
   return (
-    <div className={`relative bg-cover bg-center w-full ${expanded ? 'h-auto' : 'h-96'} flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4`}>
+    <div className="h-[300px] relative bg-cover bg-center w-full flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4">
       <h2 className='text-center text-xl font-bold text-black'>{name}</h2>
       <img src={imageUrl} alt={name} className="w-32 h-32 rounded-full mx-auto mb-2" />
       <p className='text-center text-gray-600'>{ethers.utils.formatEther(localPrice)}BFT</p>
