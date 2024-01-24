@@ -15,6 +15,6 @@ export const BITFINITY_CHAIN = {
     //blockExplorerUrls: []
   };
   
-  export const contractAddress = "0x46dFfC1875BF21F22f68e16B6990445AFee08C89";
-  export const contractAddressRES4 = "0x46154a6Ef4494CD35e0797F3506Ca901530759F2";
-  export const contractAddressFracNft = "0x16DB4a57d013a30a25d1934Abe221A4F0Ca95301";
+  export const contractAddress = "0x66d00626b72C48A7Ac3090797c6D8BeE420c29CD";
+  export const contractAddressRES4 = "0xD7FA72C690d1b1fe9fcA349A2d9b1e9a6Cff48de";
+  export const contractAddressFracNft = "0x0C86A8A9c8b89A8862FBb2FCE7829390A4a70F81";

@@ -24,7 +24,7 @@ const handleFileChange = useCallback(async (event) => {
     formData.append('file', file)
 
     try {
-      const response = await axios.post('http://192.168.1.9:1234/uploadImage', formData, {
+      const response = await axios.post('http://192.168.1.8:1111/uploadImage', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
