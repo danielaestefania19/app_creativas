@@ -16,7 +16,7 @@ type CreateItem = record {
 };
 
 type Vote = record { 
-    voter: opt principal; 
+    voter: principal; 
     rating: Rating 
 };
 
@@ -27,7 +27,7 @@ type Item = record {
     image: text;
     rating: opt Rating;
     owner: opt principal;
-    votes: opt vec Vote;
+   // ratings: vec record { opt principal; Rating }
 };
 
 
@@ -64,7 +64,5 @@ service : (opt text) -> {
     remove_item : (nat64, text) -> (Result);
     get_items_owner : (text) -> (ResultItems) query;
     whoami : () -> (principal) query;
-    vote : (nat64, Rating, text) -> (Result); // Nueva función vote
-    update_rating : (nat64) -> (Result); // Nueva función update_rating
 };
 

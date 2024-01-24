@@ -1,14 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ['./**/*.{jsx,css}',
-// ...
-'node_modules/flowbite-react/lib/esm/**/*.js'
-],
+
+const withMT = require("@material-tailwind/react/utils/withMT")
+module.exports = withMT({
+  content: ["./**/*.{jsx,css}", "node_modules/flowbite-react/lib/esm/**/*.js"],
   theme: {
     extend: {},
   },
-  plugins: [
-    require('flowbite/plugin')
-  ],
-}
-
+  plugins: [require("flowbite/plugin")],
+})

@@ -1,20 +1,16 @@
 export const idlFactory = ({ IDL }) => {
   const Rating = IDL.Variant({
-    'one' : IDL.Null,
-    'two' : IDL.Null,
-    'three' : IDL.Null,
-    'five' : IDL.Null,
-    'four' : IDL.Null,
-    'zero' : IDL.Null,
-  });
-  const Vote = IDL.Record({
-    'voter' : IDL.Opt(IDL.Principal),
-    'rating' : Rating,
+    'One' : IDL.Null,
+    'Two' : IDL.Null,
+    'Five' : IDL.Null,
+    'Four' : IDL.Null,
+    'Zero' : IDL.Null,
+    'Three' : IDL.Null,
   });
   const Item = IDL.Record({
     'owner' : IDL.Opt(IDL.Principal),
-    'votes' : IDL.Opt(IDL.Vec(Vote)),
     'item' : IDL.Text,
+    'ratings' : IDL.Vec(IDL.Tuple(IDL.Opt(IDL.Principal), Rating)),
     'description' : IDL.Text,
     'rating' : IDL.Opt(Rating),
     'image' : IDL.Text,

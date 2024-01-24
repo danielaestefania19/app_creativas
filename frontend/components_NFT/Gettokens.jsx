@@ -75,3 +75,4 @@ const FetchAllAssets = () => {
     );
 };
 export default FetchAllAssets;
+
