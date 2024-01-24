@@ -79,7 +79,6 @@ const ShowdetailsTokensFrac = ({ id, precio, NFTFractional, propietario }) => {
                   const txHash = await activos(id, defaultAccount, tokenAmount);
                   console.log(`Transaction hash: ${txHash}`);
 
-                  console.error(`Investment failed: ${error}`);
               
               
               }}

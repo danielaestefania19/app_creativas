@@ -10,8 +10,8 @@ export interface CreateItem {
 }
 export interface Item {
   'owner' : [] | [Principal],
-  'votes' : [] | [Array<Vote>],
   'item' : string,
+  'ratings' : Array<[[] | [Principal], Rating]>,
   'description' : string,
   'rating' : [] | [Rating],
   'image' : string,
@@ -27,17 +27,17 @@ export type ItemError = { 'AlreadyVoted' : null } |
   { 'NoVotes' : null } |
   { 'NotExist' : null } |
   { 'NoItemsAssociated' : null };
-export type Rating = { 'one' : null } |
-  { 'two' : null } |
-  { 'three' : null } |
-  { 'five' : null } |
-  { 'four' : null } |
-  { 'zero' : null };
+export type Rating = { 'One' : null } |
+  { 'Two' : null } |
+  { 'Five' : null } |
+  { 'Four' : null } |
+  { 'Zero' : null } |
+  { 'Three' : null };
 export type Result = { 'Ok' : null } |
   { 'Err' : ItemError };
 export type ResultItems = { 'Ok' : Array<[bigint, Item]> } |
   { 'Err' : ItemError };
-export interface Vote { 'voter' : [] | [Principal], 'rating' : Rating }
+export interface Vote { 'voter' : Principal, 'rating' : Rating }
 export interface _SERVICE {
   'get_items' : ActorMethod<[], Array<[bigint, Item]>>,
   'get_items_owner' : ActorMethod<[string], ResultItems>,

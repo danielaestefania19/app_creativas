@@ -12,7 +12,7 @@ const Footer = () => {
     <div className='w-full bg-black py-16 text-gray-300'>
     <div className='max-w-[1240px] mx-auto'>
       <div className='grid lg:grid-cols-3 gap-8'>
-        <h1 className='w-full text-3xl font-bold text-[#00df9a]'>REACT.</h1>
+        <h1 className='w-full text-3xl font-bold text-pink'>CREATIVAS</h1>
         <p className='py-4'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Id odit ullam iste repellat consequatur libero reiciendis, blanditiis accusantium.</p>
         <div className='flex justify-between md:w-[75%] my-6'>
             <FaFacebookSquare size={30} />

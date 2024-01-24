@@ -23,7 +23,16 @@ const FetchAllAssets = () => {
                 const asset = await contract.assetMap(i);
                 const owner = await contract.ownerOf(asset.assetId);
                 const approval = await contract.assetApprovals(asset.assetId);
-                newAssets.push({ ...asset, owner, approval });
+                const currentTime = Math.floor(Date.now() / 1000); // Obtén el tiempo actual en segundos
+
+                if (asset.end_crowfunding > currentTime) {
+                    // Si el end_crowfunding del activo aún no ha pasado, añádelo a newAssets
+                    newAssets.push({ ...asset, owner, approval });
+                } else {
+                    // Si el end_crowfunding del activo ya ha pasado, llama a la función finalize
+                    await contract.finalize(asset.assetId);
+                    console.log(asset.assetId)
+                }
             }
             setAssets(newAssets);
         };
@@ -48,3 +57,4 @@ const FetchAllAssets = () => {
     );
 };
 export default FetchAllAssets;
+

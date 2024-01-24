@@ -18,7 +18,7 @@ const Marketplace = ({ assets }) => {
         useEffect(() => {
           const fetchImage = async () => {
             try {
-              const response = await axios.get(http://192.168.1.7:1234/fetchImage/${asset.tokenHash}, {
+              const response = await axios.get(`http://192.168.1.9:1234/fetchImage/${asset.tokenHash}`, {
                 responseType: 'blob',
               });
 
@@ -31,7 +31,7 @@ const Marketplace = ({ assets }) => {
 
           const fetchPdf = async () => {
             try {
-              const response = await axios.get(http://192.168.1.7:1234/fetchImage/${asset.businessPlanHash}, {
+              const response = await axios.get(`http://192.168.1.9:1234/fetchImage/${asset.businessPlanHash}`, {
                 responseType: 'blob',
               });
 
@@ -63,7 +63,7 @@ const Marketplace = ({ assets }) => {
                 >
                   Connect wallet
                 </button>
-                <div id="crypto-modal" className={fixed inset-0 z-50 flex items-center justify-center ${modalVisible ? '' : 'hidden'}}>
+                <div id="crypto-modal" className={`fixed inset-0 z-50 flex items-center justify-center ${modalVisible ? '' : 'hidden'}`}>
                   <div className="relative p-4 w-full max-w-md max-h-full">
                     <div className="relative bg-white rounded-lg shadow">
                       <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t">

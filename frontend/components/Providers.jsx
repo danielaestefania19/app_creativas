@@ -18,13 +18,13 @@ const ItemsUploader = () => {
 
 
 
-const handleFileChange = useCallback(async (event) => {
+  const handleFileChange = useCallback(async (event) => {
     const file = event.target.files[0]
     const formData = new FormData()
     formData.append('file', file)
 
     try {
-      const response = await axios.post('http://192.168.1.9:1234/uploadImage', formData, {
+      const response = await axios.post('http://192.168.1.9:1111/uploadImage', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -35,10 +35,10 @@ const handleFileChange = useCallback(async (event) => {
         const image = response.data['/'] // Accede a la propiedad '/' del objeto
         console.log(image)
         console.log(whoami)
-        eccomerce.set_item({item, price, description, image, owner: whoami});// Aquí se llama a la función set_item
+        eccomerce.set_item({ item, price, description, image, owner: whoami });// Aquí se llama a la función set_item
         console.log(image)
-    }
-    
+      }
+
     } catch (error) {
       console.error(error)
       if (error.response) {
@@ -46,7 +46,7 @@ const handleFileChange = useCallback(async (event) => {
       }
     }
   }, [item, price, description, whoami]) // agrega whoami a las dependencias del useCallback
-console.log(whoami)
+  console.log(whoami)
   return (
     <div>
       <input type="text" value={item} onChange={e => setItem(e.target.value)} placeholder="Item" />

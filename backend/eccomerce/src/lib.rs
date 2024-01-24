@@ -74,12 +74,6 @@ impl Rating {
     
 }
 
-#[derive(CandidType, Serialize, Deserialize, Debug, Hash, PartialEq, Clone)] // Agrega Clone aquí
-pub struct Vote {
-    principal: Option<Principal>,
-    rating: Rating,
-}
-
 
 #[derive(CandidType, Deserialize, Clone)]
 struct Item {
@@ -89,8 +83,9 @@ struct Item {
     image: String,
     rating: Option<Rating>,
     owner: Option<Principal>,
-    votes: Option<Vec<Vote>>, // Agrega este campo
+    //ratings: Vec<(Option<Principal>, Rating)>, // Aquí cambiamos el tipo de ratings
 }
+
 
 
 #[derive(CandidType, Deserialize)]
@@ -168,61 +163,53 @@ fn set_item(item: CreateItem) -> Result<ItemSuccess, ItemError> {
         description: item.description,
         image: item.image,
         rating: None,
-        owner: Some(owner_principal),
-        votes: Some(Vec::new()), // Inicializa votes como una lista vacía
+        owner: Some(owner_principal), // Clonamos el owner_principal para usarlo en ratings
+        //ratings: vec![(Some(owner_principal), Rating::Zero)], // Inicializamos ratings con un voto estándar de 0 y el Principal del dueño del Item
     };
 
     ITEMS.with(|p| p.borrow_mut().insert(id, value.clone()));
     Ok(ItemSuccess::CreatedItem)
 }
 
-fn update_rating(id: u64) -> Result<(), ItemError> {
-    ITEMS.with(|items| {
-        let mut items = items.borrow_mut();
-        if let Some(mut item) = items.get(&id).clone() {
-            if let Some(votes) = &item.votes {
-                let total_votes = votes.len() as u64;
-                let sum: u64 = votes.iter().map(|vote| vote.rating.value() as u64).sum();
-                let average = sum / total_votes;
-                item.rating = Rating::from_value(average);
-                items.insert(id, item);
-                Ok(())
-            } else {
-                Err(ItemError::NoVotes)
-            }
-        } else {
-            Err(ItemError::ItemNotFound)
-        }
-    })
-}
 
-#[ic_cdk::update]
-fn vote(id: u64, rating: Rating, caller: String) -> Result<(), ItemError> {
-    let caller_principal = string_a_principal(caller)?;
-    let mut should_update_rating = false;
-    ITEMS.with(|items| {
-        let mut items = items.borrow_mut();
-        if let Some(mut item) = items.get(&id).clone() {
-            if let Some(votes) = &mut item.votes {
-                if votes.iter().any(|vote| vote.principal == Some(caller_principal)) {
-                    return Err(ItemError::AlreadyVoted);
-                }
-                votes.push(Vote { principal: Some(caller_principal), rating });
-                items.insert(id, item); // Actualiza el ítem
-                should_update_rating = true; // Marca que se debe actualizar el rating
-                Ok(())
-            } else {
-                Err(ItemError::NoVotes)
-            }
-        } else {
-            Err(ItemError::ItemNotFound)
-        }
-    })?;
-    if should_update_rating {
-        update_rating(id)?; // Actualiza el rating
-    }
-    Ok(())
-}
+
+// fn update_rating(id: u64) -> Result<(), ItemError> {
+//     ITEMS.with(|items| {
+//         let mut items = items.borrow_mut();
+//         if let Some(mut item) = items.get(&id).clone() {
+//             if let Some(votes) = &item.votes {
+//                 let total_votes = votes.len() as u64;
+//                 let sum: u64 = votes.iter().map(|vote| vote.rating.value() as u64).sum();
+//                 let average = sum / total_votes;
+//                 item.rating = Rating::from_value(average);
+//                 items.insert(id, item);
+//                 Ok(())
+//             } else {
+//                 Err(ItemError::NoVotes)
+//             }
+//         } else {
+//             Err(ItemError::ItemNotFound)
+//         }
+//     })
+// }
+// #[ic_cdk::update]
+// fn vote(id: u64, rating: Rating, principal: String) -> Result<(), ItemError> {
+//     let principal = string_a_principal(principal)?;
+
+//     ITEMS.with(|items| {
+//         let mut items = items.borrow_mut();
+//         if let Some(mut item) = items.get(&id).clone() { // Declara `item` como mutable
+//             // Como ratings ahora se inicializa como un vector vacío, puedes asumir que siempre será Some
+//             item.ratings.as_mut().unwrap().push((principal, rating));
+//             items.insert(id, item);
+//             Ok(())
+//         } else {
+//             Err(ItemError::ItemNotFound)
+//         }
+//     })
+// }
+
+
 
 
 
@@ -265,7 +252,7 @@ fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
             image: item.image,
             rating: old_item.rating,
             owner: Some(caller_principal),
-            votes: old_item.votes,
+            //ratings: old_item.ratings,
         };
 
         let result = p.borrow_mut().insert(id, value);
