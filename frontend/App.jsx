@@ -18,6 +18,7 @@ import { WalletProvider } from './components/WalletContext.jsx';
 import { AuthProvider } from './components/AuthContext.jsx'; // importa el AuthProvider
 import withAuthentication from './components/withAuthentication.jsx';
 import Mediun from './landing/Mediun.jsx';
+import YourInvest from './components_NFT/YourInvest.jsx'
 
 function App() {
 
@@ -65,6 +66,7 @@ function App() {
             />
           <Route path="/other/shop" element={<Shop/>} />
           <Route path="/other/createtokens" element={<AddAsset/>} />
+          <Route path="/other/invests" element={<YourInvest/>} />
           <Route path="/other/createitems" element={<ItemsUploader />} />
           <Route path="/other/items" element={<ItemsUploader/>} />
           <Route path="/other/gettokens" element={<FetchAllAssets />} /> 

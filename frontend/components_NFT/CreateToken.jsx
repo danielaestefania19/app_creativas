@@ -44,24 +44,19 @@ const AddAsset = () => {
             return;
         }
         const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/; // Patrón para verificar el formato DD/MM/AAAA
-
+    
         // Verifica si la fecha ingresada cumple con el formato DD/MM/AAAA
         if (datePattern.test(inputDate)) {
             const dateParts = inputDate.split("/");
             const dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); // Crea un objeto Date en el formato MM/DD/AAAA
             const unixTime = Math.floor(dateObject.getTime() / 1000); // Convierte la fecha a tiempo Unix
-
-            // Verifica si la fecha de inicio del proyecto es en el futuro
-            if (unixTime >= Math.floor(Date.now() / 1000)) {
-                setDate(unixTime); // Actualiza el estado con el tiempo Unix
-            } else {
-                console.log('La fecha de inicio del proyecto debe ser en el futuro');
-            }
+    
+            setDate(unixTime); // Actualiza el estado con el tiempo Unix
         } else {
             console.log('La fecha ingresada no cumple con el formato DD/MM/AAAA');
         }
     };
-
+    
 
     const addAsset = async () => {
         setIsLoading(true);
@@ -83,7 +78,7 @@ const AddAsset = () => {
 
             const formData = new FormData();
             formData.append('file', file);
-            const response = await axios.post('http://192.168.1.7:1234/uploadImage', formData, {
+            const response = await axios.post('http://192.168.1.8:1234/uploadImage', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -95,7 +90,7 @@ const AddAsset = () => {
 
                 const pdfFormData = new FormData();
                 pdfFormData.append('file', pdfFile);
-                const pdfResponse = await axios.post('http://192.168.1.7:1234/uploadImage', pdfFormData, {
+                const pdfResponse = await axios.post('http://192.168.1.8:1234/uploadImage', pdfFormData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }

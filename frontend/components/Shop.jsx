@@ -59,10 +59,10 @@ const Shop = () => {
   };
 
   return (
-    <div className="h-screen w-screen p-8 bg-[#f7e8f0] relative">
+    <div className="flex flex-col items-end mt-32 mb-2 mr-5 h-full">
         <div className="mb-4">
                 <Link to="/other/createitems">
-                    <button className='bg-[#c9398a] rounded-md p-2 text-white items-end' >Creativas Seller</button>
+                    <button className='bg-[#c9398a] rounded-md p-2 text-white' >Creativas Seller</button>
                 </Link>
             </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
