@@ -10,7 +10,6 @@ export const idlFactory = ({ IDL }) => {
   const Item = IDL.Record({
     'owner' : IDL.Opt(IDL.Principal),
     'item' : IDL.Text,
-    'ratings' : IDL.Vec(IDL.Tuple(IDL.Opt(IDL.Principal), Rating)),
     'description' : IDL.Text,
     'rating' : IDL.Opt(Rating),
     'image' : IDL.Text,

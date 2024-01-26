@@ -34,7 +34,7 @@ const ShowdetailsTokensFrac = ({ id, precio, NFTFractional, propietario }) => {
           const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
           const contractWithSigner = contract_RES4.connect(signer);
           const gasLimit = ethers.utils.hexlify(300000);
-          console.log(assetId)
+          console.log("Assetid en showfrac", assetId)
           const transaction = await contractWithSigner.invest(assetId, wei, { gasLimit, value: wei });
           const receipt = await transaction.wait();
           console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
