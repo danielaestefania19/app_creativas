@@ -18,16 +18,9 @@ import { WalletProvider } from './components/WalletContext.jsx';
 import { AuthProvider } from './components/AuthContext.jsx'; // importa el AuthProvider
 import withAuthentication from './components/withAuthentication.jsx';
 import Mediun from './landing/Mediun.jsx';
-<<<<<<< HEAD
 import YourInvest from './components_NFT/YourInvest.jsx'
-=======
-<<<<<<< HEAD
-import YourInvest from './components_NFT/YourInvest.jsx'
-=======
-import YourInvest from './components_NFT/Your_invests.jsx'
->>>>>>> a348be0b6201c2ea7d6a0fd54b911ec49bedccb4
 import YourTokens from './components_NFT/Your_Tokens.jsx'
->>>>>>> c1e0135858107c76cc11f77f930dc52e20f5daf7
+
 
 function App() {
 

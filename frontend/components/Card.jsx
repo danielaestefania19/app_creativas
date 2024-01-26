@@ -12,7 +12,7 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
   };
 
   return (
-    <div className="fixed top-0 right-0 h-full w-1/3 bg-white border-l border-gray-300 p-4">
+    <div className="fixed top-0 right-0 h-full w-1/3 bg-white border-l border-gray-300 p-4 z-40">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Carrito de Compras</h2>
         <button

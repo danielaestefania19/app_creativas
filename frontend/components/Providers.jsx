@@ -9,10 +9,12 @@ import {
   Card,
   CardHeader,
   CardBody,
+  Button,
   CardFooter,
   Typography,
   Tooltip,
-  Input
+  Input,
+  Label
 } from "@material-tailwind/react";
 
 const ItemsUploader = () => {
@@ -58,28 +60,31 @@ const ItemsUploader = () => {
   console.log(whoami)
   return (
     <div className="flex flex-col items-center mt-44 mb-2 mr-5 h-full">
-      <Card className="w-[500px] h-[300px] bg-[#F9FAFB]">
-      <CardBody className='items-center mt-8'>
-      <Typography color="blue-gray" className="font-medium" textGradient>
-        <div className="w-72">
-      <Input  value={item} onChange={e => setItem(e.target.value)} label="Item" />
-      </div>
-      <div className="w-72">
-      <Input value={price} onChange={e => setPrice(e.target.value ? Number(e.target.value) : "")} label="Price" />
-      </div>
-      <div className="w-72">
-      <Input  value={description} onChange={e => setDescription(e.target.value)} label="Description" />
-      </div>
-      <div className="w-72">
-      <input type="file" onChange={handleFileChange} />
-      </div>
-      <div>
-        <p>Principal: {whoami}</p>
-      </div>
-      </Typography>
-      </CardBody>
+      <Card className="w-[600px] h-[450px] bg-[#F9FAFB]">
+        <CardBody className='flex flex-col items-center space-y-4 mt-8'>
+          <Typography color="blue-gray" className="font-medium" textGradient>
+            <div className="w-[300px] mb-4">
+              <Input value={item} onChange={e => setItem(e.target.value)} label="Item" />
+            </div>
+            <div className="w-[300px] mb-4">
+              <Input value={price} onChange={e => setPrice(e.target.value ? Number(e.target.value) : "")} label="Price" />
+            </div>
+            <div className="w-[300px] mb-4">
+              <Input value={description} onChange={e => setDescription(e.target.value)} label="Description" />
+            </div>
+            <div class="w-[100px] mb-4">
+              <input type="file" class="bg-gray-50 border border-gray-500 rounded-lg w-[300px] " required onChange={handleFileChange}></input>
+            </div>
+            <div>
+              <p>Principal: {whoami}</p>
+            </div>
+          </Typography>
+          <Button>Read More</Button>
+        </CardBody>
       </Card>
     </div>
+
+
   )
 }
 
