@@ -66,6 +66,11 @@ const FetchAllAssets = () => {
                     <button className='bg-[#c9398a] rounded-md p-2 text-white' >Tus inversiones</button>
                 </Link>
             </div>
+            <div className="mb-4">
+                <Link to="/other/tokens">
+                    <button className='bg-[#c9398a] rounded-md p-2 text-white' >Tus Tokens</button>
+                </Link>
+            </div>
 
             {/* Contenedor del componente Marketplace */}
             <div className="flex flex-wrap justify-center">

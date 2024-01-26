@@ -11,7 +11,6 @@ export interface CreateItem {
 export interface Item {
   'owner' : [] | [Principal],
   'item' : string,
-  'ratings' : Array<[[] | [Principal], Rating]>,
   'description' : string,
   'rating' : [] | [Rating],
   'image' : string,

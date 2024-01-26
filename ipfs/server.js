@@ -38,8 +38,13 @@ async function createNode() {
 async function run() {
 const fs = await createNode();
 
-// Definimos una ruta POST para cargar archivos de imagen
 app.post('/uploadImage', upload.single('file'), async (req, res) => {
+    // Verifica si se cargó un archivo
+    if (!req.file) {
+        res.status(400).send('No se cargó ningún archivo');
+        return;
+    }
+
     // Obtenemos los datos del archivo cargado
     const data = req.file.buffer;
 
@@ -52,6 +57,7 @@ app.post('/uploadImage', upload.single('file'), async (req, res) => {
     // Enviamos una respuesta al cliente indicando que el archivo ha sido cargado
     res.status(201).send(cid)
 })
+
 
 // Definimos una ruta GET para recuperar archivos de imagen por CID
 app.get('/fetchImage/:cid', async (req, res) => {
@@ -83,13 +89,8 @@ app.get('/fetchImage/:cid', async (req, res) => {
 
 
 // Iniciamos el servidor en la dirección IP 192.168.1.9 y el puerto 5000
-<<<<<<< HEAD
 app.listen(1111, '192.168.1.9', () => {
     console.log('El servidor está escuchando en http://192.168.1.9:1234');
-=======
-app.listen(1234, '192.168.1.8', () => {
-    console.log('El servidor está escuchando en http://192.168.1.8:1234');
->>>>>>> 45b768ab2df60354b6b8111bb49a57176503b227
 })};
 
 run();
