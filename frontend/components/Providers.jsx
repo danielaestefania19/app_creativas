@@ -24,7 +24,7 @@ const ItemsUploader = () => {
     formData.append('file', file)
 
     try {
-      const response = await axios.post('http://192.168.1.9:1111/uploadImage', formData, {
+      const response = await axios.post('http://192.168.1.8:1111/uploadImage', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
