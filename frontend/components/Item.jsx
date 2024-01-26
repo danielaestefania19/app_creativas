@@ -44,7 +44,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:1111/fetchImage/${image}`, {
+        const response = await axios.get(`http://192.168.1.9:2020/fetchImage/${image}`, {
           responseType: 'blob' // Indicamos que esperamos una respuesta de tipo blob
         });
 

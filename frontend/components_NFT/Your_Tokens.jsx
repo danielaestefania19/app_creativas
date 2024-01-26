@@ -61,8 +61,8 @@ const YourTokens = () => {
     
         let wei = ethers.utils.parseEther(price.toString());
         const dirtoken = await contract_RES4.FCTV(assetId);
-        console.log(dirtoken)
         const addrFCTV = dirtoken.fractionalToken;
+        console.log("Tokenid", addrFCTV)
         const reclamo = new ethers.Contract(contract_frac.address, reclamarFrac, signer); // Aquí se usa contract_frac.address y signer
         
         const gasLimit = ethers.utils.hexlify(300000);

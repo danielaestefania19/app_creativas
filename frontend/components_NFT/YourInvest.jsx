@@ -4,9 +4,10 @@ import { ethers } from 'ethers';
 import RES4 from "../../utils/abi/RES4.json";
 import FractionalNFT from "../../utils/abi/FractionalNFT.json"
 import { contractAddressRES4 } from "../../utils/constans.js";
-import { WalletContext } from '../components/WalletContext.jsx'; 
+import { WalletContext } from '../components/WalletContext.jsx';
 import { contractAddressReclamarFracRegistry } from "../../utils/constans.js";
 import ReclamarFracRegistry from '../../utils/abi/ReclamarFracRegistry.json'
+import reclamarFrac from '../../utils/abi/reclamarFrac.json'
 // Asegúrate de ajustar la ruta de importación
 const PRIVATE_KEY_NFT = import.meta.env.VITE_PRIVATE_KEY_NFT;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -22,7 +23,7 @@ const contract_Registry = new ethers.Contract(contractAddressReclamarFracRegistr
 const YourInvest = () => {
     const { defaultAccount } = useContext(WalletContext);
     const [investedAssets, setInvestedAssets] = useState([]);
-    
+
 
     useEffect(() => {
         const fetchInvestedAssets = async () => {
@@ -56,22 +57,32 @@ const YourInvest = () => {
     const canjeartokens = async (activoId) => {
         const dirtoken = await contract_RES4.FCTV(activoId);
         const addrFCTV = dirtoken.fractionalToken;
+        console.log("Direccion del Token a reclamar:", addrFCTV)
         const contFCTV = new ethers.Contract(addrFCTV, FractionalNFT, wallet);
         // Obtiene el balance del usuario
         const balance = await contFCTV.balanceOf(defaultAccount);
 
         console.log(`El usuario tiene ${ethers.utils.formatUnits(balance)} tokens.`);
 
-        const spender = await contract_Registry.getContractAddress(assetId);
+        const spender = await contract_Registry.getContractAddress(activoId);
 
-        console.log(`La dirección del contrato para el assetId ${assetId} es ${spender}`);
+        console.log(`La dirección del contrato para el assetId ${activoId} es ${spender}`);
 
         const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
         const contractWithSigner = contFCTV.connect(signer);
-        const gasLimit = ethers.utils.hexlify(100000);
-        const transaction = await contractWithSigner.approve(spender, { gasLimit, value: balance });
+        const gasLimit = ethers.utils.hexlify(200000);
+        const transaction = await contractWithSigner.approve(spender, balance, { gasLimit });
         const receipt = await transaction.wait();
         console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
+
+        const gasLimit_reclamo = ethers.utils.hexlify(300000);
+        const reclamo = new ethers.Contract(spender, reclamarFrac, signer);
+        const reclamar = await reclamo.reclamar(balance, { gasLimit: gasLimit_reclamo });
+        const receipt_reclamo = await reclamar.wait();
+        console.log(`Transaction successful with hash: ${receipt_reclamo.transactionHash}`);
+
+
+
     };
 
 
@@ -92,8 +103,8 @@ const YourInvest = () => {
                         <button onClick={() => handleRefund(asset.assetId)}>
                             Rembolsar inversión
                         </button>
-                        )}
-                        {asset.status === "End_Crowfunding_Asset" && (
+                    )}
+                    {asset.status === "End_Crowfunding_Asset" && (
                         <button onClick={() => canjeartokens(asset.assetId)}>Canjear tokenss</button>
                     )}
                 </div>

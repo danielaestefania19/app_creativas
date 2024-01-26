@@ -89,13 +89,8 @@ app.get('/fetchImage/:cid', async (req, res) => {
 
 
 // Iniciamos el servidor en la dirección IP 192.168.1.9 y el puerto 5000
-<<<<<<< HEAD
-app.listen(1111, '192.168.1.9', () => {
-    console.log('El servidor está escuchando en http://192.168.1.9:1234');
-=======
-app.listen(1111, '192.168.1.8', () => {
-    console.log('El servidor está escuchando en http://192.168.1.8:1234');
->>>>>>> a348be0b6201c2ea7d6a0fd54b911ec49bedccb4
+app.listen(2020, '192.168.1.9', () => {
+    console.log('El servidor está escuchando en http://192.168.1.9:2020');
 })};
 
 run();
