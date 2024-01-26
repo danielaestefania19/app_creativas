@@ -54,8 +54,8 @@ const Home = () => {
         <div className='flex items-center justify-between'>
           <h1 className="h-7 w-auto text-[#FF0091]">Creativas</h1>
           <Link to="/" className="p-4">Home</Link>
-          <li className="p-4">Company</li>
-          <li className="p-4">Contact</li>
+          <h1 className="p-4">Company</h1>
+          <h1 className="p-4">Contact</h1>
           <div className='flex items-center justify-end gap-3'>
             {/* <button className="bg-[#c9398a] hidden items-center justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-all duration-150 hover:bg-gray-50 sm:inline-flex" onClick={WalletConnect}>Wallet</button> */}
             <button type="button" onClick={handleModalToggle} data-modal-target="crypto-modal" data-modal-toggle="crypto-modal" className="text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
@@ -127,11 +127,11 @@ const Home = () => {
               </div>
             </div>
             {isUserAuthenticated ? (
-              <button className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={handleLogout}>
+              <button className="inline-flex items-center justify-center rounded-xl bg-pink-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-pink-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600" onClick={handleLogout}>
                 <div className="flex items-center">Logout <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
               </button>
             ) : (
-              <button className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={handleLogin}>
+              <button className="inline-flex items-center justify-center rounded-xl bg-pink-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-pink-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600" onClick={handleLogin}>
                 <div className="flex items-center">Login <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
               </button>
             )}

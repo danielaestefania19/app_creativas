@@ -5,6 +5,15 @@ import { HttpAgent, Actor } from "@dfinity/agent"
 import { eccomerce } from "../../src/declarations/eccomerce";
 import { AuthContext } from './AuthContext'; // importa el contexto
 import { Principal } from '@dfinity/principal';
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Typography,
+  Tooltip,
+  Input
+} from "@material-tailwind/react";
 
 const ItemsUploader = () => {
   const [item, setItem] = useState("");
@@ -48,14 +57,28 @@ const ItemsUploader = () => {
   }, [item, price, description, whoami]) // agrega whoami a las dependencias del useCallback
   console.log(whoami)
   return (
-    <div>
-      <input type="text" value={item} onChange={e => setItem(e.target.value)} placeholder="Item" />
-      <input type="number" value={price} onChange={e => setPrice(e.target.value ? Number(e.target.value) : "")} placeholder="Price" />
-      <input type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" />
+    <div className="flex flex-col items-center mt-44 mb-2 mr-5 h-full">
+      <Card className="w-[500px] h-[300px] bg-[#F9FAFB]">
+      <CardBody className='items-center mt-8'>
+      <Typography color="blue-gray" className="font-medium" textGradient>
+        <div className="w-72">
+      <Input  value={item} onChange={e => setItem(e.target.value)} label="Item" />
+      </div>
+      <div className="w-72">
+      <Input value={price} onChange={e => setPrice(e.target.value ? Number(e.target.value) : "")} label="Price" />
+      </div>
+      <div className="w-72">
+      <Input  value={description} onChange={e => setDescription(e.target.value)} label="Description" />
+      </div>
+      <div className="w-72">
       <input type="file" onChange={handleFileChange} />
+      </div>
       <div>
         <p>Principal: {whoami}</p>
       </div>
+      </Typography>
+      </CardBody>
+      </Card>
     </div>
   )
 }
