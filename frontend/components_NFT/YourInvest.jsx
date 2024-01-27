@@ -36,14 +36,28 @@ const YourInvest = () => {
                 if (investment > 0) {
                     const status = await contract_RES4.projectStatus(i);
                     const outcome = await contract_RES4.fundingOutcome(i);
-                    newInvestedAssets.push({ ...asset, status, outcome, owner });
+                    const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                    // Obtén la dirección del contrato de reclamaciones
+                    const contractAddress = await contract_Registry.getContractAddress(asset.assetId);
+                    // Crea una nueva instancia del contrato de reclamaciones
+                    const contract = new ethers.Contract(contractAddress, reclamarFrac, wallet);
+                    // Intenta obtener el estado del contrato
+                    let claimState;
+                    try {
+                        claimState = await contract.getClaimState();
+                    } catch (error) {
+                        console.error(`Error al obtener el estado de claimState para el activo ${i}: ${error}`);
+                        claimState = 0; // Puedes ajustar este valor a lo que necesites
+                    }
+                    newInvestedAssets.push({ ...asset, status, outcome, owner, claimState });
                 }
             }
             setInvestedAssets(newInvestedAssets);
         };
-
+    
         fetchInvestedAssets();
     }, [defaultAccount]);
+    
 
     const handleRefund = async (assetId) => {
         const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
@@ -97,8 +111,7 @@ const YourInvest = () => {
 
         // Crea una nueva instancia del contrato de reclamaciones
         const contract = new ethers.Contract(contractAddress, reclamarFrac, signer);
-
-
+        
 
         // Escucha el evento Claimed
         contract.on("Claimed", (reclamante, cantidad, event) => {
@@ -117,21 +130,6 @@ const YourInvest = () => {
 
         console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
 
-        // Imprimir todos los eventos
-        if (receipt.events) {
-            receipt.events.forEach((event) => {
-                console.log(`Nombre del evento: ${event.event}`);
-                console.log('Argumentos del evento:');
-                for (let arg in event.args) {
-                    if (ethers.BigNumber.isBigNumber(event.args[arg])) {
-                        console.log(`${arg}: ${event.args[arg].toString()}`);
-                    } else {
-                        console.log(`${arg}: ${event.args[arg]}`);
-                    }
-                }
-            });
-
-        }
     }
 
 
@@ -152,9 +150,10 @@ const YourInvest = () => {
                             Rembolsar inversión
                         </button>
                     )}
-                    {asset.status === "End_Crowfunding_Asset" && (
-                        <button onClick={() => approvetoken(asset.assetId)}>Canjear tokenss</button>
-                    )}
+                  {asset.status === "End_Crowfunding_Asset" && asset.claimState === 1 && (
+    <button onClick={() => approvetoken(asset.assetId)}>Canjear tokens</button>
+)}
+
                 </div>
             ))}
         </div>
