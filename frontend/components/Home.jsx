@@ -127,11 +127,11 @@ const Home = () => {
               </div>
             </div>
             {isUserAuthenticated ? (
-              <button className="inline-flex items-center justify-center rounded-xl bg-pink-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-pink-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600" onClick={handleLogout}>
+              <button className="inline-flex items-center justify-center rounded-xl bg-white border dark:border-gray-600 px-3 py-2 text-sm font-semibold text-pink-600 shadow-sm transition-all duration-150" onClick={handleLogout}>
                 <div className="flex items-center">Logout <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
               </button>
             ) : (
-              <button className="inline-flex items-center justify-center rounded-xl bg-pink-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-pink-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600" onClick={handleLogin}>
+              <button className="inline-flex items-center justify-center rounded-xl bg-white  border dark:border-gray-600 px-3 py-2 text-sm font-semibold text-pink-600 shadow-sm transition-all duration-150" onClick={handleLogin}>
                 <div className="flex items-center">Login <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
               </button>
             )}

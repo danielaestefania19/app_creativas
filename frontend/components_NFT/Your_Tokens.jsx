@@ -66,7 +66,7 @@ const YourTokens = () => {
         const transaction = await reclamo.fund(addrFCTV, { gasLimit, value: wei });
         const receipt = await transaction.wait();
         console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
-         // Imprimir todos los eventos
+        // Imprimir todos los eventos
         if (receipt.events) {
             receipt.events.forEach((event) => {
                 console.log(`Nombre del evento: ${event.event}`);
@@ -79,27 +79,32 @@ const YourTokens = () => {
                     }
                 }
             });
-            
-     }
+
+        }
     };
 
 
     return (
         <div>
-            <h2>Tus Tokens</h2>
-            {ownedAssets.map((asset, index) => (
-                <div key={index}>
-                    <h2>NFT ID #{ethers.utils.formatUnits(asset.assetId, 0)}</h2>
-                    <h3>Title {asset.titulo}</h3>
-                    <p>Small Description{asset.small_description}</p>
-                    <p>Price{ethers.utils.formatUnits(asset.price, 0)}</p>
-                    <p>Fractional{ethers.utils.formatUnits(asset.NFTFractional, 0)}</p>
-                    {asset.status === "End_Crowfunding_Asset" && (
-                        <button onClick={() => deployContract(asset.assetId, asset.price)}>Reclamar Token</button>
-                    )}
+            <h2 className="flex flex-col items-center mt-32 mb-2 mr-5 h-full">Tus Tokens</h2>
+            <div div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4'>
+                <div className="h-[300px] relative bg-cover bg-center w-full flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4 col-span-1">
+                    {ownedAssets.map((asset, index) => (
+                        <div key={index}>
+                            <h2>NFT ID #{ethers.utils.formatUnits(asset.assetId, 0)}</h2>
+                            <h3>Title {asset.titulo}</h3>
+                            <p>Small Description{asset.small_description}</p>
+                            <p>Price{ethers.utils.formatUnits(asset.price, 0)}</p>
+                            <p>Fractional{ethers.utils.formatUnits(asset.NFTFractional, 0)}</p>
+                            {asset.status === "End_Crowfunding_Asset" && (
+                                <button onClick={() => deployContract(asset.assetId, asset.price)}>Reclamar Token</button>
+                            )}
+                        </div>
+                    ))}
                 </div>
-            ))}
+            </div>
         </div>
+
     );
 
 

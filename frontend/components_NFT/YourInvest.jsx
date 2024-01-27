@@ -139,7 +139,9 @@ const YourInvest = () => {
 
     return (
         <div>
-            <h2>Tus inversiones</h2>
+            <h2 className="flex flex-col items-center mt-32 mb-2 mr-5 h-full">Tus inversiones</h2>
+            <div div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4'>
+                <div className="h-[300px] relative bg-cover bg-center w-full flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4 col-span-1">
             {investedAssets.map((asset, index) => (
                 <div key={index}>
                     <h2>NFT ID #{ethers.utils.formatUnits(asset.assetId, 0)}</h2>
@@ -156,7 +158,12 @@ const YourInvest = () => {
                         <button onClick={() => approvetoken(asset.assetId)}>Canjear tokenss</button>
                     )}
                 </div>
+               
+
             ))}
+            </div>
+             </div>
+             
         </div>
     );
 };
