@@ -75,23 +75,16 @@ const Shop = () => {
         )}
       </div>
       {cartVisible && cart.length > 0 && <Cart cart={cart} removeFromCart={removeFromCart} onHideCart={handleToggleCart} />}
-      {/*       <button
+            <button
         className="fixed bottom-4 right-4 bg-[#3490dc] text-white px-4 py-2 rounded-md "
         onClick={handleToggleCart}>
         {<>
             <FiShoppingCart className="mr-2" />
-            <span>
+            <span className="absolute top-0 right-0 inline-block bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                 {cart.reduce((total, item) => total + item.quantity, 0)}
             </span>
         </>}
-      </button> */}
-      <button className="relative bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
-        <svg className="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-          <path d="M17.08,6H4.37l-0.71-1A2,2,0,0,0,1.56,4H1A1,1,0,0,0,1,6H2.44L4.13,11.38l-0.46,1.41A1,1,0,0,0,4.62,14H15a1,1,0,0,0,.93-.63l2.82-7A1,1,0,0,0,18.49,5H17.08ZM16.85,7l-2.49,6H5.21L4.27,7Z" />
-        </svg>
-        <span>Carrito</span>
-        <span className="absolute top-0 right-0 inline-block bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
-      </button>
+      </button> 
 
 
     </div>
