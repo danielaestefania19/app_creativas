@@ -18,7 +18,7 @@ const Marketplace = ({ assets }) => {
         useEffect(() => {
           const fetchImage = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.8:1111/fetchImage/${asset.tokenHash}`, {
+              const response = await axios.get(`http://192.168.1.9:2020/fetchImage/${asset.tokenHash}`, {
                 responseType: 'blob',
               });
 
@@ -31,7 +31,7 @@ const Marketplace = ({ assets }) => {
 
           const fetchPdf = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.8:1111/fetchImage/${asset.businessPlanHash}`, {
+              const response = await axios.get(`http://192.168.1.9:2020/fetchImage/${asset.businessPlanHash}`, {
                 responseType: 'blob',
               });
 

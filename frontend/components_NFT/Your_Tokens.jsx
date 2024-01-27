@@ -33,45 +33,57 @@ const YourTokens = () => {
                 const owner = await contract_RES4.ownerOf(i);
                 const status = await contract_RES4.projectStatus(i);
                 console.log(`Asset ${i} status: ${status}`); // Imprime el estado del activo
-    
+
                 if (owner === defaultAccount) {
                     // Si el usuario es el propietario de este activo, añádelo a newOwnedAssets
                     // Incluye el estado del proyecto en el objeto del activo
-                    newOwnedAssets.push({...asset, status});
+                    newOwnedAssets.push({ ...asset, status });
                 }
             }
             setOwnedAssets(newOwnedAssets);
         };
-    
+
         fetchOwnedAssets();
     }, [defaultAccount]); // Dependencia en defaultAccount para que se vuelva a ejecutar si cambia
-    
+
 
     const deployContract = async (assetId, price) => {
-        console.log("Assetid en your tokens", assetId)
-        console.log("Assetid en your tokens ethers,", ethers.utils.formatUnits(assetId, 0))
         const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
         const factory = new ethers.ContractFactory(reclamarFrac, contractCodeObjFrac, signer);
         const contract_frac = await factory.deploy(contractAddressRES4, assetId);
         await contract_frac.deployed();
         console.log(`Contract deployed at ${contract_frac.address}`);
-          // Almacena la dirección del contrato desplegado en ReclamarFracRegistry
+        // Almacena la dirección del contrato desplegado en ReclamarFracRegistry
         await contract_Registry.storeContractAddress(assetId, contract_frac.address);
 
-    
+
         let wei = ethers.utils.parseEther(price.toString());
         const dirtoken = await contract_RES4.FCTV(assetId);
-        console.log(dirtoken)
         const addrFCTV = dirtoken.fractionalToken;
-        const reclamo = new ethers.Contract(contract_frac.address, reclamarFrac, signer); // Aquí se usa contract_frac.address y signer
-        
+        console.log("Tokenid", addrFCTV)
+        const reclamo = new ethers.Contract(contract_frac.address, reclamarFrac, signer); // Aquí se usa contract_frac.address y signe
         const gasLimit = ethers.utils.hexlify(300000);
         const transaction = await reclamo.fund(addrFCTV, { gasLimit, value: wei });
         const receipt = await transaction.wait();
         console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
+         // Imprimir todos los eventos
+        if (receipt.events) {
+            receipt.events.forEach((event) => {
+                console.log(`Nombre del evento: ${event.event}`);
+                console.log('Argumentos del evento:');
+                for (let arg in event.args) {
+                    if (ethers.BigNumber.isBigNumber(event.args[arg])) {
+                        console.log(`${arg}: ${event.args[arg].toString()}`);
+                    } else {
+                        console.log(`${arg}: ${event.args[arg]}`);
+                    }
+                }
+            });
+            
+     }
     };
-    
-    
+
+
     return (
         <div>
             <h2>Tus Tokens</h2>
@@ -89,8 +101,8 @@ const YourTokens = () => {
             ))}
         </div>
     );
-    
-    
+
+
 }
 
 export default YourTokens;

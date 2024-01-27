@@ -17,6 +17,77 @@
   },
   {
     "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "enum reclamarFrac.ClaimState",
+        "name": "claimState",
+        "type": "uint8"
+      }
+    ],
+    "name": "ClaimStateDetails",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "reclamante",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "cantidad",
+        "type": "uint256"
+      }
+    ],
+    "name": "Claimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "funds",
+        "type": "uint256"
+      }
+    ],
+    "name": "FundsDetails",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "supply",
+        "type": "uint256"
+      }
+    ],
+    "name": "SupplyDetails",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
+    ],
+    "name": "TokenAddressDetails",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
     "inputs": [],
     "name": "funded",
     "type": "event"
@@ -30,13 +101,13 @@
       },
       {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "tokenAmount",
         "type": "uint256"
       }
     ],
     "name": "claim",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

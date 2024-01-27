@@ -78,7 +78,7 @@ const AddAsset = () => {
 
             const formData = new FormData();
             formData.append('file', file);
-            const response = await axios.post('http://192.168.1.8:1111/uploadImage', formData, {
+            const response = await axios.post('http://192.168.1.9:2020/uploadImage', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -90,7 +90,7 @@ const AddAsset = () => {
 
                 const pdfFormData = new FormData();
                 pdfFormData.append('file', pdfFile);
-                const pdfResponse = await axios.post('http://192.168.1.8:1111/uploadImage', pdfFormData, {
+                const pdfResponse = await axios.post('http://192.168.1.9:2020/uploadImage', pdfFormData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }

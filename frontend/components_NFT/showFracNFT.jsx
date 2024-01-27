@@ -44,23 +44,24 @@ const ShowdetailsTokensFrac = ({ id, precio, NFTFractional, propietario }) => {
       }
   };
 
-    const activos = async (activoId, receiver, amount) => {
-        const dirtoken = await contract_RES4.FCTV(activoId);
-        console.log(dirtoken)
-        const addrFCTV = dirtoken.fractionalToken;
-        const contFCTV = new ethers.Contract(addrFCTV, FractionalNFT, wallet);
+  const activos = async (activoId, receiver, amount) => {
+    const dirtoken = await contract_RES4.FCTV(activoId);
+    console.log(dirtoken)
+    const addrFCTV = dirtoken.fractionalToken;
+    console.log(addrFCTV)
+    const contFCTV = new ethers.Contract(addrFCTV, FractionalNFT, wallet);
 
-        return await signTransaction(receiver, amount, addrFCTV, contFCTV);
-    };
+    return await signTransaction(receiver, amount, addrFCTV, contFCTV);
+};
 
-    const signTransaction = async (receiver, amount, addrFCTV, contFCTV) => {
-        const value = ethers.utils.parseEther(amount.toString());
-        const gasLimit = ethers.utils.hexlify(100000);
-        const transaction = await contFCTV.transfer(receiver, value, { gasLimit });
-        const receipt = await transaction.wait();
+const signTransaction = async (receiver, amount, addrFCTV, contFCTV) => {
+    const value = ethers.utils.parseEther(amount.toString());
+    const gasLimit = ethers.utils.hexlify(100000);
+    const transaction = await contFCTV.transfer(receiver, value, { gasLimit });
+    const receipt = await transaction.wait();
 
-        return receipt.transactionHash;
-    };
+    return receipt.transactionHash;
+};
 
     return (
     <div>
