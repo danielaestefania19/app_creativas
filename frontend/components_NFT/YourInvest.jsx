@@ -54,18 +54,15 @@ const YourInvest = () => {
         console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
     };
 
-    const canjeartokens = async (activoId) => {
+    const approvetoken = async (activoId) => {
         const dirtoken = await contract_RES4.FCTV(activoId);
         const addrFCTV = dirtoken.fractionalToken;
         console.log("Direccion del Token a reclamar:", addrFCTV)
         const contFCTV = new ethers.Contract(addrFCTV, FractionalNFT, wallet);
         // Obtiene el balance del usuario
         const balance = await contFCTV.balanceOf(defaultAccount);
-
         console.log(`El usuario tiene ${ethers.utils.formatUnits(balance)} tokens.`);
-
         const spender = await contract_Registry.getContractAddress(activoId);
-
         console.log(`La dirección del contrato para el assetId ${activoId} es ${spender}`);
 
         const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
@@ -73,18 +70,69 @@ const YourInvest = () => {
         const gasLimit = ethers.utils.hexlify(200000);
         const transaction = await contractWithSigner.approve(spender, balance, { gasLimit });
         const receipt = await transaction.wait();
-        console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
+        console.log(`Transaction successful with hash: ${receipt.transactionHash}`)
 
-        const gasLimit_reclamo = ethers.utils.hexlify(300000);
-        const reclamo = new ethers.Contract(spender, reclamarFrac, signer);
-        const reclamar = await reclamo.reclamar(balance, { gasLimit: gasLimit_reclamo });
-        const receipt_reclamo = await reclamar.wait();
-        console.log(`Transaction successful with hash: ${receipt_reclamo.transactionHash}`);
-
-
-
+        return await canjeartoken(activoId);
     };
 
+    const canjeartoken = async (activoId) => {
+        // Obtén la dirección del token fraccional
+        const dirtoken = await contract_RES4.FCTV(activoId);
+        const addrFCTV = dirtoken.fractionalToken;
+        console.log("Direccion del Token a reclamar:", addrFCTV);
+
+        // Crea una nueva instancia del contrato del token fraccional
+        const contFCTV = new ethers.Contract(addrFCTV, FractionalNFT, wallet);
+
+        // Obtiene el balance del usuario
+        const balance = await contFCTV.balanceOf(defaultAccount);
+        console.log(`El usuario tiene ${balance} tokens.`);
+
+        // Obtiene la dirección del contrato de reclamaciones
+        const contractAddress = await contract_Registry.getContractAddress(activoId);
+        console.log(`La dirección del contrato para el assetId ${activoId} es ${contractAddress}`);
+
+        // Obtén el signer a partir del proveedor de Ethereum
+        const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+
+        // Crea una nueva instancia del contrato de reclamaciones
+        const contract = new ethers.Contract(contractAddress, reclamarFrac, signer);
+
+
+
+        // Escucha el evento Claimed
+        contract.on("Claimed", (reclamante, cantidad, event) => {
+            console.log(`Evento Claimed emitido. Reclamante: ${reclamante}, Cantidad: ${cantidad.toString()}`);
+            console.log(`Información del evento: ${event}`);
+        });
+
+
+
+        const gasLimit = ethers.utils.hexlify(200000);
+        // Llama a la función claim del contrato
+        const tx = await contract.claim(addrFCTV, balance, { gasLimit });
+
+        // Espera a que la transacción sea minada
+        const receipt = await tx.wait();
+
+        console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
+
+        // Imprimir todos los eventos
+        if (receipt.events) {
+            receipt.events.forEach((event) => {
+                console.log(`Nombre del evento: ${event.event}`);
+                console.log('Argumentos del evento:');
+                for (let arg in event.args) {
+                    if (ethers.BigNumber.isBigNumber(event.args[arg])) {
+                        console.log(`${arg}: ${event.args[arg].toString()}`);
+                    } else {
+                        console.log(`${arg}: ${event.args[arg]}`);
+                    }
+                }
+            });
+
+        }
+    }
 
 
 
@@ -105,7 +153,7 @@ const YourInvest = () => {
                         </button>
                     )}
                     {asset.status === "End_Crowfunding_Asset" && (
-                        <button onClick={() => canjeartokens(asset.assetId)}>Canjear tokenss</button>
+                        <button onClick={() => approvetoken(asset.assetId)}>Canjear tokenss</button>
                     )}
                 </div>
             ))}
