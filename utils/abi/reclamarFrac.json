@@ -151,6 +151,19 @@
   },
   {
     "inputs": [],
+    "name": "getClaimState",
+    "outputs": [
+      {
+        "internalType": "enum reclamarFrac.ClaimState",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "nftAddress",
     "outputs": [
       {
