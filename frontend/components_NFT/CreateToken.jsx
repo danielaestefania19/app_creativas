@@ -11,6 +11,12 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY_NFT, provider);
 const contract = new ethers.Contract(contractAddressRES4, RES4, wallet);
 
+const API_KEY = import.meta.env.VITE_PINATA_API_KEY;
+
+const API_SECRET = import.meta.env.VITE_PINATA_API_SECRET;
+
+const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
+
 const AddAsset = () => {
     const [price, setPrice] = useState("");
     const [localPrice, setLocalPrice] = useState(ethers.utils.parseEther("0.0"));
@@ -32,6 +38,7 @@ const AddAsset = () => {
     const [file, setFile] = useState(null);
     const [pdfFile, setPdfFile] = useState(null);
 
+
     const getAssetsCount = async () => {
         const assetsCount = await contract.assetsCount();
         console.log('El AssetId es: ', assetsCount.toString());
@@ -44,19 +51,19 @@ const AddAsset = () => {
             return;
         }
         const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/; // Patrón para verificar el formato DD/MM/AAAA
-    
+
         // Verifica si la fecha ingresada cumple con el formato DD/MM/AAAA
         if (datePattern.test(inputDate)) {
             const dateParts = inputDate.split("/");
             const dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); // Crea un objeto Date en el formato MM/DD/AAAA
             const unixTime = Math.floor(dateObject.getTime() / 1000); // Convierte la fecha a tiempo Unix
-    
+
             setDate(unixTime); // Actualiza el estado con el tiempo Unix
         } else {
             console.log('La fecha ingresada no cumple con el formato DD/MM/AAAA');
         }
     };
-    
+
 
     const addAsset = async () => {
         setIsLoading(true);
@@ -76,46 +83,49 @@ const AddAsset = () => {
 
 
 
-            const formData = new FormData();
-            formData.append('file', file);
-            const response = await axios.post('http://192.168.1.9:2020/uploadImage', formData, {
+            // Sube la imagen a Pinata
+            const imageFormData = new FormData();
+            imageFormData.append('file', file);
+            const imageResponse =await axios.post(url, imageFormData, {
+                maxContentLength: 'Infinity',
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': `multipart/form-data; boundary=${imageFormData._boundary}`,
+                    'pinata_api_key': API_KEY,
+                    'pinata_secret_api_key': API_SECRET
                 }
             });
-            if (response.status === 201) {
-                const imageHash = response.data['/'];
-                console.log(imageHash);
-                setTokenHash(imageHash);
+            const imageHash = imageResponse.data.IpfsHash;
+            setTokenHash(imageHash);
 
-                const pdfFormData = new FormData();
-                pdfFormData.append('file', pdfFile);
-                const pdfResponse = await axios.post('http://192.168.1.9:2020/uploadImage', pdfFormData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                if (pdfResponse.status === 201) {
-                    const pdfHash = pdfResponse.data['/'];
-                    console.log(pdfHash);
-                    setBusinessPlanHash(pdfHash);
-
-                    // Resto del código...
-                    const tx = await contract.addAsset(parseInt(localPriceEther), autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash, parseInt(localInvestmentObjectiveEther), end_crowfunding, to, { gasLimit: 3000000 });
-                    console.log(`Transaction hash: ${tx.hash}`);
-                    console.log(projectStartDate, projectEndDate, end_crowfunding);
-                    console.log(typeof projectStartDate); // Debería imprimir 'number'
-                    console.log(typeof projectEndDate); // Debería imprimir 'number'
-                    console.log(typeof end_crowfunding); // Debería imprimir 'number'
-
-                    console.log('La dirección del contrato es: ', contractAddressRES4);
-
-
-                    // Resto del código...
-                    console.log(`El precio en ether es: ${localPriceEther.toString()}`); // Imprime el precio en ether usando la variable local
-                    getAssetsCount();
+            // Sube el PDF a Pinata
+            const pdfFormData = new FormData();
+            pdfFormData.append('file', pdfFile);
+            const pdfResponse = await axios.post(url, pdfFormData, {
+                maxContentLength: 'Infinity',
+                headers: {
+                    'Content-Type': `multipart/form-data; boundary=${pdfFormData._boundary}`,
+                    'pinata_api_key': API_KEY,
+                    'pinata_secret_api_key': API_SECRET
                 }
-            }
+            });
+            const pdfHash = pdfResponse.data.IpfsHash;
+            setBusinessPlanHash(pdfHash);
+            // Resto del código...
+            const tx = await contract.addAsset(parseInt(localPriceEther), autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash, parseInt(localInvestmentObjectiveEther), end_crowfunding, to, { gasLimit: 3000000 });
+            console.log(`Transaction hash: ${tx.hash}`);
+            console.log(projectStartDate, projectEndDate, end_crowfunding);
+            console.log(typeof projectStartDate); // Debería imprimir 'number'
+            console.log(typeof projectEndDate); // Debería imprimir 'number'
+            console.log(typeof end_crowfunding); // Debería imprimir 'number'
+
+            console.log('La dirección del contrato es: ', contractAddressRES4);
+
+
+            // Resto del código...
+            console.log(`El precio en ether es: ${localPriceEther.toString()}`); // Imprime el precio en ether usando la variable local
+            getAssetsCount();
+
+
         } catch (error) {
             setError("Algo salió mal al enviar tu transacción: " + error.message);
         }

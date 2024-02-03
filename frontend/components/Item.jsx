@@ -5,6 +5,7 @@ import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
 import { contractAddress } from "../../utils/constans.js";
 import PaymentDetails from "./PaymentDetails";
+import Spinner from '@material-tailwind/react/Spinner'; // Importa el componente Spinner
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -44,17 +45,10 @@ const Item = ({ name, price, description, image, addToCart }) => {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.9:2020/fetchImage/${image}`, {
-          responseType: 'blob' // Indicamos que esperamos una respuesta de tipo blob
-        });
-
-        const url = URL.createObjectURL(response.data); // Creamos una URL de objeto a partir del blob
-        setImageUrl(url); // Actualizamos la URL de la imagen
+        const url = `https://gateway.pinata.cloud/ipfs/${image}`;
+        setImageUrl(url);
       } catch (error) {
         console.error(error);
-        if (error.response) {
-          console.error(error.response.data);
-        }
       }
     };
 
