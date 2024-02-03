@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import axios from 'axios';
 import RES4 from "../../utils/abi/RES4.json";
 import { contractAddressRES4 } from "../../utils/constans.js";
+import { Spinner } from "@material-tailwind/react";
 
 const PRIVATE_KEY_NFT = import.meta.env.VITE_PRIVATE_KEY_NFT;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -23,15 +24,18 @@ const AddAsset = () => {
     const [autor, setAutor] = useState("");
     const [titulo, setTitulo] = useState("");
     const [small_description, setSmallDescription] = useState("");
-    const [projectStartDate, setProjectStartDate] = useState('');
-    const [projectEndDate, setProjectEndDate] = useState('');
+    const [projectStartDateDisplay, setProjectStartDateDisplay] = useState("");
+    const [projectStartDate, setProjectStartDate] = useState("");
+    const [projectEndDateDisplay, setProjectEndDateDisplay] = useState("");
+    const [projectEndDate, setProjectEndDate] = useState("");
     const [NFTFractional, setNFTFractional] = useState("");
     const [paymentGuaranteeClauses, setPaymentGuaranteeClauses] = useState("");
     const [businessPlanHash, setBusinessPlanHash] = useState("");
     const [tokenHash, setTokenHash] = useState("");
     const [investmentObjective, setInvestmentObjective] = useState("");
     const [localInvestmentObjective, setLocalInvestmentObjective] = useState(ethers.utils.parseEther("0.0"));
-    const [end_crowfunding, setEnd_Crowfunding] = useState("");
+    const [endCrowfundingDisplay, setEndCrowfundingDisplay] = useState("");
+    const [endCrowfunding, setEndCrowfunding] = useState("");
     const [to, setTo] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -41,12 +45,23 @@ const AddAsset = () => {
 
     const getAssetsCount = async () => {
         const assetsCount = await contract.assetsCount();
-        console.log('El AssetId es: ', assetsCount.toString());
+        console.log('The AssetId is: ', assetsCount.toString());
     };
 
-    const handleDateChange = (e, setDate) => {
+    const showAlert = async (hash) => {
+        const assetsCount = await contract.assetsCount();
+        const assetsCountMinusOne = assetsCount - 1;
+
+        alert(`Token has been created successfully. Check it in your wallet. Contract Address: ${contractAddressRES4}, Token ID: ${assetsCountMinusOne.toString()}, Transaccion Hash: ${hash},`);
+    };
+    const handleDateChange = (e, setDate, setDateDisplay) => {
         const inputDate = e.target.value;
-        // Si el valor de entrada está vacío, no hagas nada
+        setDateDisplay(inputDate); // Actualiza el valor que se muestra en el input
+    };
+
+    const handleDateBlur = (e, setDate, setDateDisplay) => {
+        const inputDate = e.target.value;
+
         if (!inputDate) {
             return;
         }
@@ -60,26 +75,25 @@ const AddAsset = () => {
 
             setDate(unixTime); // Actualiza el estado con el tiempo Unix
         } else {
-            console.log('La fecha ingresada no cumple con el formato DD/MM/AAAA');
+            alert('The date entered does not comply with the DD/MM/YYYY format');
         }
     };
-
 
     const addAsset = async () => {
         setIsLoading(true);
         try {
-            let decimalString = parseInt(price).toString(); // Convierte el precio a un número entero
+            let decimalString = parseInt(price).toString();
             let wei = ethers.utils.parseEther(decimalString);
-            let ether = ethers.utils.formatEther(wei); // Convierte el wei de vuelta a ether
-            let localPriceEther = ether; // Usa una variable local para almacenar el valor de ether
-            setLocalPrice(ether); // Actualiza el estado con el valor de ether
-            console.log(`El precio en ether es: ${localPriceEther}`); // Imprime el precio en ether usando la variable local
+            let ether = ethers.utils.formatEther(wei);
+            let localPriceEther = ether;
+            setLocalPrice(ether);
+            console.log(`The price in ether is: ${localPriceEther}`);
 
-            let investmentObjectiveDecimalString = parseInt(investmentObjective).toString(); // Convierte el objetivo de inversión a un número entero
+            let investmentObjectiveDecimalString = parseInt(investmentObjective).toString();
             let investmentObjectiveWei = ethers.utils.parseEther(investmentObjectiveDecimalString);
-            let localInvestmentObjectiveEther = ethers.utils.formatEther(investmentObjectiveWei); // Convierte el wei de vuelta a ether
-            setLocalInvestmentObjective(localInvestmentObjectiveEther); // Actualiza el estado con el valor de ether
-            console.log(`El objetivo de inversión en ether es: ${localInvestmentObjectiveEther}`); // Imprime el objetivo de inversión en ether
+            let localInvestmentObjectiveEther = ethers.utils.formatEther(investmentObjectiveWei);
+            setLocalInvestmentObjective(localInvestmentObjectiveEther);
+            console.log(`The investment objective in Ethereum is: ${localInvestmentObjectiveEther}`);
 
 
 
@@ -127,7 +141,7 @@ const AddAsset = () => {
 
 
         } catch (error) {
-            setError("Algo salió mal al enviar tu transacción: " + error.message);
+            setError("Something went wrong when sending your transaction: " + error.message);
         }
         setIsLoading(false);
     };
@@ -137,14 +151,14 @@ const AddAsset = () => {
         if (file.type === 'application/pdf') {
             setPdfFile(file);
         } else {
-            console.error('El archivo debe ser un PDF');
+            console.error('The file must be a PDF');
         }
     };
 
 
 
     return (
-        <div className="flex items-center justify-center h-screen bg-[#f7e8f0] ">
+        <div className="flex items-center justify-center h-screen bg-[#f5f1f3] ">
             <div className="bg-white p-8 rounded-lg w-4/5 max-w-screen-lg  mt-28">
                 <form>
                     <div class="grid gap-4 mb-2 md:grid-cols-2">
@@ -153,12 +167,12 @@ const AddAsset = () => {
                             <input type="text" id="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Price" required value={price} onChange={e => setPrice(e.target.value)}></input>
                         </div>
                         <div>
-                            <label for="last_name" class="block text-sm font-medium text-gray-900 dark:text-white">Autor</label>
-                            <input type="text" id="last_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Autor" required value={autor} onChange={e => setAutor(e.target.value)}></input>
+                            <label for="last_name" class="block text-sm font-medium text-gray-900 dark:text-white">Author</label>
+                            <input type="text" id="last_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Author" required value={autor} onChange={e => setAutor(e.target.value)}></input>
                         </div>
                         <div>
-                            <label for="company" class="block text-sm font-medium text-gray-900 dark:text-white">Titulo</label>
-                            <input type="text" id="company" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Titulo" required value={titulo} onChange={e => setTitulo(e.target.value)}></input>
+                            <label for="company" class="block text-sm font-medium text-gray-900 dark:text-white">Title of</label>
+                            <input type="text" id="company" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Title of" required value={titulo} onChange={e => setTitulo(e.target.value)}></input>
                         </div>
                         <div>
                             <label for="phone" class="block text-sm font-medium text-gray-900 dark:text-white">Small Description</label>
@@ -166,11 +180,12 @@ const AddAsset = () => {
                         </div>
                         <div>
                             <label for="projectStartDate" class="block text-sm font-medium text-gray-900 dark:text-white">Project Start Date</label>
-                            <input type="text" id="projectStartDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Project Start Date" required value={projectStartDate} onChange={e => setProjectStartDate(e.target.value)} onBlur={e => handleDateChange(e, setProjectStartDate)}></input>
+
+                            <input type="text" id="projectStartDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Project Start Date" required value={projectStartDateDisplay} onChange={e => handleDateChange(e, setProjectStartDate, setProjectStartDateDisplay)} onBlur={e => handleDateBlur(e, setProjectStartDate, setProjectStartDateDisplay)}></input>
                         </div>
                         <div>
                             <label for="projectEndDate" class="block text-sm font-medium text-gray-900 dark:text-white">Project End Date</label>
-                            <input type="text" id="projectEndDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Project End Date" required value={projectEndDate} onChange={e => setProjectEndDate(e.target.value)} onBlur={e => handleDateChange(e, setProjectEndDate)}></input>
+                            <input type="text" id="projectEndDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Project End Date" required value={projectEndDateDisplay} onChange={e => handleDateChange(e, setProjectEndDate, setProjectEndDateDisplay)} onBlur={e => handleDateBlur(e, setProjectEndDate, setProjectEndDateDisplay)}></input>
                         </div>
 
                     </div>
@@ -188,22 +203,22 @@ const AddAsset = () => {
                     </div>
                     <div class="mb-4">
                         <label for="confirm_password" class="block  text-sm font-medium text-gray-900 dark:text-white">Business Plan Hash</label>
-                        <input type="file" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Token Hash" required onChange={handleFileChange}></input>
+                        <input type="file" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Business Plan Hash" required onChange={handleFileChange}></input>
                     </div>
                     <div class="mb-4">
-                        <label for="first_name" class="block text-sm font-medium text-gray-900 dark:text-white">Objetivo de Financiación</label>
-                        <input type="text" id="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Objetivo" required value={investmentObjective} onChange={e => setInvestmentObjective(e.target.value)}></input>
+                        <label for="first_name" class="block text-sm font-medium text-gray-900 dark:text-white">Funding Objective</label>
+                        <input type="text" id="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Funding Objective" required value={investmentObjective} onChange={e => setInvestmentObjective(e.target.value)}></input>
                     </div>
                     <div class="mb-4">
-                        <label for="projectEndDate" class="block text-sm font-medium text-gray-900 dark:text-white">Fin de la Financiación</label>
-                        <input type="text" id="projectEndDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Project End Date" required value={end_crowfunding} onChange={e => setEnd_Crowfunding(e.target.value)} onBlur={e => handleDateChange(e, setEnd_Crowfunding)}></input>
+                        <label for="end_crowfunding" class="block text-sm font-medium text-gray-900 dark:text-white">End of Funding</label>
+                        <input type="text" id="end_crowfunding" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="End of Funding" required value={endCrowfundingDisplay} onChange={e => handleDateChange(e, setEndCrowfunding, setEndCrowfundingDisplay)} onBlur={e => handleDateBlur(e, setEndCrowfunding, setEndCrowfundingDisplay)}></input>
                     </div>
-
-                    <div class="mb-4">
-                        <label for="confirm_password" class="block  text-sm font-medium text-gray-900 dark:text-white">To</label>
+                    <div clas="mb-4">
+                        <label for="confirm_password" class="block  text-sm font-medium text-gray-900 dark:text-white">Owner's account for the NFT</label>
                         <input type="text" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={to} onChange={e => setTo(e.target.value)} placeholder="To"></input>
                     </div>
-                    <button type="buttom" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={addAsset} disabled={isLoading}>Agregar Activo</button>
+                    <button type="buttom" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={addAsset} disabled={isLoading}>
+                        {isLoading ? <Spinner /> : 'Add Asset'}</button>
                     {error ? <p className="text-red-500 mt-4">{error}</p> : null}
                 </form>
             </div>

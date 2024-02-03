@@ -65,7 +65,7 @@ const Shop = () => {
           <button className='bg-[#c9398a] rounded-md p-2 text-white' >Creativas Seller</button>
         </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-center mr-7">
         {loading ? (
           <div>Loading...</div>
         ) : (

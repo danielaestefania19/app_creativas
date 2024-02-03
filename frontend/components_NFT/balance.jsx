@@ -65,7 +65,7 @@ const Balance = () => {
 
   return (
     <div>
-   <p>Hola Alfredo</p>
+   <p>Hi!</p>
     </div>
   );
 };

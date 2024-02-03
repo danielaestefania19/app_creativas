@@ -17,10 +17,10 @@ const WalletConnect = () => {
               const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
               await accountChangedHandler(signer);
           }).catch((err) => {
-              setErrorMessage("Error al conectar con Metamask: " + err.message);
+              setErrorMessage("Error connecting with Metamask: " + err.message);
           });
       } else {
-          setErrorMessage("Por favor, instala Metamask!!!");
+          setErrorMessage("Please install Metamask!!!");
       }
     }
   
