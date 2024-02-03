@@ -44,12 +44,12 @@ const Item = ({ name, price, description, image, addToCart }) => {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.8:1111/fetchImage/${image}`, {
-          responseType: 'blob' // Indicamos que esperamos una respuesta de tipo blob
+        const response = await axios.get(`http://192.168.1.8:2020/fetchImage/${image}`, {
+          responseType: 'blob' 
         });
 
-        const url = URL.createObjectURL(response.data); // Creamos una URL de objeto a partir del blob
-        setImageUrl(url); // Actualizamos la URL de la imagen
+        const url = URL.createObjectURL(response.data); 
+        setImageUrl(url);
       } catch (error) {
         console.error(error);
         if (error.response) {
@@ -76,12 +76,11 @@ const Item = ({ name, price, description, image, addToCart }) => {
 
       const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
       const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
-      alert(`Transaction Exitosa detalles de la transación: ${tx.hash}`); // Imprime el hash de la transacción
-
+      alert(`Transaction Successful transaction details: ${tx.hash}`); 
       setPaymentStarted(true);
       setShowPaymentDetails(true);
     } catch (error) {
-      setError("Algo salió mal al enviar tu transacción: " + error.message);
+      alert("Something went wrong when sending your transaction: " + error.message);
     }
     setIsLoading(false);
   };
@@ -93,7 +92,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
         navigate(`/pay/${externalPaymentId}`);
       }
     } catch (err) {
-      setError("Error al iniciar el pago: " + err.message);
+      setError("Error starting payment: " + err.message);
     }
   };
   return (
@@ -111,13 +110,13 @@ const Item = ({ name, price, description, image, addToCart }) => {
           }}
           disabled={isLoading}
         >
-          {isLoading ? 'Procesando la transacción...' : 'Comprar'}
+          {isLoading ? 'Processing the transaction...' : 'Buy'}
         </button>
         <button
           className="bg-blue-500 text-white px-3 py-1 rounded"
           onClick={() => addToCart()}
         >
-          Añadir al carrito
+         Add to cart
         </button>
       </div>
       {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} closeModal={() => setShowPaymentDetails(false)}/>}

@@ -25,10 +25,10 @@ const PaymentDetails = ({ externalPaymentId, closeModal }) => {
         setPaymentDetails({ externalPaymentId, price: price, status });
         setShowDetails(true);
       } else {
-        console.log("El pago no existe");
+        console.log("Payment does not exist");
       }
     } catch (error) {
-      console.log("Error al obtener los detalles del pago:", error);
+      console.log("Error getting payment details:", error);
     }
   };
 
@@ -38,30 +38,30 @@ const PaymentDetails = ({ externalPaymentId, closeModal }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white p-8 rounded-md z-50">
-    <div className="modal">
-      <div className="modal-content">
-        {showDetails && paymentDetails ? (
-          <div>
-            <h2>Detalles del Pago</h2>
-            <p>ID del Pago: {paymentDetails.externalPaymentId}</p>
-            <p>Precio: {paymentDetails.price} BFT</p>
-            <p>Status: {paymentDetails.status}</p>
-            <WalletConnect />
-            <WalletPay id={paymentDetails.externalPaymentId} amount={paymentDetails.price} />
+      <div className="bg-white p-8 rounded-md z-50">
+        <div className="modal">
+          <div className="modal-content">
+            {showDetails && paymentDetails ? (
+              <div>
+                <button onClick={() => {
+                  setShowDetails(false);
+                  closeModal();
+                }}>
+                  Close Modal
+                </button>
+                <h2>Payment Details</h2>
+                <p>Payment ID: {paymentDetails.externalPaymentId}</p>
+                <p>Price: {ethers.utils.formatEther(paymentDetails.price)} BFT</p>
+                <p>Status: {paymentDetails.status}</p>
+                <WalletConnect />
+                <WalletPay id={paymentDetails.externalPaymentId} amount={paymentDetails.price} />
+              </div>
+            ) : (
+              <p>Loading payment details...</p>
+            )}
           </div>
-        ) : (
-          <p>Cargando detalles del pago...</p>
-        )}
-        <button onClick={() => {
-          setShowDetails(false);
-          closeModal(); // Agrega esta función para cerrar el modal desde el componente padre
-        }}>
-          Cerrar Modal
-        </button>
+        </div>
       </div>
-    </div>
-    </div>
     </div>
   );
 };

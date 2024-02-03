@@ -38,6 +38,7 @@ const ShowdetailsTokensFrac = ({ id, precio, NFTFractional, propietario }) => {
           const transaction = await contractWithSigner.invest(assetId, wei, { gasLimit, value: wei });
           const receipt = await transaction.wait();
           console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
+          alert(`Transaction successful with hash: ${receipt.transactionHash}`);
           setPurchasedTokens({ ...purchasedTokens, [assetId]: true });
       } catch (error) {
           console.error(`Failed to send transaction: ${error}`);
@@ -59,7 +60,7 @@ const signTransaction = async (receiver, amount, addrFCTV, contFCTV) => {
     const gasLimit = ethers.utils.hexlify(100000);
     const transaction = await contFCTV.transfer(receiver, value, { gasLimit });
     const receipt = await transaction.wait();
-
+    alert(`Transaction successful with hash: ${receipt.transactionHash}. Claim your token in your wallet:  ${addrFCTV}` );
     return receipt.transactionHash;
 };
 
@@ -88,7 +89,7 @@ const signTransaction = async (receiver, amount, addrFCTV, contFCTV) => {
             </button>
           ))}
         </div>
-        <p>Total a pagar: {amount}</p>
+        <p>Total to pay: {amount}</p>
         <input type="number" value={tokenAmount} onChange={handleTokenAmountChange} min="1" max={NFTFractional} />
       </div>
     </div>

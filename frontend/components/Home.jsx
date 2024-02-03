@@ -5,6 +5,7 @@ import { useAuth } from './Login'; // Importa useAuth aquí
 import { AuthContext } from './AuthContext.jsx';
 import { Img } from '@chakra-ui/react';
 import favicon from '../assets/favicon.png';
+import Logo from '../assets/Logo.png'
 import WalletConnect from './WalletConnect.jsx';
 
 const Home = () => {
@@ -52,7 +53,7 @@ const Home = () => {
     <header className={`${visible ? 'fixed' : 'hidden'} inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-3 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg`}>
       <div className="px-4">
         <div className='flex items-center justify-between'>
-          <h1 className="h-7 w-auto text-[#FF0091]">Creativas</h1>
+          <img className="h-11 w-auto ml-2 " alt="Icono" src={Logo}/>
           <Link to="/" className="p-4">Home</Link>
           <h1 className="p-4">Company</h1>
           <h1 className="p-4">Contact</h1>

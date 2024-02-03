@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // Importa useLocation aquí
+import { useNavigate, useLocation } from 'react-router-dom'; 
 import { useContext } from 'react';
-import { AuthContext } from './AuthContext'; // Importa AuthContext aquí
+import { AuthContext } from './AuthContext'; 
 
 const withAuthentication = (Component) => {
   return (props) => {
-    const { isUserAuthenticated, setLastVisitedRoute } = useContext(AuthContext); // Usa useContext aquí
+    const { isUserAuthenticated, setLastVisitedRoute } = useContext(AuthContext); 
     const navigate = useNavigate();
-    const location = useLocation(); // Obtiene la ubicación actual
+    const location = useLocation(); 
 
     useEffect(() => {
       if (!isUserAuthenticated) {
-        setLastVisitedRoute(location.pathname); // Guarda la ruta actual
+        setLastVisitedRoute(location.pathname); 
         navigate('/login');
       }
     }, [isUserAuthenticated, navigate, location.pathname, setLastVisitedRoute]);

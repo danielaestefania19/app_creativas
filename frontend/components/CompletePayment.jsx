@@ -24,9 +24,9 @@ const CompletePayment = ({ id }) => {
         try {
             const tx = await contract.complete(parseInt(id));
             await tx.wait();
-            alert(`Pago completado con éxito. Detalles de la transacción: ${tx.hash}`);
+            alert(`Payment completed successfully. Details of the transaction: ${tx.hash}`);
         } catch (error) {
-            alert('Error al completar el pago: ' + error.message);
+            alert('Error completing payment:' + error.message);
         }
         setIsLoading(false);
     }
@@ -37,7 +37,7 @@ const CompletePayment = ({ id }) => {
                 style={{ background: "#000000", color: "#FFFFFF" }}
                 onClick={completeHandler}
                 disabled={isLoading}>
-                {isLoading ? 'Completando Transacción' : 'Envío Recibido'}
+                {isLoading ? 'Completing Transaction' : 'Shipment received'}
             </Button>
         </div>
     )

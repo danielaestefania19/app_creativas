@@ -9,7 +9,7 @@ export const useAuth = () => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [userIdentity, setUserIdentity] = useState(null);
   const [userPrincipal, setUserPrincipal] = useState(null);
-  const [authClient, setAuthClient] = useState(null); // Nuevo estado para authClient
+  const [authClient, setAuthClient] = useState(null); 
   
 
   const login = async () => {
@@ -23,7 +23,7 @@ export const useAuth = () => {
       iiUrl = local_ii_url;
     }
     const newAuthClient = await AuthClient.create();
-    setAuthClient(newAuthClient); // Guarda authClient en el estado
+    setAuthClient(newAuthClient); 
 
     await new Promise((resolve) => {
       newAuthClient.login({
@@ -45,7 +45,6 @@ export const useAuth = () => {
     const principal = await actor.whoami();
     console.log(principal.toText());
 
-    // Actualizar estado
     setIsUserAuthenticated(await newAuthClient.isAuthenticated());
     setUserIdentity(identity);
     setUserPrincipal(principal.toText());
@@ -53,8 +52,7 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
-    await authClient?.logout(); // Ahora authClient está disponible aquí
-    // Actualizar estado
+    await authClient?.logout(); 
     setIsUserAuthenticated(false);
     setUserIdentity(null);
     setUserPrincipal(null);
@@ -63,5 +61,5 @@ export const useAuth = () => {
   useEffect(() => {
   }, []);
 
-  return { isUserAuthenticated, userIdentity, userPrincipal, login, logout }; // Devuelve login y logout aquí
+  return { isUserAuthenticated, userIdentity, userPrincipal, login, logout }; 
 };
