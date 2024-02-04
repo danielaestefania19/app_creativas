@@ -10,17 +10,20 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
-const PaymentDetails = ({ externalPaymentId, closeModal }) => {
+
+const PaymentDetails = ({ externalPaymentId, contractAddress, closeModal }) => {
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+
+  // Inicializa el contrato con la dirección correcta
+  const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
   const fetchPaymentDetails = async () => {
     try {
       const paymentExists = await contract.checkIfPaymentExists(externalPaymentId);
       if (paymentExists) {
-        const price = (await contract.getPrice(externalPaymentId)).toString();
+        const price = (await contract.getPrice(externalPaymentId));
         const status = await contract.getStatus(externalPaymentId);
         setPaymentDetails({ externalPaymentId, price: price, status });
         setShowDetails(true);
@@ -53,9 +56,9 @@ const PaymentDetails = ({ externalPaymentId, closeModal }) => {
                 <p>Payment ID: {paymentDetails.externalPaymentId}</p>
                 <p>Price: {ethers.utils.formatEther(paymentDetails.price)} BFT</p>
                 <p>Status: {paymentDetails.status}</p>
-                <WalletConnect />
-                <WalletPay id={paymentDetails.externalPaymentId} amount={paymentDetails.price} />
-              </div>
+                {/* <WalletConnect /> */}
+                <WalletPay id={paymentDetails.externalPaymentId} amount={paymentDetails.price} contractAddress={contractAddress} />
+            </div>
             ) : (
               <p>Loading payment details...</p>
             )}

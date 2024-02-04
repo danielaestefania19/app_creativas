@@ -13,7 +13,7 @@ export const useAuth = () => {
   
 
   const login = async () => {
-    const local_ii_url = `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:5000`;
+    const local_ii_url = `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:8000`;
     let iiUrl;
     if (process.env.DFX_NETWORK === "local") {
       iiUrl = local_ii_url;

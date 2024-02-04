@@ -66,21 +66,6 @@ const YourTokens = () => {
         console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
 
         alert(`Your funds have been successfully funded. Transaction Hash: ${receipt.transactionHash}`);
-
-        if (receipt.events) {
-            receipt.events.forEach((event) => {
-                console.log(`Nombre del evento: ${event.event}`);
-                console.log('Argumentos del evento:');
-
-                for (let arg in event.args) {
-                    if (ethers.BigNumber.isBigNumber(event.args[arg])) {
-                        console.log(`${arg}: ${event.args[arg].toString()}`);
-                    } else {
-                        console.log(`${arg}: ${event.args[arg]}`);
-                    }
-                }
-            });
-        }
     };
 
     return (

@@ -83,7 +83,9 @@ struct Item {
     image: String,
     rating: Option<Rating>,
     owner: Option<Principal>,
-    //ratings: Vec<(Option<Principal>, Rating)>, // Aquí cambiamos el tipo de ratings
+    contract_address: String,
+
+   
 }
 
 
@@ -94,8 +96,11 @@ pub struct CreateItem {
     price: u64,
     description: String,
     image: String,
-    owner: String, // Haz que el campo owner sea opcional
+    owner: String, 
+    contract_address: String,
 }
+
+
 
 // Implementación de trait para la serialización y deserialización de Item
 
@@ -163,54 +168,13 @@ fn set_item(item: CreateItem) -> Result<ItemSuccess, ItemError> {
         description: item.description,
         image: item.image,
         rating: None,
-        owner: Some(owner_principal), // Clonamos el owner_principal para usarlo en ratings
-        //ratings: vec![(Some(owner_principal), Rating::Zero)], // Inicializamos ratings con un voto estándar de 0 y el Principal del dueño del Item
+        owner: Some(owner_principal), 
+        contract_address: item.contract_address
     };
 
     ITEMS.with(|p| p.borrow_mut().insert(id, value.clone()));
     Ok(ItemSuccess::CreatedItem)
 }
-
-
-
-// fn update_rating(id: u64) -> Result<(), ItemError> {
-//     ITEMS.with(|items| {
-//         let mut items = items.borrow_mut();
-//         if let Some(mut item) = items.get(&id).clone() {
-//             if let Some(votes) = &item.votes {
-//                 let total_votes = votes.len() as u64;
-//                 let sum: u64 = votes.iter().map(|vote| vote.rating.value() as u64).sum();
-//                 let average = sum / total_votes;
-//                 item.rating = Rating::from_value(average);
-//                 items.insert(id, item);
-//                 Ok(())
-//             } else {
-//                 Err(ItemError::NoVotes)
-//             }
-//         } else {
-//             Err(ItemError::ItemNotFound)
-//         }
-//     })
-// }
-// #[ic_cdk::update]
-// fn vote(id: u64, rating: Rating, principal: String) -> Result<(), ItemError> {
-//     let principal = string_a_principal(principal)?;
-
-//     ITEMS.with(|items| {
-//         let mut items = items.borrow_mut();
-//         if let Some(mut item) = items.get(&id).clone() { // Declara `item` como mutable
-//             // Como ratings ahora se inicializa como un vector vacío, puedes asumir que siempre será Some
-//             item.ratings.as_mut().unwrap().push((principal, rating));
-//             items.insert(id, item);
-//             Ok(())
-//         } else {
-//             Err(ItemError::ItemNotFound)
-//         }
-//     })
-// }
-
-
-
 
 
 #[ic_cdk::query]
@@ -252,6 +216,7 @@ fn update_item(id: u64, item: CreateItem) -> Result<(), ItemError> {
             image: item.image,
             rating: old_item.rating,
             owner: Some(caller_principal),
+            contract_address:  old_item.contract_address,
             //ratings: old_item.ratings,
         };
 

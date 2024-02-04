@@ -13,6 +13,7 @@ type CreateItem = record {
     description: text;
     image: text;
     owner: text;
+    contract_address: text;
 };
 
 type Vote = record { 
@@ -27,6 +28,7 @@ type Item = record {
     image: text;
     rating: opt Rating;
     owner: opt principal;
+    contract_address: text;
    // ratings: vec record { opt principal; Rating }
 };
 

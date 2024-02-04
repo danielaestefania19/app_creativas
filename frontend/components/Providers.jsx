@@ -1,11 +1,15 @@
 import React, { useCallback, useState, useContext, useEffect } from 'react';
+import { ethers } from 'ethers';
 import axios from 'axios';
 import FormData from 'form-data';
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { eccomerce } from "../../src/declarations/eccomerce";
 import { AuthContext } from './AuthContext';
+import Crypay from "../../utils/abi/Crypay.json";
+import { contractCodeObjCrypay } from "../../utils/constans.js";
 import { Principal } from '@dfinity/principal';
+import { WalletContext } from './WalletContext.jsx';
 import {
   Card,
   CardHeader,
@@ -18,6 +22,12 @@ import {
   Label
 } from "@material-tailwind/react";
 
+const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
+const provider = new ethers.providers.JsonRpcProvider(API_URL);
+const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
 const ItemsUploader = () => {
   const [item, setItem] = useState("");
   const [price, setPrice] = useState("");
@@ -26,7 +36,8 @@ const ItemsUploader = () => {
   const [myipfsHash, setIPFSHASH] = useState('');
   const [error, setError] = useState(null); // new state for the error
   const { whoami } = useContext(AuthContext);
-  const [fileMessage, setFileMessage] = useState('Sin archivos seleccionados'); // nuevo estado
+  const [fileMessage, setFileMessage] = useState('No file selected'); // nuevo estado
+  const { defaultAccount } = useContext(WalletContext);
 
   const handleFileChange = useCallback(async (event) => {
     const file = event.target.files[0];
@@ -34,12 +45,18 @@ const ItemsUploader = () => {
       setFile(file);
       setFileMessage(file.name); // actualizamos el mensaje con el nombre del archivo
     } else {
-      setFileMessage('Sin archivos seleccionados'); // si no hay archivo, mostramos este mensaje
+      setFileMessage('No file selected'); // si no hay archivo, mostramos este mensaje
     }
   }, []);
 
 
   const handleUpload = useCallback(async () => {
+
+    if (!whoami) {
+      setError('Invalid user. Please log in again.');
+      return;
+    }
+    
     if (!file) {
       setError('Select a file before uploading an item.');
       return;
@@ -58,7 +75,6 @@ const ItemsUploader = () => {
     const API_SECRET = import.meta.env.VITE_PINATA_API_SECRET;
 
     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
-
     try {
       const response = await axios.post(
         url,
@@ -72,18 +88,37 @@ const ItemsUploader = () => {
           }
         }
       );
-      eccomerce.set_item({ item, price, description, image: response.data.IpfsHash, owner: whoami });
-      // If everything goes well, we clear the error
-      setError(null);
+      try {
+
+        const factory = new ethers.ContractFactory(Crypay, contractCodeObjCrypay, wallet);
+        console.log(defaultAccount)
+        const contract_frac = await factory.deploy(defaultAccount);
+        await contract_frac.deployed();
+        console.log(`Contract deployed at ${contract_frac.address}`);
+        console.log(whoami)
+
+        await eccomerce.set_item({ 
+          item, 
+          price, 
+          description, 
+          image: response.data.IpfsHash, 
+          owner: whoami, 
+          contract_address: contract_frac.address // Aquí agregas la dirección del contrato desplegado
+        });
+        // Mueve la alerta aquí
+        alert('Product uploaded successfully');
+      } catch (error) {
+        setError('Error uploading the product' );
+      }
+      
     } catch (error) {
       console.error(error);
       if (error.response) {
         console.error(error.response.data);
       }
-
-      // Here we set the error message we want to show
       setError('An error occurred while uploading the product. Please try again.');
     }
+    
   }, [file, item, price, description, whoami]);
 
   return (
@@ -101,9 +136,11 @@ const ItemsUploader = () => {
               <Input value={description} onChange={e => setDescription(e.target.value)} label="Description" />
             </div>
             <div class="w-[100px] mb-4">
-              <input type="file" class="bg-gray-50 border border-gray-500 rounded-lg w-[300px]" required onChange={handleFileChange}></input>
+              <input type="file" class="bg-gray-50 border border-gray-500 rounded-lg w-[300px]" style={{ display: 'none' }} id="fileInput" onChange={handleFileChange}></input>
+              <button onClick={() => document.getElementById('fileInput').click()}>Select File</button>
               <p>{fileMessage}</p> {/* mostramos el mensaje aquí */}
             </div>
+
 
             <div>
               <p>Principal: {whoami}</p>

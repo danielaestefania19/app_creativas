@@ -98,10 +98,10 @@ const YourInvest = () => {
         const receipt = await tx.wait();
 
         // Imprimes el hash de la transacción
-        console.log(receipt.hash)
+        console.log(receipt.transactionHash)
 
         // Muestras una alerta con el hash de la transacción
-        alert(`Your funds have been successfully claimed. Check your wallet to see your funds. Transaction Hash: ${receipt.hash}`);
+        alert(`Your funds have been successfully claimed. Check your wallet to see your funds. Transaction Hash: ${receipt.transactionHash}`);
     }
 
     return (

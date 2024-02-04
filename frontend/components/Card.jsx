@@ -4,81 +4,57 @@ import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
 import { contractAddress } from "../../utils/constans.js";
-import PaymentDetails from "./PaymentDetails";
+import PaymentDetailsCard from "./PaymentsDetailsCard.jsx";
 import { Spinner } from "@material-tailwind/react";
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
+const provider = new ethers.providers.JsonRpcProvider(API_URL);
+const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
 const Cart = ({ cart, removeFromCart, onHideCart }) => {
   const navigate = useNavigate();
-  const [externalPaymentId, setExternalPaymentId] = useState(0);
+  const [externalPaymentIds, setExternalPaymentIds] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStarted, setPaymentStarted] = useState(false);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [error, setError] = useState(null);
 
-  const provider = new ethers.providers.JsonRpcProvider(API_URL);
-  const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-  const contract = new ethers.Contract(contractAddress, Crypay, wallet);
-
-  useEffect(() => {
-    const fetchPaymentCount = async () => {
-      try {
-        const paymentCount = await contract.paymentCount();
-        setExternalPaymentId(parseInt(paymentCount));
-      } catch (error) {
-        return error.message;
-      }
-    };
-
-    fetchPaymentCount();
-  }, []);
-
-  const checkIfPaymentExists = async (id) => {
-    return await contract.checkIfPaymentExists(id);
-  };
-
-  const startNewPayment = async (localPrice) => {
+  const handleCheckout = async () => {
     setIsLoading(true);
+    const payments = [];
     try {
-      let paymentExists = await checkIfPaymentExists(externalPaymentId);
-      while (paymentExists) {
-        setExternalPaymentId(prevId => prevId + 1);
-        paymentExists = await checkIfPaymentExists(externalPaymentId);
+      for (const item of cart) {
+        const contract = new ethers.Contract(item.contract_address, Crypay, wallet);
+        let decimalString = item.price + ".0";
+        let wei = ethers.utils.parseEther(decimalString);
+        let paymentCount = await contract.paymentCount();
+        let externalPaymentId = parseInt(paymentCount);
+        let paymentExists = await contract.checkIfPaymentExists(externalPaymentId);
+        while (paymentExists) {
+          externalPaymentId++;
+          paymentExists = await contract.checkIfPaymentExists(externalPaymentId);
+        }
+        const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, wei);
+  
+        // Crea una nueva instancia de wallet para cada transacción
+        const newWallet = new ethers.Wallet(PRIVATE_KEY, provider);
+  
+        const tx = await contract.connect(newWallet).startNewPayment(externalPaymentId, wei, { gasLimit: gasEstimate.toNumber() });
+        const receipt = await tx.wait();
+        console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
+        payments.push({ id: externalPaymentId, address: item.contract_address });
       }
-
-      const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
-      const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
-      alert(`Transaction Successful transaction details: ${tx.hash}`); // Imprime el hash de la transacción
-
       setPaymentStarted(true);
       setShowPaymentDetails(true);
+      setExternalPaymentIds(payments);
     } catch (error) {
-      setError("Something went wrong when sending your transaction: " + error.message);
+      alert("Something went wrong when sending your transaction: " + error.message);
     }
     setIsLoading(false);
   };
-
-  const handleCheckout = async () => {
-    try {
-      // Calcula el precio total del carrito
-      let totalWei = ethers.BigNumber.from(0);
-      cart.forEach(item => {
-        let decimalString = item.price + ".0";
-        let wei = ethers.utils.parseEther(decimalString);
-        totalWei = totalWei.add(wei);
-      });
-
-      // Inicia un nuevo pago con el precio total
-      await startNewPayment(totalWei);
-      if (paymentStarted) {
-        navigate(`/pay/${externalPaymentId}`);
-      }
-    } catch (err) {
-      setError("Error starting payment: " + err.message);
-    }
-  };
+  
 
   return (
     <div className="fixed top-0 right-0 h-full w-1/3 bg-white border-l border-gray-300 p-4 z-40">
@@ -88,7 +64,7 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
           className="text-gray-500 hover:text-gray-700"
           onClick={onHideCart}
         >
-         Disguise
+          Disguise
         </button>
       </div>
       {cart.length === 0 ? (
@@ -114,14 +90,14 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
           <button
             className="bg-[#c9398a] text-white px-4 py-2 rounded-md mt-4"
             onClick={handleCheckout}
-          
+
             disabled={isLoading}
-            >
-          {isLoading ? <Spinner /> : 'Buy'}
+          >
+            {isLoading ? <Spinner /> : 'Buy'}
           </button>
         </>
       )}
-      {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} closeModal={() => setShowPaymentDetails(false)}/>}
+      {showPaymentDetails && <PaymentDetailsCard externalPaymentIds={externalPaymentIds} cart={cart} closeModal={() => setShowPaymentDetails(false)} />}
       {error && <div className="error">{error}</div>}
     </div>
   );

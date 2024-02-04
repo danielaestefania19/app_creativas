@@ -10,10 +10,11 @@ const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 // Configuración del contrato
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
-const CompletePayment = ({ id }) => {
+
+const CompletePayment = ({ id, contractAddress }) => {
     const [isLoading, setIsLoading] = useState(false);
+    const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
     const completeHandler = async () => {
         if (!id) {

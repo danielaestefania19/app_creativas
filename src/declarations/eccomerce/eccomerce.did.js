@@ -13,6 +13,7 @@ export const idlFactory = ({ IDL }) => {
     'description' : IDL.Text,
     'rating' : IDL.Opt(Rating),
     'image' : IDL.Text,
+    'contract_address' : IDL.Text,
     'price' : IDL.Nat64,
   });
   const ItemError = IDL.Variant({
@@ -37,6 +38,7 @@ export const idlFactory = ({ IDL }) => {
     'item' : IDL.Text,
     'description' : IDL.Text,
     'image' : IDL.Text,
+    'contract_address' : IDL.Text,
     'price' : IDL.Nat64,
   });
   return IDL.Service({

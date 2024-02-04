@@ -6,11 +6,12 @@ import CompletePayment from './CompletePayment.jsx';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
-const contract = new ethers.Contract(contractAddress, Crypay, provider);
 
-const WalletPay = ({ id, amount }) => {
+
+const WalletPay = ({ id, amount, contractAddress }) => {
     const [paymentId, setPaymentId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const contract = new ethers.Contract(contractAddress, Crypay, provider);
 
     const payHandler = async () => {
         if (!id || !amount) {
@@ -43,7 +44,8 @@ const WalletPay = ({ id, amount }) => {
                 disabled={isLoading}>
                 {isLoading ? 'Making transaction...' : 'Pay'}
                 </button>
-            {paymentId && <CompletePayment id={paymentId} />} 
+                {paymentId && <CompletePayment id={paymentId} contractAddress={contractAddress} />}
+ 
         </div>
     )
 }

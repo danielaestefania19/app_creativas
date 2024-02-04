@@ -6,6 +6,7 @@ export interface CreateItem {
   'item' : string,
   'description' : string,
   'image' : string,
+  'contract_address' : string,
   'price' : bigint,
 }
 export interface Item {
@@ -14,6 +15,7 @@ export interface Item {
   'description' : string,
   'rating' : [] | [Rating],
   'image' : string,
+  'contract_address' : string,
   'price' : bigint,
 }
 export type ItemError = { 'AlreadyVoted' : null } |

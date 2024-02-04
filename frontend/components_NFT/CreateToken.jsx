@@ -42,7 +42,6 @@ const AddAsset = () => {
     const [file, setFile] = useState(null);
     const [pdfFile, setPdfFile] = useState(null);
 
-
     const getAssetsCount = async () => {
         const assetsCount = await contract.assetsCount();
         console.log('The AssetId is: ', assetsCount.toString());
@@ -65,21 +64,31 @@ const AddAsset = () => {
         if (!inputDate) {
             return;
         }
-        const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/; // Patrón para verificar el formato DD/MM/AAAA
+        const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
 
-        // Verifica si la fecha ingresada cumple con el formato DD/MM/AAAA
         if (datePattern.test(inputDate)) {
             const dateParts = inputDate.split("/");
-            const dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); // Crea un objeto Date en el formato MM/DD/AAAA
-            const unixTime = Math.floor(dateObject.getTime() / 1000); // Convierte la fecha a tiempo Unix
+            const dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+            const unixTime = Math.floor(dateObject.getTime() / 1000);
 
-            setDate(unixTime); // Actualiza el estado con el tiempo Unix
+            setDate(unixTime); // Actualiza el valor que se usa en la función
         } else {
             alert('The date entered does not comply with the DD/MM/YYYY format');
         }
     };
 
     const addAsset = async () => {
+        if (!price || !autor || !titulo || !small_description || !projectStartDate || !projectEndDate || !NFTFractional || !paymentGuaranteeClauses || !endCrowfunding || !to) {
+            setError("Please fill out all fields.");
+            return;
+        }
+    
+        // Verifica que los archivos hayan sido subidos
+        if (!file || !pdfFile) {
+            setError("Please upload both files.");
+            return;
+        }
+    
         setIsLoading(true);
         try {
             let decimalString = parseInt(price).toString();
@@ -97,10 +106,11 @@ const AddAsset = () => {
 
 
 
+
             // Sube la imagen a Pinata
             const imageFormData = new FormData();
             imageFormData.append('file', file);
-            const imageResponse =await axios.post(url, imageFormData, {
+            const imageResponse = await axios.post(url, imageFormData, {
                 maxContentLength: 'Infinity',
                 headers: {
                     'Content-Type': `multipart/form-data; boundary=${imageFormData._boundary}`,
@@ -124,19 +134,22 @@ const AddAsset = () => {
             });
             const pdfHash = pdfResponse.data.IpfsHash;
             setBusinessPlanHash(pdfHash);
+
+
+
+
+            // Luego, en tu función addAsset:
+            const tx = await contract.addAsset(parseInt(localPriceEther), autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash, parseInt(localInvestmentObjectiveEther), endCrowfunding, to, { gasLimit: 3000000 });
+
+            // Espera a que la transacción se complete
+            await tx.wait();
+            console.log(tx.hash)
+
+            // Muestra la alerta
+            showAlert(tx.hash);;
+
+
             // Resto del código...
-            const tx = await contract.addAsset(parseInt(localPriceEther), autor, titulo, small_description, projectStartDate, projectEndDate, parseInt(NFTFractional), paymentGuaranteeClauses, pdfHash, imageHash, parseInt(localInvestmentObjectiveEther), end_crowfunding, to, { gasLimit: 3000000 });
-            console.log(`Transaction hash: ${tx.hash}`);
-            console.log(projectStartDate, projectEndDate, end_crowfunding);
-            console.log(typeof projectStartDate); // Debería imprimir 'number'
-            console.log(typeof projectEndDate); // Debería imprimir 'number'
-            console.log(typeof end_crowfunding); // Debería imprimir 'number'
-
-            console.log('La dirección del contrato es: ', contractAddressRES4);
-
-
-            // Resto del código...
-            console.log(`El precio en ether es: ${localPriceEther.toString()}`); // Imprime el precio en ether usando la variable local
             getAssetsCount();
 
 
@@ -151,7 +164,7 @@ const AddAsset = () => {
         if (file.type === 'application/pdf') {
             setPdfFile(file);
         } else {
-            console.error('The file must be a PDF');
+            setError('The file must be a PDF');
         }
     };
 
@@ -198,13 +211,24 @@ const AddAsset = () => {
                         <input type="text" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Payment Guarantee Clauses" required value={paymentGuaranteeClauses} onChange={e => setPaymentGuaranteeClauses(e.target.value)}></input>
                     </div>
                     <div class="mb-4">
-                        <label for="confirm_password" class="block text-sm font-medium text-gray-900 dark:text-white">Token Hash</label>
-                        <input type="file" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Token Hash" required onChange={e => setFile(e.target.files[0])}></input>
+                        <label for="tokenHash" class="block text-sm font-medium text-gray-900 dark:text-white">Token Hash</label>
+                        <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <input type="file" id="tokenHash" style={{ display: 'none' }} onChange={e => setFile(e.target.files[0])} />
+                            <button onClick={() => document.getElementById('tokenHash').click()}>Select File</button>
+                            <p>{file ? file.name : 'No file selected'}</p>
+                        </div>
                     </div>
+
                     <div class="mb-4">
-                        <label for="confirm_password" class="block  text-sm font-medium text-gray-900 dark:text-white">Business Plan Hash</label>
-                        <input type="file" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Business Plan Hash" required onChange={handleFileChange}></input>
+                        <label for="businessPlanHash" class="block text-sm font-medium text-gray-900 dark:text-white">Business Plan Hash</label>
+                        <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <input type="file" id="businessPlanHash" style={{ display: 'none' }} onChange={handleFileChange} />
+                            <button onClick={() => document.getElementById('businessPlanHash').click()}>Select File</button>
+                            <p>{pdfFile ? pdfFile.name : 'No file selected'}</p>
+                        </div>
                     </div>
+
+
                     <div class="mb-4">
                         <label for="first_name" class="block text-sm font-medium text-gray-900 dark:text-white">Funding Objective</label>
                         <input type="text" id="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Funding Objective" required value={investmentObjective} onChange={e => setInvestmentObjective(e.target.value)}></input>
@@ -215,7 +239,7 @@ const AddAsset = () => {
                     </div>
                     <div clas="mb-4">
                         <label for="confirm_password" class="block  text-sm font-medium text-gray-900 dark:text-white">Owner's account for the NFT</label>
-                        <input type="text" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={to} onChange={e => setTo(e.target.value)} placeholder="To"></input>
+                        <input type="text" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={to} onChange={e => setTo(e.target.value)} placeholder="Owner"></input>
                     </div>
                     <button type="buttom" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={addAsset} disabled={isLoading}>
                         {isLoading ? <Spinner /> : 'Add Asset'}</button>

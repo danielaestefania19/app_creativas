@@ -3,24 +3,23 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
-import { contractAddress } from "../../utils/constans.js";
 import PaymentDetails from "./PaymentDetails";
-import Spinner from '@material-tailwind/react/Spinner'; // Importa el componente Spinner
+
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
-const Item = ({ name, price, description, image, addToCart }) => {
+const Item = ({ name, price, description, image, contract_address, addToCart }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [expanded, setExpanded] = useState(false);
 
+  const contract = new ethers.Contract(contract_address, Crypay, wallet);
   let decimalString = price + ".0";
   let wei = ethers.utils.parseEther(decimalString);
 
@@ -70,7 +69,8 @@ const Item = ({ name, price, description, image, addToCart }) => {
 
       const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
       const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
-      alert(`Transaction Successful transaction details: ${tx.hash}`); 
+      const receipt = await tx.wait();
+      console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
       setPaymentStarted(true);
       setShowPaymentDetails(true);
     } catch (error) {
@@ -113,7 +113,7 @@ const Item = ({ name, price, description, image, addToCart }) => {
          Add to cart
         </button>
       </div>
-      {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} closeModal={() => setShowPaymentDetails(false)}/>}
+      {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} contractAddress={contract_address} closeModal={() => setShowPaymentDetails(false)}/>}
       {error && <div className="error">{error}</div>}
     </div>
   );
