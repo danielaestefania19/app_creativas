@@ -7,13 +7,17 @@ import { Img } from '@chakra-ui/react';
 import favicon from '../assets/favicon.png';
 import Logo from '../assets/Logo.png'
 import WalletConnect from './WalletConnect.jsx';
+import { WalletContext } from './WalletContext.jsx';
+import Metamask from '../assets/Metamask.png'
 
 const Home = () => {
   const [nav, setNav] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
-  const { whoami, setWhoami, isUserAuthenticated, login, logout} = useContext(AuthContext);
+  const { whoami, setWhoami, isUserAuthenticated, login, logout } = useContext(AuthContext);
+
+  const { defaultAccount } = useContext(WalletContext); // Obtén defaultAccount del WalletContext
 
   const handleNav = () => {
     setNav(!nav);
@@ -53,16 +57,17 @@ const Home = () => {
     <header className={`${visible ? 'fixed' : 'hidden'} inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-3 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg`}>
       <div className="px-4">
         <div className='flex items-center justify-between'>
-          <img className="h-11 w-auto ml-2 " alt="Icono" src={Logo}/>
+          <img className="h-11 w-auto ml-2 " alt="Icono" src={Logo} />
           <Link to="/" className="p-4">Home</Link>
           <h1 className="p-4">Company</h1>
           <h1 className="p-4">Contact</h1>
           <div className='flex items-center justify-end gap-3'>
             {/* <button className="bg-[#c9398a] hidden items-center justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-all duration-150 hover:bg-gray-50 sm:inline-flex" onClick={WalletConnect}>Wallet</button> */}
             <button type="button" onClick={handleModalToggle} data-modal-target="crypto-modal" data-modal-toggle="crypto-modal" className="text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
-              <svg aria-hidden="true" className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-              Connect wallet
+              {defaultAccount ? <img src={Metamask} alt="Metamask logo" className="h-4 mr-2" /> : <svg aria-hidden="true" className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>}
+              {defaultAccount ? 'Connected' : 'Connect wallet'}
             </button>
+
             <div id="crypto-modal" tabIndex="-1" aria-hidden="true" className={`fixed inset-0 z-50 flex items-center justify-center ${modalVisible ? '' : 'hidden'} mt-16`}>
               <div className="relative p-4 w-full max-w-md max-h-full">
 

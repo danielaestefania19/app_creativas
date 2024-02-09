@@ -20,6 +20,7 @@ import withAuthentication from './components/withAuthentication.jsx';
 import Mediun from './landing/Mediun.jsx';
 import YourInvest from './components_NFT/YourInvest.jsx'
 import YourTokens from './components_NFT/Your_Tokens.jsx'
+import Checkout from './components/checkout.jsx'
 
 
 function App() {
@@ -72,7 +73,7 @@ function App() {
           <Route path="/other/tokens" element={<YourTokens/>} />
           <Route path="/other/createitems" element={<ItemsUploader />} />
           <Route path="/other/items" element={<ItemsUploader/>} />
-          <Route path="/other/gettokens" element={<FetchAllAssets/>} /> 
+          <Route path="/other/gettokens" element={<Checkout/>} /> 
           <Route path="/login" element={<LoggedOut />} />
           <Route path="/status" element={<PaymentDetails />} />
           <Route path="/pay" element={<PaymentButton />} />

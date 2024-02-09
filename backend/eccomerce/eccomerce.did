@@ -7,18 +7,106 @@ type Rating = variant {
     Five;
 };
 
+type Address = record {
+    country: text;
+    state: text;
+    postal_code: text;
+    phone_number: text;
+    city: text;
+    address: text;
+};
+type UserAddress = record {
+    address_user: opt principal;
+    addresses: opt vec Address;
+};
+
+type CreateUserAddress = record {
+    address: Address;
+};
+
+type AddressEdit = record {
+    country: opt text;
+    state: opt text;
+    postal_code: opt text;
+    phone_number: opt text;
+    city: opt text;
+    address: opt text;
+};
+
+type UserAddressEdit = record {
+    address: AddressEdit;
+};
+
+type PurchaseStatus = variant {
+    Started;
+    Paid;
+    Shipped;
+    Delivered;
+    Completed;
+    Refunded;
+    Disputed;
+};
+
+
+type Purchase = record {
+    item_id: nat64;
+    amount: nat64;
+    name: text;
+    lastname: text;
+    buyer: opt principal;
+    account_buyer: text;
+    status: PurchaseStatus;
+    payment_id: nat64;
+    seller: opt principal;
+    account_seller: text;
+    contract_address: text;
+    shipping_address: Address;
+};
+
+type CreatePurchase = record {
+    item_id: nat64;
+    amount: nat64;
+    name: text;
+    lastname: text;
+    account_buyer: text;
+    payment_id: nat64;
+    id_shipping_address: nat64;
+};
+
+
+
 type CreateItem = record {
     item: text;
     price: nat64;
     description: text;
     image: text;
-    owner: text;
     contract_address: text;
+    billing_address: text;
+    stock: nat64;
+    category: text;
 };
-
+type UpdateItem  = record {
+    price: opt nat64;
+    description: opt text;
+    image: opt text;
+    stock: opt nat64;
+};
 type Vote = record { 
     voter: principal; 
-    rating: Rating 
+    rating: Rating;
+};
+
+type Category = variant {
+    Electronics;
+    ClothingShoesAccessories;
+    HomeKitchen;
+    BeautyPersonalCare;
+    Books;
+    SportsOutdoor;
+    FoodBeverages;
+    HomeImprovement;
+    Baby;
+    PetsAccessories;
 };
 
 type Item = record {
@@ -29,6 +117,10 @@ type Item = record {
     rating: opt Rating;
     owner: opt principal;
     contract_address: text;
+    billing_address: text;
+    stock: nat64;
+    category: Category;
+
    // ratings: vec record { opt principal; Rating }
 };
 
@@ -53,18 +145,50 @@ type Result = variant {
     Err: ItemError;
 };
 
+
+type Result_get = variant {
+    Ok: text;
+    Err: ItemError;
+};
+
+type Result_get_owner = variant {
+    Ok: principal;
+    Err: ItemError;
+};
+
+
 type ResultItems = variant {
     Ok: vec record { nat64; Item };
     Err: ItemError;
 };
 
+type Result_get_address = variant {
+    Ok: vec record { nat64; Address };
+    Err: ItemError;
+};
+type Result_get_address_by_id = variant {
+    Ok: opt Address;
+    Err: ItemError;
+};
+type Result_get_your_sales = variant {
+    Ok: vec Purchase;
+    Err: ItemError;
+};
 
 service : (opt text) -> {
     get_items : () -> (vec record { nat64; Item }) query;
-    set_item : (CreateItem) -> ();
-    update_item : (nat64, CreateItem) -> (Result);
-    remove_item : (nat64, text) -> (Result);
-    get_items_owner : (text) -> (ResultItems) query;
+    get_user_addresses : () -> (Result_get_address) query;
+    set_item : (CreateItem) -> (Result);
+    associate_address : (CreateUserAddress) -> ();
+    get_contract_address : (nat64) -> (Result_get) query;
+    get_address_by_id : (nat64) -> (Result_get_address_by_id) query;
+    create_purchase : (CreatePurchase) -> (Result);
+    get_item_billing_address : (nat64) -> (Result_get) query;
+    get_item_owner : (nat64) -> (Result_get_owner);
+    update_address : (nat64, UserAddressEdit) -> (Result);
+    update_item : (nat64, UpdateItem) -> (Result);
+    get_your_sales : () -> (Result_get_your_sales) query;
+    remove_item : (nat64) -> (Result);
+    get_items_owner : () -> (ResultItems) query;
     whoami : () -> (principal) query;
 };
-

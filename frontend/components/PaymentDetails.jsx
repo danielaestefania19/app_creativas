@@ -12,10 +12,13 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
 
-const PaymentDetails = ({ externalPaymentId, contractAddress, closeModal }) => {
+const PaymentDetails = ({ user, item_id, externalPaymentId, contractAddress, closeModal }) => {
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
 
+  console.log(user)
+
+  console.log(item_id)
   // Inicializa el contrato con la dirección correcta
   const contract = new ethers.Contract(contractAddress, Crypay, wallet);
 
@@ -57,7 +60,7 @@ const PaymentDetails = ({ externalPaymentId, contractAddress, closeModal }) => {
                 <p>Price: {ethers.utils.formatEther(paymentDetails.price)} BFT</p>
                 <p>Status: {paymentDetails.status}</p>
                 {/* <WalletConnect /> */}
-                <WalletPay id={paymentDetails.externalPaymentId} amount={paymentDetails.price} contractAddress={contractAddress} />
+                <WalletPay item_id={item_id} id={paymentDetails.externalPaymentId} amount={paymentDetails.price} contractAddress={contractAddress} />
             </div>
             ) : (
               <p>Loading payment details...</p>

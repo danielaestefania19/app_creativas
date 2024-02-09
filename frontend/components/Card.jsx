@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,  useContext } from "react";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
@@ -6,6 +6,7 @@ import Crypay from "../../utils/abi/Crypay.json";
 import { contractAddress } from "../../utils/constans.js";
 import PaymentDetailsCard from "./PaymentsDetailsCard.jsx";
 import { Spinner } from "@material-tailwind/react";
+import { AuthContext } from './AuthContext';
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -20,8 +21,14 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
   const [paymentStarted, setPaymentStarted] = useState(false);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [error, setError] = useState(null);
+  const { whoami, isUserAuthenticated } = useContext(AuthContext);
 
   const handleCheckout = async () => {
+    if (!isUserAuthenticated || whoami === null) {
+      alert("You must log in before purchasing.");
+      console.log("You must log in before purchasing.");
+      return;
+    }
     setIsLoading(true);
     const payments = [];
     try {

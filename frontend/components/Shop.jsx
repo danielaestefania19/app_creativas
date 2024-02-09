@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { eccomerce } from "../../src/declarations/eccomerce";
 import Item from "./Item";
 import Cart from "./Card.jsx";
 import '../styles/styles.css';
 import { FiShoppingCart } from "react-icons/fi";
 import { Link } from 'react-router-dom';
+import { AuthContext } from './AuthContext';
+
 
 const Shop = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const [cartVisible, setCartVisible] = useState(false);
+  const { whoami, isUserAuthenticated } = useContext(AuthContext);
+
 
   useEffect(() => {
     const fetchItems = async () => {
