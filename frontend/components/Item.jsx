@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
 import PaymentDetails from "./PaymentDetails";
+import { AuthContext } from './AuthContext';
 
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
@@ -12,12 +13,16 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
-const Item = ({ name, price, description, image, contract_address, addToCart }) => {
+const Item = ({ id, name, price, description, image, contract_address, addToCart }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const { whoami, isUserAuthenticated } = useContext(AuthContext);
+
+
+  console.log(id)
 
   const contract = new ethers.Contract(contract_address, Crypay, wallet);
   let decimalString = price + ".0";
@@ -80,6 +85,11 @@ const Item = ({ name, price, description, image, contract_address, addToCart }) 
   };
 
   const handleBuyClick = async () => {
+    if (!isUserAuthenticated || whoami === null) {
+      setError("You must log in before purchasing.");
+      console.log("You must log in before purchasing.")
+      return;
+    }
     try {
       await startNewPayment();
       if (paymentStarted) {
@@ -113,7 +123,7 @@ const Item = ({ name, price, description, image, contract_address, addToCart }) 
          Add to cart
         </button>
       </div>
-      {showPaymentDetails && <PaymentDetails externalPaymentId={externalPaymentId} contractAddress={contract_address} closeModal={() => setShowPaymentDetails(false)}/>}
+      {showPaymentDetails && <PaymentDetails user={whoami} item_id={id} externalPaymentId={externalPaymentId} contractAddress={contract_address} closeModal={() => setShowPaymentDetails(false)}/>}
       {error && <div className="error">{error}</div>}
     </div>
   );

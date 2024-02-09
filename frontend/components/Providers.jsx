@@ -6,6 +6,7 @@ import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { eccomerce } from "../../src/declarations/eccomerce";
 import { AuthContext } from './AuthContext';
+// import { AuthContext } from './Login.jsx';
 import Crypay from "../../utils/abi/Crypay.json";
 import { contractCodeObjCrypay } from "../../utils/constans.js";
 import { Principal } from '@dfinity/principal';
@@ -35,9 +36,14 @@ const ItemsUploader = () => {
   const [file, setFile] = useState(null);
   const [myipfsHash, setIPFSHASH] = useState('');
   const [error, setError] = useState(null); // new state for the error
-  const { whoami } = useContext(AuthContext);
+  const { whoami, actor } = useContext(AuthContext); // accede al actor aquí
   const [fileMessage, setFileMessage] = useState('No file selected'); // nuevo estado
   const { defaultAccount } = useContext(WalletContext);
+  const [category, setCategory] = useState("");
+  const [stock, setStock] = useState(0);
+
+
+  console.log(whoami)
 
   const handleFileChange = useCallback(async (event) => {
     const file = event.target.files[0];
@@ -56,7 +62,7 @@ const ItemsUploader = () => {
       setError('Invalid user. Please log in again.');
       return;
     }
-    
+
     if (!file) {
       setError('Select a file before uploading an item.');
       return;
@@ -97,20 +103,25 @@ const ItemsUploader = () => {
         console.log(`Contract deployed at ${contract_frac.address}`);
         console.log(whoami)
 
-        await eccomerce.set_item({ 
-          item, 
-          price, 
-          description, 
-          image: response.data.IpfsHash, 
-          owner: whoami, 
-          contract_address: contract_frac.address // Aquí agregas la dirección del contrato desplegado
+
+        await actor.set_item({
+          item,
+          price,
+          description,
+          image: response.data.IpfsHash,
+          contract_address: contract_frac.address,
+          billing_address: defaultAccount.toString(),
+          stock,
+          category
+
+
         });
         // Mueve la alerta aquí
         alert('Product uploaded successfully');
       } catch (error) {
-        setError('Error uploading the product' );
+        setError('Error uploading the product' + error);
       }
-      
+
     } catch (error) {
       console.error(error);
       if (error.response) {
@@ -118,8 +129,8 @@ const ItemsUploader = () => {
       }
       setError('An error occurred while uploading the product. Please try again.');
     }
-    
-  }, [file, item, price, description, whoami]);
+
+  }, [file, item, price, description, whoami, stock, category]);
 
   return (
     <div className="flex flex-col items-center mt-44 mb-2 mr-5 h-full">
@@ -140,6 +151,30 @@ const ItemsUploader = () => {
               <button onClick={() => document.getElementById('fileInput').click()}>Select File</button>
               <p>{fileMessage}</p> {/* mostramos el mensaje aquí */}
             </div>
+            <div className="w-[300px] mb-4">
+              <label>
+                Category:
+                <select value={category} onChange={e => setCategory(e.target.value)}>
+                  <option value="">Select a category</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="ClothingShoesAccessories">Clothing, Shoes & Accessories</option>
+                  <option value="HomeKitchen">Home & Kitchen</option>
+                  <option value="BeautyPersonalCare">Beauty & Personal Care</option>
+                  <option value="Books">Books</option>
+                  <option value="SportsOutdoor">Sports & Outdoor</option>
+                  <option value="FoodBeverages">Food & Beverages</option>
+                  <option value="HomeImprovement">Home Improvement</option>
+                  <option value="Baby">Baby</option>
+                  <option value="PetsAccessories">Pets & Accessories</option>
+                </select>
+
+              </label>
+            </div>
+
+            <div className="w-[300px] mb-4">
+              <Input value={stock} onChange={e => setStock(e.target.value ? Number(e.target.value) : 0)} label="Stock" />
+            </div>
+
 
 
             <div>
