@@ -59,7 +59,11 @@ const Home = () => {
         <div className='flex items-center justify-between'>
           <img className="h-11 w-auto ml-2 " alt="Icono" src={Logo} />
           <Link to="/" className="p-4">Home</Link>
-          <h1 className="p-4">Company</h1>
+          <h1 className="p-4">
+            <a href="https://creativas.gitbook.io/creativas/" target="_blank" rel="noopener noreferrer">
+              Docs
+            </a>
+          </h1>
           <h1 className="p-4">Contact</h1>
           <div className='flex items-center justify-end gap-3'>
             {/* <button className="bg-[#c9398a] hidden items-center justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-all duration-150 hover:bg-gray-50 sm:inline-flex" onClick={WalletConnect}>Wallet</button> */}

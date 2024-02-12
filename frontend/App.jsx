@@ -21,6 +21,7 @@ import Mediun from './landing/Mediun.jsx';
 import YourInvest from './components_NFT/YourInvest.jsx'
 import YourTokens from './components_NFT/Your_Tokens.jsx'
 import Checkout from './components/checkout.jsx'
+import UserProfile from './ecommerce/Profile.jsx';
 
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
             />
           <Route path="/other/shop" element={<Shop/>} />
           <Route path="/other/createtokens" element={<AddAsset/>} />
+          <Route path="/other/profile" element={<UserProfile/>} />
           <Route path="/other/invests" element={<YourInvest/>} />
           <Route path="/other/tokens" element={<YourTokens/>} />
           <Route path="/other/createitems" element={<ItemsUploader />} />
