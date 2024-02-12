@@ -6,7 +6,7 @@ import '../styles/styles.css';
 import { FiShoppingCart } from "react-icons/fi";
 import { Link } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
-
+import { DefaultSidebar} from "../ecommerce/Sidebar.jsx";
 
 const Shop = () => {
   const [items, setItems] = useState([]);
@@ -63,10 +63,11 @@ const Shop = () => {
   };
 
   return (
-    <div className="flex flex-col items-end mt-32 mb-2 mr-5 h-full">
+    <div className="flex flex-col mt-32 mb-2 mr-5 h-full">
+      <DefaultSidebar/>
       <div className="mb-4">
         <Link to="/other/createitems">
-          <button className='bg-[#c9398a] rounded-md p-2 text-white' >Creativas Seller</button>
+          <button className='bg-[#c9398a] rounded-md p-2 text-white items-end' >Creativas Seller</button>
         </Link>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-center mr-7">
