@@ -6,7 +6,60 @@ type Rating = variant {
     Four;
     Five;
 };
+type Review = record {
+    rating: Rating;
+    review: text;
+    reviewer: opt principal;
+};
 
+type CreateReview = record {
+    item_id: nat64;
+    rating: nat64;
+    review: text;
+};
+type Profile = record {
+    user: opt principal;
+    username: text;
+    profile_picture: text;
+    about: text;
+    active: bool;  // Nuevo campo para el estado de actividad
+    last_connection: opt nat64;  // Nuevo campo para la última conexión
+};
+
+type CreateProfile = record {
+    username: text;
+    profile_picture: opt text;
+    about: opt text;
+};
+
+type AddProfilePicture = record {
+    profile_picture: text;
+};
+
+type MensajeStatus = variant {
+    Sent;
+    Read;
+};
+
+type Message = record {
+    sender: opt principal;
+    content: text;
+    addressee: opt principal;
+    time: nat64;
+    status: MensajeStatus;
+};
+
+type SendMessage = record {
+    content: text;
+    addressee: principal;
+};
+
+type Conversation = record {
+    other_user: principal;
+    last_message: Message;
+    unread: bool;
+    unread_count: nat64; 
+};
 type Address = record {
     country: text;
     state: text;
@@ -47,7 +100,6 @@ type PurchaseStatus = variant {
     Disputed;
 };
 
-
 type Purchase = record {
     item_id: nat64;
     amount: nat64;
@@ -72,7 +124,6 @@ type CreatePurchase = record {
     payment_id: nat64;
     id_shipping_address: nat64;
 };
-
 
 
 type CreateItem = record {
@@ -114,14 +165,12 @@ type Item = record {
     price: nat64;
     description: text;
     image: text;
-    rating: opt Rating;
+    reviews: vec Review; // Agrega este campo
     owner: opt principal;
     contract_address: text;
     billing_address: text;
     stock: nat64;
     category: Category;
-
-   // ratings: vec record { opt principal; Rating }
 };
 
 
@@ -137,6 +186,7 @@ type ItemError = variant {
     AlreadyVoted; // Agrega este error
     NoVotes; // Agrega este error
     ItemNotFound; // Agrega este error
+    InvalidRating;
 };
 
 
@@ -170,12 +220,37 @@ type Result_get_address_by_id = variant {
     Ok: opt Address;
     Err: ItemError;
 };
-type Result_get_your_sales = variant {
+
+type Result_get_profile = variant {
+    Ok: Profile;
+    Err: ItemError;
+};
+type Result_get_purchases = variant {
     Ok: vec Purchase;
+    Err: ItemError
+};
+
+type InboxResult = record {
+    conversations: vec Conversation;
+    total_unread_chats: nat64;
+};
+
+type Result_get_private_chat = variant {
+    Ok: vec Message;
+    Err: ItemError
+};
+
+type Result_get_inbox = variant {
+    Ok: InboxResult;
     Err: ItemError;
 };
 
-service : (opt text) -> {
+type Result_Bool = variant {
+    Ok: bool;
+    Err: ItemError;
+};
+
+service : (CreateProfile) -> {
     get_items : () -> (vec record { nat64; Item }) query;
     get_user_addresses : () -> (Result_get_address) query;
     set_item : (CreateItem) -> (Result);
@@ -183,12 +258,27 @@ service : (opt text) -> {
     get_contract_address : (nat64) -> (Result_get) query;
     get_address_by_id : (nat64) -> (Result_get_address_by_id) query;
     create_purchase : (CreatePurchase) -> (Result);
+    get_your_sales : () -> (Result_get_purchases) query;
+    get_your_purchases : () -> (Result_get_purchases) query;
     get_item_billing_address : (nat64) -> (Result_get) query;
     get_item_owner : (nat64) -> (Result_get_owner);
+    has_profile : () -> (bool) query;
+    create_profile : (CreateProfile) -> (Result);
+    add_review : (CreateReview) -> (Result); 
+    add_picture : (nat64, AddProfilePicture) -> (Result);
+    get_user_profile : () -> (Result_get_profile) query;
     update_address : (nat64, UserAddressEdit) -> (Result);
     update_item : (nat64, UpdateItem) -> (Result);
-    get_your_sales : () -> (Result_get_your_sales) query;
     remove_item : (nat64) -> (Result);
     get_items_owner : () -> (ResultItems) query;
+    get_private_chat : (principal) -> (Result_get_private_chat) query;
+    activate_profile : () -> (Result);
+    desactivate_profile : () -> (Result);
+    get_profile_by_principal : (principal) -> (Result_get_profile) query;
+    is_active : (principal) -> (Result_Bool) query;
+    send_message: (SendMessage) -> (Result);
+    send_message_by_canister: (SendMessage) -> (Result);
+    get_inbox: () -> (Result_get_inbox) query;
     whoami : () -> (principal) query;
+    manager : () -> (principal) query;
 };

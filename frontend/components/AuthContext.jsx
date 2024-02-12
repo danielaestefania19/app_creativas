@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     const identity = await newAuthClient.getIdentity();
     const agent = new HttpAgent({ identity });
 
-    const newActor = createActor('bd3sg-teaaa-aaaaa-qaaba-cai', { agent });
+    const newActor = createActor('bkyz2-fmaaa-aaaaa-qaaaq-cai', { agent });
 
     const principal = await newActor.whoami();
     console.log(principal.toText());
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (userPrincipal) {
       const agent = new HttpAgent({ identity: userIdentity });
-      const newActor = createActor('bd3sg-teaaa-aaaaa-qaaba-cai', { agent });
+      const newActor = createActor('bkyz2-fmaaa-aaaaa-qaaaq-cai', { agent });
       setActor(newActor);
     }
   }, [userPrincipal, userIdentity]);

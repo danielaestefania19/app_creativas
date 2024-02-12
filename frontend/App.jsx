@@ -73,7 +73,7 @@ function App() {
           <Route path="/other/tokens" element={<YourTokens/>} />
           <Route path="/other/createitems" element={<ItemsUploader />} />
           <Route path="/other/items" element={<ItemsUploader/>} />
-          <Route path="/other/gettokens" element={<Checkout/>} /> 
+          <Route path="/other/gettokens" element={<FetchAllAssets/>} /> 
           <Route path="/login" element={<LoggedOut />} />
           <Route path="/status" element={<PaymentDetails />} />
           <Route path="/pay" element={<PaymentButton />} />
