@@ -1,0 +1,11 @@
+/home/alfredo/Documentos/app_creativas/target/debug/deps/libconst_oid-2b8762272007661e.rmeta: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/checked.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/arcs.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/encoder.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/error.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/parser.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/../README.md
+
+/home/alfredo/Documentos/app_creativas/target/debug/deps/const_oid-2b8762272007661e.d: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/checked.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/arcs.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/encoder.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/error.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/parser.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/../README.md
+
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/lib.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/checked.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/arcs.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/encoder.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/error.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/parser.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.6/src/../README.md:

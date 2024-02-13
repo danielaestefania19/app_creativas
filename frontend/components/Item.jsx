@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
 import PaymentDetails from "./PaymentDetails";
 import { AuthContext } from './AuthContext';
-
+import { WalletContext } from './WalletContext.jsx';
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -49,7 +49,7 @@ const Item = ({ id, name, price, description, image, contract_address, addToCart
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const url = `https://gateway.pinata.cloud/ipfs/${image}`;
+        const url = `https://green-capable-vole-518.mypinata.cloud/ipfs/${image}`;
         setImageUrl(url);
       } catch (error) {
         console.error(error);

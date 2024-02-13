@@ -1,0 +1,10 @@
+/home/alfredo/Documentos/app_creativas/target/debug/deps/libprimeorder-173d9472f01b77f1.rmeta: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/point_arithmetic.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/affine.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/field.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/projective.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/../README.md
+
+/home/alfredo/Documentos/app_creativas/target/debug/deps/primeorder-173d9472f01b77f1.d: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/point_arithmetic.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/affine.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/field.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/projective.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/../README.md
+
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/lib.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/point_arithmetic.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/affine.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/field.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/projective.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/primeorder-0.13.6/src/../README.md:

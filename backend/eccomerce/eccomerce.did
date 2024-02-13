@@ -28,8 +28,8 @@ type Profile = record {
 
 type CreateProfile = record {
     username: text;
-    profile_picture: opt text;
-    about: opt text;
+    profile_picture: text;
+    about: text;
 };
 
 type AddProfilePicture = record {
@@ -54,6 +54,10 @@ type SendMessage = record {
     addressee: principal;
 };
 
+
+type LastChecked = record {
+    key: principal;
+};
 type Conversation = record {
     other_user: principal;
     last_message: Message;
@@ -122,9 +126,8 @@ type CreatePurchase = record {
     lastname: text;
     account_buyer: text;
     payment_id: nat64;
-    id_shipping_address: nat64;
-};
-
+    id_shipping_address: nat; // Cambia nat64 a nat
+};    
 
 type CreateItem = record {
     item: text;
@@ -213,9 +216,9 @@ type ResultItems = variant {
 };
 
 type Result_get_address = variant {
-    Ok: vec record { nat64; Address };
+    Ok: vec record { nat; Address }; // Cambia nat64 a nat
     Err: ItemError;
-};
+};   
 type Result_get_address_by_id = variant {
     Ok: opt Address;
     Err: ItemError;
@@ -272,6 +275,7 @@ service : (CreateProfile) -> {
     remove_item : (nat64) -> (Result);
     get_items_owner : () -> (ResultItems) query;
     get_private_chat : (principal) -> (Result_get_private_chat) query;
+    mark_messages_as_read : (principal) -> (Result);
     activate_profile : () -> (Result);
     desactivate_profile : () -> (Result);
     get_profile_by_principal : (principal) -> (Result_get_profile) query;

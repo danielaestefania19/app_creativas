@@ -61,7 +61,7 @@ const WalletPayCard = ({ paymentInfo }) => {
         disabled={isLoading}>
         {isLoading ? 'Making transaction...' : 'Pay'}
       </button>
-      {/* {isPaymentComplete && ( // Renderiza CompletePaymentCard solo si isPaymentComplete es true
+      {isPaymentComplete && ( // Renderiza CompletePaymentCard solo si isPaymentComplete es true
         <div 
           className="WalletCard" 
           style={{ 
@@ -77,7 +77,7 @@ const WalletPayCard = ({ paymentInfo }) => {
             <CompletePaymentCard key={index} paymentInfo={info} />
           ))}
         </div>
-      )} */}
+      )}
     </>
   )
 

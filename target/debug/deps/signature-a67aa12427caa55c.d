@@ -1,0 +1,11 @@
+/home/alfredo/Documentos/app_creativas/target/debug/deps/libsignature-a67aa12427caa55c.rmeta: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/error.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/keypair.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/signature.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/signer.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/verifier.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/../README.md
+
+/home/alfredo/Documentos/app_creativas/target/debug/deps/signature-a67aa12427caa55c.d: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/error.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/keypair.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/signature.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/signer.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/verifier.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/../README.md
+
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/lib.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/error.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/keypair.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/signature.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/signer.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/verifier.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/signature-1.6.4/src/../README.md:

@@ -45,9 +45,9 @@ export interface CreateItem {
   'price' : bigint,
 }
 export interface CreateProfile {
-  'about' : [] | [string],
+  'about' : string,
   'username' : string,
-  'profile_picture' : [] | [string],
+  'profile_picture' : string,
 }
 export interface CreatePurchase {
   'id_shipping_address' : bigint,
@@ -91,6 +91,7 @@ export type ItemError = { 'AlreadyVoted' : null } |
   { 'NoVotes' : null } |
   { 'NotExist' : null } |
   { 'NoItemsAssociated' : null };
+export interface LastChecked { 'key' : Principal }
 export type MensajeStatus = { 'Read' : null } |
   { 'Sent' : null };
 export interface Message {
@@ -199,6 +200,7 @@ export interface _SERVICE {
   'has_profile' : ActorMethod<[], boolean>,
   'is_active' : ActorMethod<[Principal], Result_Bool>,
   'manager' : ActorMethod<[], Principal>,
+  'mark_messages_as_read' : ActorMethod<[Principal], Result>,
   'remove_item' : ActorMethod<[bigint], Result>,
   'send_message' : ActorMethod<[SendMessage], Result>,
   'send_message_by_canister' : ActorMethod<[SendMessage], Result>,

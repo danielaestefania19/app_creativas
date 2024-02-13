@@ -22,6 +22,7 @@ import YourInvest from './components_NFT/YourInvest.jsx'
 import YourTokens from './components_NFT/Your_Tokens.jsx'
 import Checkout from './components/checkout.jsx'
 import UserProfile from './ecommerce/Profile.jsx';
+import Formulario from './components/CreateProfile.jsx'
 
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
           <Route path="/other/invests" element={<YourInvest/>} />
           <Route path="/other/tokens" element={<YourTokens/>} />
           <Route path="/other/createitems" element={<ItemsUploader />} />
+          <Route path="/formulario" element={<Formulario />} />
           <Route path="/other/items" element={<ItemsUploader/>} />
           <Route path="/other/gettokens" element={<FetchAllAssets/>} /> 
           <Route path="/login" element={<LoggedOut />} />

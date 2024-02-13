@@ -2,8 +2,16 @@ import React, { useState, useEffect, createContext } from 'react';
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { eccomerce, createActor } from "../../src/declarations/eccomerce";
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate aquí
 
 export const AuthContext = createContext();
+
+const canister_id = import.meta.env.VITE_CANISTER_ID;
+
+
+const network = import.meta.env.VITE_DFX_NETWORK;
+
+
 
 export const AuthProvider = ({ children }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
@@ -13,6 +21,7 @@ export const AuthProvider = ({ children }) => {
   const [actor, setActor] = useState(eccomerce);
   const [whoami, setWhoami] = useState(null); // Nueva variable de estado
   const [lastVisitedRoute, setLastVisitedRoute] = useState('/'); 
+  const navigate = useNavigate(); // Usa useNavigate aquí
 
   const login = async () => {
     const local_ii_url = `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:7070`;
@@ -40,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     const identity = await newAuthClient.getIdentity();
     const agent = new HttpAgent({ identity });
 
-    const newActor = createActor('bkyz2-fmaaa-aaaaa-qaaaq-cai', { agent });
+    const newActor = createActor(canister_id, { agent });
 
     const principal = await newActor.whoami();
     console.log(principal.toText());
@@ -50,6 +59,14 @@ export const AuthProvider = ({ children }) => {
     setUserIdentity(identity);
     setUserPrincipal(principal);
     setActor(newActor);
+
+    // Mueve la comprobación del perfil aquí
+    const hasProfile = await newActor.has_profile();
+    console.log("Bool:", hasProfile)
+
+    if (!hasProfile) {
+      navigate('/formulario'); // Navega al formulario
+    }
   };
 
   const logout = async () => {
@@ -63,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (userPrincipal) {
       const agent = new HttpAgent({ identity: userIdentity });
-      const newActor = createActor('bkyz2-fmaaa-aaaaa-qaaaq-cai', { agent });
+      const newActor = createActor(canister_id, { agent });
       setActor(newActor);
     }
   }, [userPrincipal, userIdentity]);

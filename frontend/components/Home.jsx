@@ -9,13 +9,19 @@ import Logo from '../assets/Logo.png'
 import WalletConnect from './WalletConnect.jsx';
 import { WalletContext } from './WalletContext.jsx';
 import Metamask from '../assets/Metamask.png'
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate aquí
+// import webpush from 'web-push'
+
+
 
 const Home = () => {
   const [nav, setNav] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
-  const { whoami, setWhoami, isUserAuthenticated, login, logout } = useContext(AuthContext);
+  const { whoami, setWhoami, isUserAuthenticated, login, logout, actor } = useContext(AuthContext);
+  const [subscription, setSubscription] = useState(null);
+
 
   const { defaultAccount } = useContext(WalletContext); // Obtén defaultAccount del WalletContext
 
@@ -24,13 +30,14 @@ const Home = () => {
   };
   // En Home
   const handleLogin = async () => {
-    const principal = await login(); // Obtiene el principal del usuario de login
-    setWhoami(principal); // Actualiza whoami en AuthContext
-  };
+    await login(); // Espera a que login termine
+
+};
+
 
   const handleLogout = async () => {
     await logout();
-    setWhoami(null);
+
   };
 
 

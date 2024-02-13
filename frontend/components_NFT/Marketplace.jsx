@@ -19,33 +19,26 @@ const Marketplace = ({ assets }) => {
         useEffect(() => {
           const fetchImage = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.8:2020/fetchImage/${asset.tokenHash}`, {
-                responseType: 'blob',
-              });
-              const url = URL.createObjectURL(response.data);
+              const url = `https://green-capable-vole-518.mypinata.cloud/ipfs/${asset.tokenHash}`;
               setImageUrl(url);
             } catch (error) {
               console.error(error);
             }
           };
-
+        
           const fetchPdf = async () => {
             try {
-              const response = await axios.get(`http://192.168.1.8:2020/fetchImage/${asset.businessPlanHash}`, {
-                responseType: 'blob',
-              });
-
-              const blob = new Blob([response.data], { type: 'application/pdf' });
-              const url = URL.createObjectURL(blob);
+              const url = `https://green-capable-vole-518.mypinata.cloud/ipfs/${asset.businessPlanHash}`;
               setPdfUrl(url);
             } catch (error) {
               console.error(error);
             }
           };
-
+        
           fetchImage();
           fetchPdf();
         }, [asset]);
+        
 
         return (
           <div key={index} className="card-container col-span-1">

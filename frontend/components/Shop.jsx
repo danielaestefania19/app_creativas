@@ -13,7 +13,7 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const [cartVisible, setCartVisible] = useState(false);
-  const { whoami, isUserAuthenticated } = useContext(AuthContext);
+  const { whoami, isUserAuthenticated, actor } = useContext(AuthContext);
 
 
   useEffect(() => {

@@ -1,8 +1,8 @@
 export const idlFactory = ({ IDL }) => {
   const CreateProfile = IDL.Record({
-    'about' : IDL.Opt(IDL.Text),
+    'about' : IDL.Text,
     'username' : IDL.Text,
-    'profile_picture' : IDL.Opt(IDL.Text),
+    'profile_picture' : IDL.Text,
   });
   const ItemError = IDL.Variant({
     'AlreadyVoted' : IDL.Null,
@@ -34,7 +34,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const CreateUserAddress = IDL.Record({ 'address' : Address });
   const CreatePurchase = IDL.Record({
-    'id_shipping_address' : IDL.Nat64,
+    'id_shipping_address' : IDL.Nat,
     'name' : IDL.Text,
     'account_buyer' : IDL.Text,
     'payment_id' : IDL.Nat64,
@@ -128,7 +128,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const Result_get_profile = IDL.Variant({ 'Ok' : Profile, 'Err' : ItemError });
   const Result_get_address = IDL.Variant({
-    'Ok' : IDL.Vec(IDL.Tuple(IDL.Nat64, Address)),
+    'Ok' : IDL.Vec(IDL.Tuple(IDL.Nat, Address)),
     'Err' : ItemError,
   });
   const PurchaseStatus = IDL.Variant({
@@ -228,6 +228,7 @@ export const idlFactory = ({ IDL }) => {
     'has_profile' : IDL.Func([], [IDL.Bool], ['query']),
     'is_active' : IDL.Func([IDL.Principal], [Result_Bool], ['query']),
     'manager' : IDL.Func([], [IDL.Principal], ['query']),
+    'mark_messages_as_read' : IDL.Func([IDL.Principal], [Result], []),
     'remove_item' : IDL.Func([IDL.Nat64], [Result], []),
     'send_message' : IDL.Func([SendMessage], [Result], []),
     'send_message_by_canister' : IDL.Func([SendMessage], [Result], []),
@@ -239,9 +240,9 @@ export const idlFactory = ({ IDL }) => {
 };
 export const init = ({ IDL }) => {
   const CreateProfile = IDL.Record({
-    'about' : IDL.Opt(IDL.Text),
+    'about' : IDL.Text,
     'username' : IDL.Text,
-    'profile_picture' : IDL.Opt(IDL.Text),
+    'profile_picture' : IDL.Text,
   });
   return [CreateProfile];
 };

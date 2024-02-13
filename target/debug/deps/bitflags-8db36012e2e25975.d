@@ -1,0 +1,11 @@
+/home/alfredo/Documentos/app_creativas/target/debug/deps/libbitflags-8db36012e2e25975.rmeta: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/iter.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/parser.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/traits.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/public.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/internal.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/external.rs
+
+/home/alfredo/Documentos/app_creativas/target/debug/deps/bitflags-8db36012e2e25975.d: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/iter.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/parser.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/traits.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/public.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/internal.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/external.rs
+
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/lib.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/iter.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/parser.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/traits.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/public.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/internal.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bitflags-2.4.2/src/external.rs:

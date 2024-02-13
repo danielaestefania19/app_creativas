@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { ethers } from 'ethers';
 import { eccomerce } from "../../src/declarations/eccomerce";
 import Crypay from "../../utils/abi/Crypay.json";
 import { contractAddress } from "../../utils/constans.js";
 import CompletePayment from './CompletePayment.jsx';
 import { WalletContext } from './WalletContext.jsx';
+
+
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
@@ -60,7 +62,7 @@ const WalletPay = ({ item_id, id, amount, contractAddress }) => {
                 disabled={isLoading}>
                 {isLoading ? 'Making transaction...' : 'Pay'}
                 </button>
-                {/* {paymentId && <CompletePayment id={paymentId} contractAddress={contractAddress} />} */}
+                {paymentId && <CompletePayment id={paymentId} contractAddress={contractAddress} />}
  
         </div>
     )
