@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate(); // Usa useNavigate aquí
 
   const login = async () => {
-    const local_ii_url = `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:7070`;
+    const local_ii_url = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8080`;
     let iiUrl;
     if (process.env.DFX_NETWORK === "local") {
       iiUrl = local_ii_url;
@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       iiUrl = local_ii_url;
     }
+    
     const newAuthClient = await AuthClient.create();
     setAuthClient(newAuthClient); 
 

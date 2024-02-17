@@ -175,11 +175,17 @@ export interface UserAddress {
   'addresses' : [] | [Array<Address>],
 }
 export interface UserAddressEdit { 'address' : AddressEdit }
+export interface UserMessages {
+  'messages' : Array<Message>,
+  'unread' : bigint,
+  'last_checked' : bigint,
+}
 export interface Vote { 'voter' : Principal, 'rating' : Rating }
 export interface _SERVICE {
   'activate_profile' : ActorMethod<[], Result>,
   'add_picture' : ActorMethod<[bigint, AddProfilePicture], Result>,
   'add_review' : ActorMethod<[CreateReview], Result>,
+  'add_token_to_principal' : ActorMethod<[string], Result>,
   'associate_address' : ActorMethod<[CreateUserAddress], undefined>,
   'create_profile' : ActorMethod<[CreateProfile], Result>,
   'create_purchase' : ActorMethod<[CreatePurchase], Result>,

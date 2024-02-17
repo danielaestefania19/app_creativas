@@ -10,7 +10,11 @@ import WalletConnect from './WalletConnect.jsx';
 import { WalletContext } from './WalletContext.jsx';
 import Metamask from '../assets/Metamask.png'
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate aquí
-// import webpush from 'web-push'
+import { MessagePayload, onMessage } from "firebase/messaging";
+import { getFirebaseToken, messaging } from "../FirebaseConfig.jsx";
+import { ToastContainer, toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+
 
 
 
@@ -20,20 +24,51 @@ const Home = () => {
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
   const { whoami, setWhoami, isUserAuthenticated, login, logout, actor } = useContext(AuthContext);
-  const [subscription, setSubscription] = useState(null);
 
+  async function handleNotifications() {
+    const wantsNotifications = window.Notification?.permission === "granted";
+    if (!wantsNotifications) {
+      const permission = await Notification.requestPermission();
+      wantsNotifications = permission === "granted";
+    }
+  
+    if (wantsNotifications) {
+      // Genera un token de FCM y lo guarda en la blockchain
+      getFirebaseToken().then((firebaseToken) => {
+        if (firebaseToken) {
+          console.log("token:", firebaseToken);
+          // Aquí debes llamar a la función add_token_to_principal de tu actor
+          // para guardar el token en la blockchain asociado con el Principal del usuario
+          actor.add_token_to_principal(firebaseToken).then(() => {
+            // Muestra una notificación toast cuando el token se ha guardado con éxito
+            toast("Notificaciones habilitadas");
+          });
+        }
+      });
+    }
+  }
+  
+  useEffect (()=>{
+    onMessage(messaging, message=>{
+      console.log("tu mensaje:", message);
+      toast(message.notification.title);
+    
+    
+    })
+    
+    
+    }, []);
 
   const { defaultAccount } = useContext(WalletContext); // Obtén defaultAccount del WalletContext
 
   const handleNav = () => {
     setNav(!nav);
   };
-  // En Home
   const handleLogin = async () => {
     await login(); // Espera a que login termine
-
-};
-
+    // Después de que el usuario se loguee
+    handleNotifications();
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -60,6 +95,7 @@ const Home = () => {
     };
   }, [prevScrollPos, visible]);
   return (
+
     // <header className="fixed inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-3 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg"> {/* Agregué una clase de fondo */}
     <header className={`${visible ? 'fixed' : 'hidden'} inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-3 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg`}>
       <div className="px-4">
@@ -169,6 +205,7 @@ const Home = () => {
         <li className="p-4">Contact</li>
       </ul>
       <div>
+    
         {/* {<p>Principal: {whoami}</p>} */}
       </div>
     </header>

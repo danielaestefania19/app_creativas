@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Routes, Link, useNavigate } from 'react-router-dom';
 import Home from './components/Home.jsx';
 import Body from './components/Body.jsx';
@@ -28,6 +28,11 @@ import Formulario from './components/CreateProfile.jsx'
 function App() {
 
 
+
+
+ 
+  
+  
   const AddAssetWithAuth = withAuthentication(AddAsset);
   const ItemsUploaderWithAuth = withAuthentication(ItemsUploader);
 
@@ -84,6 +89,7 @@ function App() {
         </Routes>
     </AuthProvider>
     </WalletProvider>
+
   );
 };
 

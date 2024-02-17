@@ -1,4 +1,4 @@
-use b3_utils::caller_is_controller;
+use b3_utils::{call, caller_is_controller};
 use candid::Principal;
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
@@ -10,10 +10,10 @@ use serde_derive::Serialize;
 use std::collections::HashMap;
 use std::{borrow::Cow, cell::RefCell};
 
-// use ic_cdk::api::management_canister::http_request::{
-//     http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
-//     TransformContext,
-// };
+use ic_cdk::api::management_canister::http_request::{
+    http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
+    TransformContext,
+};
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
@@ -23,6 +23,8 @@ const MAX_VALUE_SIZE_PURCHASE: u32 = 8000;
 const MAX_VALUE_SIZE_MESSAGE: u32 = 5000;
 const MAX_VALUE_SIZE_PROFILE: u32 = 5000;
 const MAX_VALUE_SIZE_PRINCIPAL: u32 = 200;
+const MAX_VALUE_SIZE_USER_MESSAGES: u32 = 800;
+const MAX_VALUE_SIZE_FCM_TOKENS: u32 = 8000;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Hash, PartialEq)]
 enum RatingError {
@@ -135,6 +137,26 @@ impl Storable for Profile {
     };
 }
 
+#[derive(CandidType, Deserialize, Clone)]
+pub struct FcmTokens {
+    tokens: Vec<String>,
+}
+
+impl Storable for FcmTokens {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_FCM_TOKENS,
+        is_fixed_size: false,
+    };
+}
+
 #[derive(CandidType, Deserialize, Clone, PartialEq)]
 pub enum MensajeStatus {
     Sent,
@@ -148,6 +170,28 @@ pub struct Message {
     addressee: Option<Principal>,
     time: u64, // Tiempo Unix en milisegundos
     status: MensajeStatus,
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct UserMessages {
+    messages: Vec<Message>,
+    last_checked: u64, // Cambia a u64
+    unread: u64, // Cambia a u64
+}
+
+impl Storable for UserMessages {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_USER_MESSAGES,
+        is_fixed_size: false,
+    };
 }
 
 #[derive(CandidType, Deserialize, Clone)]
@@ -297,8 +341,9 @@ pub struct CreatePurchase {
     lastname: String,
     account_buyer: String,
     payment_id: u64,
-    id_shipping_address: usize, // Índice de la dirección de envío en el vector de direcciones del usuario
+    id_shipping_address: u64, // Cambia usize a u64
 }
+
 
 // Implementación de trait para la serialización y deserialización de Item
 
@@ -440,70 +485,7 @@ impl PurchaseIDManager {
         id
     }
 }
-// pub struct AddressIDManager {
-//     next_id: std::cell::Cell<u64>,
-// }
 
-// impl AddressIDManager {
-//     pub fn new() -> AddressIDManager {
-//         AddressIDManager {
-//             next_id: std::cell::Cell::new(1),
-//         }
-//     }
-
-//     pub fn get_id(&self) -> u64 {
-//         let mut id = self.next_id.get();
-//         while check_if_address_exists(id) {
-//             id += 1;
-//         }
-//         self.next_id.set(id + 1);
-//         id
-//     }
-// }
-
-pub struct MessageIDManager {
-    next_id: std::cell::Cell<u64>,
-}
-
-impl MessageIDManager {
-    pub fn new() -> MessageIDManager {
-        MessageIDManager {
-            next_id: std::cell::Cell::new(1),
-        }
-    }
-
-    pub fn get_id(&self) -> u64 {
-        let mut id = self.next_id.get();
-        while check_if_message_exists(id) {
-            id += 1;
-        }
-        self.next_id.set(id + 1);
-        id
-    }
-}
-
-// pub struct ProfileIDManager {
-//     next_id: std::cell::Cell<u64>,
-// }
-
-// impl ProfileIDManager {
-//     pub fn new() -> ProfileIDManager {
-//         ProfileIDManager {
-//             next_id: std::cell::Cell::new(1),
-//         }
-//     }
-
-//     pub fn get_id(&self) -> u64 {
-//         let mut id = self.next_id.get();
-//         while check_if_profile_exists(id) {
-//             id += 1;
-//         }
-//         self.next_id.set(id + 1);
-//         id
-//     }
-// }
-
-// Inicialización de la memoria, los ítems y el administrador de ID
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
@@ -522,25 +504,27 @@ static ADDRESS_BOOK: RefCell<StableBTreeMap<KeyPrincipal, UserAddress, Memory>> 
 
     ));
 
-    // Supongamos que tienes esta estructura de datos para almacenar las notificaciones
-static NOTIFICATIONS: RefCell<StableBTreeMap<u64, Message, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))),
-));
-
     // Cambia el tipo de clave de u64 a Principal
 static PROFILES: RefCell<StableBTreeMap<KeyPrincipal, Profile, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(4))),
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))),
 ));
-
-     static LAST_CHECKED: RefCell<StableBTreeMap<KeyPrincipal, u64, Memory>> = RefCell::new(StableBTreeMap::init(
+    static LAST_SEEN: RefCell<StableBTreeMap<KeyPrincipal, u64, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(4))),
+    ));
+ 
+    static USER_MESSAGES: RefCell<StableBTreeMap<KeyPrincipal, UserMessages, Memory>> = RefCell::new(StableBTreeMap::init(
         MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(5))),
     ));
 
+        // Cambia el tipo de clave de u64 a Principal
+static FCM_TOKENS: RefCell<StableBTreeMap<KeyPrincipal, FcmTokens, Memory>> = RefCell::new(StableBTreeMap::init(
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))),
+));
+
+
+
     static ID_MANAGER: IDManager = IDManager::new();
-    // static ADDRESS_ID_MANAGER: AddressIDManager = AddressIDManager::new();
     static PURCHASE_ID_MANAGER: PurchaseIDManager = PurchaseIDManager::new();
-    static NOTIFICATIONS_ID_MANAGER: MessageIDManager = MessageIDManager::new();
-    // static PROFILES_ID_MANAGER: ProfileIDManager = ProfileIDManager::new();
 }
 
 #[ic_cdk::init]
@@ -601,7 +585,7 @@ fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
     // Obtener la dirección de envío específica usando el índice proporcionado
     let shipping_address = user_address.addresses
         .as_ref()
-        .and_then(|addresses| addresses.get(purchase.id_shipping_address))
+        .and_then(|addresses| addresses.get(purchase.id_shipping_address as usize)) // Convierte u64 a usize
         .ok_or(ItemError::NotExist)?
         .clone();
 
@@ -634,109 +618,202 @@ fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
 
 #[ic_cdk::update]
 fn send_message(message: SendMessage) -> Result<(), ItemError> {
-    // Crea un nuevo mensaje con el tiempo actual
+    let sender = ic_cdk::api::caller();
     let new_message = Message {
-        sender: Some(ic_cdk::api::caller()),
+        sender: Some(sender.clone()),
         content: message.content,
-        addressee: Some(message.addressee),
+        addressee: Some(message.addressee.clone()),
         time: ic_cdk::api::time(),
         status: MensajeStatus::Sent,
     };
 
-    // Obtén un nuevo ID para el mensaje
-    let id = NOTIFICATIONS_ID_MANAGER.with(|manager| manager.get_id());
+    // Añade el nuevo mensaje a los mensajes del usuario receptor
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
+        let mut user_messages = um.get(&KeyPrincipal { key: message.addressee.clone() }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        user_messages.messages.push(new_message.clone());
+        um.insert(KeyPrincipal { key: message.addressee.clone() }, user_messages);
+    });
 
-    // Añade el nuevo mensaje a las notificaciones
-    NOTIFICATIONS.with(|n| n.borrow_mut().insert(id, new_message));
+    // Añade el nuevo mensaje a los mensajes del usuario que envía
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
+        let mut user_messages = um.get(&KeyPrincipal { key: sender }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        user_messages.messages.push(new_message);
+        um.insert(KeyPrincipal { key: sender }, user_messages);
+    });
+
+    // Inicializa last_seen a 0 para el receptor del mensaje
+    LAST_SEEN.with(|ls| {
+        let mut ls = ls.borrow_mut();
+        ls.insert(KeyPrincipal { key: message.addressee.clone() }, 0);
+    });
+
+    // Inicializa last_seen a 0 para el remitente del mensaje
+    LAST_SEEN.with(|ls| {
+        let mut ls = ls.borrow_mut();
+        ls.insert(KeyPrincipal { key: sender }, 0);
+    });
+
+    Ok(())
+}
+
+
+#[ic_cdk::update]
+fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
+    let sender = ic_cdk::id(); // El remitente es el Principal del canister
+    let new_message = Message {
+        sender: Some(sender.clone()),
+        content: message.content,
+        addressee: Some(message.addressee.clone()),
+        time: ic_cdk::api::time(),
+        status: MensajeStatus::Sent,
+    };
+
+    // Añade el nuevo mensaje a los mensajes del usuario receptor
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
+        let mut user_messages = um.get(&KeyPrincipal { key: message.addressee.clone() }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        user_messages.messages.push(new_message.clone());
+        um.insert(KeyPrincipal { key: message.addressee.clone() }, user_messages);
+    });
+
+    // Añade el nuevo mensaje a los mensajes del canister
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
+        let mut user_messages = um.get(&KeyPrincipal { key: sender }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        user_messages.messages.push(new_message);
+        um.insert(KeyPrincipal { key: sender }, user_messages);
+    });
+
+    // Inicializa last_seen a 0 para el receptor del mensaje
+    LAST_SEEN.with(|ls| {
+        let mut ls = ls.borrow_mut();
+        ls.insert(KeyPrincipal { key: message.addressee.clone() }, 0);
+    });
+
+    // Inicializa last_seen a 0 para el canister
+    LAST_SEEN.with(|ls| {
+        let mut ls = ls.borrow_mut();
+        ls.insert(KeyPrincipal { key: sender }, 0);
+    });
 
     Ok(())
 }
 
 #[ic_cdk::update]
-fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
-    let sender = ic_cdk::id();
-    // Crea un nuevo mensaje con el tiempo actual
-    let new_message = Message {
-        sender: Some(sender),
-        content: message.content,
-        addressee: Some(message.addressee),
-        time: ic_cdk::api::time(),
-        status: MensajeStatus::Sent,
-    };
+fn add_token_to_principal(token: String) -> Result<(), ItemError> {
+    // Obtiene el Principal de quien llama a la función
+    let caller = ic_cdk::api::caller();
+    let principal = KeyPrincipal { key: caller };
 
-    // Obtén un nuevo ID para el mensaje
-    let id = NOTIFICATIONS_ID_MANAGER.with(|manager| manager.get_id());
+    FCM_TOKENS.with(|fcm_tokens_map| {
+        let mut fcm_tokens_map = fcm_tokens_map.borrow_mut();
 
-    // Añade el nuevo mensaje a las notificaciones
-    NOTIFICATIONS.with(|n| n.borrow_mut().insert(id, new_message));
+        if let Some(fcm_tokens) = fcm_tokens_map.get(&principal) {
+            // Si el token ya existe para el Principal, retorna un error.
+            if fcm_tokens.tokens.contains(&token) {
+                return Err(ItemError::AlreadyExist);
+            }
 
-    Ok(())
+            // Si el token no existe, clona los tokens, agrega el nuevo token y vuelve a insertarlos.
+            let mut new_tokens = fcm_tokens.tokens.clone();
+            new_tokens.push(token);
+            let new_fcm_tokens = FcmTokens { tokens: new_tokens };
+            fcm_tokens_map.insert(principal, new_fcm_tokens);
+        } else {
+            // Si el Principal no existe en el mapa, crea una nueva entrada.
+            let fcm_tokens = FcmTokens {
+                tokens: vec![token],
+            };
+            fcm_tokens_map.insert(principal, fcm_tokens);
+        }
+
+        Ok(())
+    })
 }
+
 
 #[ic_cdk::query]
 fn get_inbox() -> Result<InboxResult, ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let mut conversations: HashMap<Principal, (Message, u64, bool)> = HashMap::new(); // Modifica el HashMap para almacenar el número de mensajes no leídos y el estado de lectura por conversación
-    let mut total_unread_chats = 0; // Nuevo contador para el total de chats con mensajes no leídos
+    let mut conversations: HashMap<Principal, (Message, u64, bool)> = HashMap::new();
+    let mut total_unread_chats = 0;
 
-    NOTIFICATIONS.with(|n| {
-        let notifications_map = n.borrow();
-
-        for (_, message) in notifications_map.iter() {
-            if message.addressee == Some(caller_principal)
-                || message.sender == Some(caller_principal)
-            {
-                let other_user = if message.addressee == Some(caller_principal) {
-                    message.sender.unwrap()
-                } else {
-                    message.addressee.unwrap()
-                };
-
-                // Si la conversación ya existe, actualiza el último mensaje si es más reciente
-                if let Some((existing_message, existing_unread_count, existing_unread)) =
-                    conversations.get(&other_user)
-                {
-                    let new_unread_count = if message.status == MensajeStatus::Sent {
-                        existing_unread_count + 1
-                    } else {
-                        *existing_unread_count
-                    };
-                    let new_unread = if message.status == MensajeStatus::Sent {
-                        true
-                    } else {
-                        *existing_unread
-                    };
-                    if existing_message.time < message.time {
-                        conversations
-                            .insert(other_user, (message.clone(), new_unread_count, new_unread));
-                    }
-                } else {
-                    let new_unread_count = if message.status == MensajeStatus::Sent {
-                        1
-                    } else {
-                        0
-                    };
-                    let new_unread = if message.status == MensajeStatus::Sent {
-                        true
-                    } else {
-                        false
-                    };
-                    conversations
-                        .insert(other_user, (message.clone(), new_unread_count, new_unread));
-                }
-
-                if message.status == MensajeStatus::Sent
-                    && conversations.get(&other_user).unwrap().1 == 1
-                {
-                    total_unread_chats += 1;
-                }
-            }
-        }
+    let user_messages = USER_MESSAGES.with(|um| {
+        let um = um.borrow();
+        um.get(&KeyPrincipal { key: caller_principal }).clone()
     });
 
-    if conversations.is_empty() {
-        return Err(ItemError::NotExist);
+    let mut user_messages = match user_messages {
+        Some(user_messages) => user_messages,
+        None => return Err(ItemError::NotExist), // Devuelve un error si el usuario no existe
+    };
+
+    for message in &user_messages.messages[user_messages.last_checked as usize..] {
+        let other_user = if message.addressee == Some(caller_principal) {
+            message.sender.unwrap()
+        } else {
+            message.addressee.unwrap()
+        };
+
+        if let Some((existing_message, existing_unread_count, existing_unread)) =
+            conversations.get(&other_user)
+        {
+            let new_unread_count = if message.status == MensajeStatus::Sent {
+                existing_unread_count + 1
+            } else {
+                *existing_unread_count
+            };
+            let new_unread = if message.status == MensajeStatus::Sent {
+                true
+            } else {
+                *existing_unread
+            };
+            if existing_message.time < message.time {
+                conversations
+                    .insert(other_user, (message.clone(), new_unread_count, new_unread));
+            }
+        } else {
+            let new_unread_count = if message.status == MensajeStatus::Sent {
+                1
+            } else {
+                0
+            };
+            let new_unread = if message.status == MensajeStatus::Sent {
+                true
+            } else {
+                false
+            };
+            conversations
+                .insert(other_user, (message.clone(), new_unread_count, new_unread));
+        }
+
+        if message.status == MensajeStatus::Sent {
+            user_messages.unread += 1;
+            total_unread_chats += 1;
+        }
     }
+
+    // Si conversations está vacío, añade el último mensaje comprobado
+    if conversations.is_empty() && !user_messages.messages.is_empty() {
+        let last_message = &user_messages.messages[user_messages.last_checked as usize - 1];
+        let other_user = if last_message.addressee == Some(caller_principal) {
+            last_message.sender.unwrap()
+        } else {
+            last_message.addressee.unwrap()
+        };
+        conversations.insert(other_user, (last_message.clone(), 0, false));
+    }
+
+    // Actualiza last_checked
+    user_messages.last_checked = user_messages.messages.len() as u64;
+
+    // Vuelve a insertar user_messages en el mapa
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
+        um.insert(KeyPrincipal { key: caller_principal }, user_messages);
+    });
 
     let conversations: Vec<Conversation> = conversations
         .into_iter()
@@ -752,8 +829,9 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
     Ok(InboxResult {
         conversations,
         total_unread_chats,
-    }) // Devuelve un InboxResult que coincide con la definición en la interfaz Candid
+    })
 }
+
 
 #[ic_cdk::query]
 fn get_private_chat(other_user: Principal) -> Result<Vec<Message>, ItemError> {
@@ -761,15 +839,17 @@ fn get_private_chat(other_user: Principal) -> Result<Vec<Message>, ItemError> {
     let mut messages = Vec::new();
 
     // Recoge todos los mensajes entre el usuario actual y other_user
-    NOTIFICATIONS.with(|n| {
-        let notifications_map = n.borrow();
+    USER_MESSAGES.with(|um| {
+        let um = um.borrow();
 
-        for (_, message) in notifications_map.iter() {
-            if (message.addressee == Some(caller_principal) && message.sender == Some(other_user))
-                || (message.addressee == Some(other_user)
-                    && message.sender == Some(caller_principal))
-            {
-                messages.push(message.clone());
+        if let Some(user_messages) = um.get(&KeyPrincipal { key: caller_principal }) {
+            for message in &user_messages.messages {
+                if (message.addressee == Some(caller_principal) && message.sender == Some(other_user.clone()))
+                    || (message.addressee == Some(other_user.clone())
+                        && message.sender == Some(caller_principal.clone()))
+                {
+                    messages.push(message.clone());
+                }
             }
         }
     });
@@ -787,55 +867,57 @@ fn get_private_chat(other_user: Principal) -> Result<Vec<Message>, ItemError> {
 #[ic_cdk::update]
 async fn mark_messages_as_read(other_user: Principal) -> Result<(), ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let mut ids_to_mark_as_read = Vec::new();
 
-    // Obtén el ID del último mensaje procesado para other_user
-    let last_checked = LAST_CHECKED.with(|last_checked| {
-        last_checked
-            .borrow()
-            .get(&&KeyPrincipal { key: other_user })
-            .clone()
-            .unwrap_or(0)
-    });
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
 
-    // Primero, recoge los IDs de los mensajes que necesitas marcar como leídos
-    NOTIFICATIONS.with(|n| {
-        let notifications_map = n.borrow();
+        if let Some(mut user_messages) = um.get(&KeyPrincipal { key: caller_principal }).clone() {
+            // Obtiene el último mensaje visto en esta conversación
+            let last_seen = LAST_SEEN.with(|ls| {
+                let ls = ls.borrow();
+                ls.get(&KeyPrincipal { key: other_user.clone() }).unwrap_or(0).clone()
+            });
 
-        for (id, message) in notifications_map.iter() {
-            if id > last_checked
-                && message.addressee == Some(caller_principal)
-                && message.sender == Some(other_user)
-            {
-                ids_to_mark_as_read.push(id);
+            for (i, message) in user_messages.messages.iter_mut().enumerate() {
+                if i < last_seen as usize {
+                    continue; // Salta los mensajes ya vistos
+                }
+
+                if (message.addressee == Some(caller_principal) && message.sender == Some(other_user.clone()))
+                    || (message.addressee == Some(other_user.clone()) && message.sender == Some(caller_principal))
+                    && message.status != MensajeStatus::Read
+                {
+                    message.status = MensajeStatus::Read;
+                    LAST_SEEN.with(|ls| {
+                        let mut ls = ls.borrow_mut();
+                        ls.insert(KeyPrincipal { key: other_user.clone() }, i as u64); // Actualiza el último mensaje visto
+                    });
+                }
+            }
+
+            // Vuelve a insertar el UserMessages actualizado en el mapa
+            um.insert(KeyPrincipal { key: caller_principal }, user_messages.clone());
+
+            // Actualiza los mensajes en la lista de mensajes del otro usuario
+            if let Some(mut other_user_messages) = um.get(&KeyPrincipal { key: other_user.clone() }).clone() {
+                for message in other_user_messages.messages.iter_mut() {
+                    if (message.addressee == Some(other_user.clone()) && message.sender == Some(caller_principal))
+                        || (message.addressee == Some(caller_principal) && message.sender == Some(other_user.clone()))
+                        && message.status != MensajeStatus::Read
+                    {
+                        message.status = MensajeStatus::Read;
+                    }
+                }
+
+                // Vuelve a insertar el UserMessages actualizado en el mapa
+                um.insert(KeyPrincipal { key: other_user.clone() }, other_user_messages);
             }
         }
     });
-
-    // Luego, marca todos los mensajes necesarios como leídos
-    // Luego, marca todos los mensajes necesarios como leídos
-    let ids_to_mark_as_read_clone = ids_to_mark_as_read.clone();
-    NOTIFICATIONS.with(|n| {
-        let mut notifications_map = n.borrow_mut();
-
-        for id in ids_to_mark_as_read_clone {
-            if let Some(mut message) = notifications_map.remove(&id) {
-                message.status = MensajeStatus::Read;
-                notifications_map.insert(id, message);
-            }
-        }
-    });
-
-    // Actualiza el ID del último mensaje procesado para other_user
-    if let Some(&max_id) = ids_to_mark_as_read.iter().max() {
-        LAST_CHECKED.with(|last_checked| {
-            let mut last_checked = last_checked.borrow_mut();
-            last_checked.insert(KeyPrincipal { key: other_user }, max_id);
-        });
-    }
 
     Ok(())
 }
+
 
 #[ic_cdk::update]
 fn add_review(review: CreateReview) -> Result<(), ItemError> {
@@ -897,7 +979,17 @@ fn update_purchase_status_to_shipped(id: u64) -> Result<(), ItemError> {
         }
 
         purchase.status = PurchaseStatus::Shipped;
-        PURCHASES.with(|p| p.borrow_mut().insert(id, purchase));
+        PURCHASES.with(|p| p.borrow_mut().insert(id, purchase.clone()));
+
+        // Envía un mensaje al comprador
+        if let Some(buyer_principal) = purchase.buyer {
+            let message = SendMessage {
+                content: format!("¡Buenas noticias! Tu producto ha sido enviado. ID de la compra: {}", id),
+                addressee: buyer_principal,
+            };
+            send_message_by_canister(message)?;
+        }
+
         Ok(())
     } else {
         Err(ItemError::NotExist)
@@ -1233,7 +1325,7 @@ fn get_item_owner(item_id: u64) -> Result<Principal, ItemError> {
 }
 
 #[ic_cdk::query]
-fn get_user_addresses() -> Result<Vec<(usize, Address)>, ItemError> {
+fn get_user_addresses() -> Result<Vec<(u64, Address)>, ItemError> {
     let caller_principal = ic_cdk::api::caller();
     let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
 
@@ -1243,12 +1335,13 @@ fn get_user_addresses() -> Result<Vec<(usize, Address)>, ItemError> {
         if let Some(user_address) = book.get(&key_principal) {
             // Si el usuario existe, devolver todas sus direcciones junto con su índice
             if let Some(user_addresses) = &user_address.addresses {
-                return Ok(user_addresses.iter().enumerate().map(|(i, addr)| (i, addr.clone())).collect());
+                return Ok(user_addresses.iter().enumerate().map(|(i, addr)| (i as u64, addr.clone())).collect());
             }
         }
         Err(ItemError::NotExist)
     })
 }
+
 
 
 #[ic_cdk::update]
@@ -1331,11 +1424,6 @@ fn check_if_address_exists(principal: Principal) -> bool {
 #[ic_cdk::query]
 fn check_if_purchase_exists(id: u64) -> bool {
     PURCHASES.with(|p| p.borrow().contains_key(&id))
-}
-
-#[ic_cdk::query]
-fn check_if_message_exists(id: u64) -> bool {
-    NOTIFICATIONS.with(|p| p.borrow().contains_key(&id))
 }
 
 #[ic_cdk::query]
