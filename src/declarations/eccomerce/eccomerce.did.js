@@ -34,7 +34,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const CreateUserAddress = IDL.Record({ 'address' : Address });
   const CreatePurchase = IDL.Record({
-    'id_shipping_address' : IDL.Nat,
+    'id_shipping_address' : IDL.Nat64,
     'name' : IDL.Text,
     'account_buyer' : IDL.Text,
     'payment_id' : IDL.Nat64,
@@ -128,7 +128,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const Result_get_profile = IDL.Variant({ 'Ok' : Profile, 'Err' : ItemError });
   const Result_get_address = IDL.Variant({
-    'Ok' : IDL.Vec(IDL.Tuple(IDL.Nat, Address)),
+    'Ok' : IDL.Vec(IDL.Tuple(IDL.Nat64, Address)),
     'Err' : ItemError,
   });
   const PurchaseStatus = IDL.Variant({

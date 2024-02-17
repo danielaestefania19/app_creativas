@@ -4,7 +4,7 @@ import Home from './components/Home.jsx';
 import Body from './components/Body.jsx';
 import Footer from './landing/Footer.jsx';
 import './styles/styles.css'
-import Shop from "./components/Shop.jsx"
+import Shop from "./ecommerce/Shop.jsx"
 import PaymentDetails from "./components/PaymentDetails.jsx";
 import Card from './landing/Card.jsx';
 import PaymentButton from "./components/Pay.jsx"
@@ -23,6 +23,7 @@ import YourTokens from './components_NFT/Your_Tokens.jsx'
 import Checkout from './components/checkout.jsx'
 import UserProfile from './ecommerce/Profile.jsx';
 import Formulario from './components/CreateProfile.jsx'
+import Inbox from './ecommerce/Inbox.jsx';
 
 
 function App() {
@@ -51,12 +52,12 @@ function App() {
   return (
     <WalletProvider>
     <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
-        <Home className="bg-white"/>
         <Routes>
         <Route
               path="/"
               element={
                 <>
+                <Home className="bg-white"/>
                   <Body
                     onCreatePayment={handleCreatePayment}
                     getTokens={GetTokens}
@@ -75,6 +76,7 @@ function App() {
           <Route path="/other/invests" element={<YourInvest/>} />
           <Route path="/other/tokens" element={<YourTokens/>} />
           <Route path="/other/createitems" element={<ItemsUploader />} />
+          <Route path="/other/createmessage" element={<Inbox />} />
           <Route path="/formulario" element={<Formulario />} />
           <Route path="/other/items" element={<ItemsUploader/>} />
           <Route path="/other/gettokens" element={<FetchAllAssets/>} /> 

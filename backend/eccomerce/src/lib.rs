@@ -297,8 +297,9 @@ pub struct CreatePurchase {
     lastname: String,
     account_buyer: String,
     payment_id: u64,
-    id_shipping_address: usize, // Índice de la dirección de envío en el vector de direcciones del usuario
+    id_shipping_address: u64, // Cambia usize a u64
 }
+
 
 // Implementación de trait para la serialización y deserialización de Item
 
@@ -601,7 +602,7 @@ fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
     // Obtener la dirección de envío específica usando el índice proporcionado
     let shipping_address = user_address.addresses
         .as_ref()
-        .and_then(|addresses| addresses.get(purchase.id_shipping_address))
+        .and_then(|addresses| addresses.get(purchase.id_shipping_address as usize)) // Convierte u64 a usize
         .ok_or(ItemError::NotExist)?
         .clone();
 
@@ -1233,7 +1234,7 @@ fn get_item_owner(item_id: u64) -> Result<Principal, ItemError> {
 }
 
 #[ic_cdk::query]
-fn get_user_addresses() -> Result<Vec<(usize, Address)>, ItemError> {
+fn get_user_addresses() -> Result<Vec<(u64, Address)>, ItemError> {
     let caller_principal = ic_cdk::api::caller();
     let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
 
@@ -1243,12 +1244,13 @@ fn get_user_addresses() -> Result<Vec<(usize, Address)>, ItemError> {
         if let Some(user_address) = book.get(&key_principal) {
             // Si el usuario existe, devolver todas sus direcciones junto con su índice
             if let Some(user_addresses) = &user_address.addresses {
-                return Ok(user_addresses.iter().enumerate().map(|(i, addr)| (i, addr.clone())).collect());
+                return Ok(user_addresses.iter().enumerate().map(|(i, addr)| (i as u64, addr.clone())).collect());
             }
         }
         Err(ItemError::NotExist)
     })
 }
+
 
 
 #[ic_cdk::update]

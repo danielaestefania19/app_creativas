@@ -126,7 +126,7 @@ type CreatePurchase = record {
     lastname: text;
     account_buyer: text;
     payment_id: nat64;
-    id_shipping_address: nat; // Cambia nat64 a nat
+    id_shipping_address: nat64; // Cambia nat64 a nat
 };    
 
 type CreateItem = record {
@@ -216,9 +216,10 @@ type ResultItems = variant {
 };
 
 type Result_get_address = variant {
-    Ok: vec record { nat; Address }; // Cambia nat64 a nat
+    Ok: vec record { nat64; Address }; // Cambia nat a nat64
     Err: ItemError;
-};   
+};
+ 
 type Result_get_address_by_id = variant {
     Ok: opt Address;
     Err: ItemError;
