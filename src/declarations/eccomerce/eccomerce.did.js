@@ -127,6 +127,10 @@ export const idlFactory = ({ IDL }) => {
     'last_connection' : IDL.Opt(IDL.Nat64),
   });
   const Result_get_profile = IDL.Variant({ 'Ok' : Profile, 'Err' : ItemError });
+  const Result_get_tokens = IDL.Variant({
+    'Ok' : IDL.Vec(IDL.Text),
+    'Err' : ItemError,
+  });
   const Result_get_address = IDL.Variant({
     'Ok' : IDL.Vec(IDL.Tuple(IDL.Nat64, Address)),
     'Err' : ItemError,
@@ -220,6 +224,11 @@ export const idlFactory = ({ IDL }) => {
     'get_profile_by_principal' : IDL.Func(
         [IDL.Principal],
         [Result_get_profile],
+        ['query'],
+      ),
+    'get_tokens_for_principal' : IDL.Func(
+        [IDL.Text],
+        [Result_get_tokens],
         ['query'],
       ),
     'get_user_addresses' : IDL.Func([], [Result_get_address], ['query']),

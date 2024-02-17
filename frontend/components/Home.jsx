@@ -25,28 +25,7 @@ const Home = () => {
   const [visible, setVisible] = useState(true);
   const { whoami, setWhoami, isUserAuthenticated, login, logout, actor } = useContext(AuthContext);
 
-  async function handleNotifications() {
-    const wantsNotifications = window.Notification?.permission === "granted";
-    if (!wantsNotifications) {
-      const permission = await Notification.requestPermission();
-      wantsNotifications = permission === "granted";
-    }
-  
-    if (wantsNotifications) {
-      // Genera un token de FCM y lo guarda en la blockchain
-      getFirebaseToken().then((firebaseToken) => {
-        if (firebaseToken) {
-          console.log("token:", firebaseToken);
-          // Aquí debes llamar a la función add_token_to_principal de tu actor
-          // para guardar el token en la blockchain asociado con el Principal del usuario
-          actor.add_token_to_principal(firebaseToken).then(() => {
-            // Muestra una notificación toast cuando el token se ha guardado con éxito
-            toast("Notificaciones habilitadas");
-          });
-        }
-      });
-    }
-  }
+
   
   useEffect (()=>{
     onMessage(messaging, message=>{
@@ -66,8 +45,7 @@ const Home = () => {
   };
   const handleLogin = async () => {
     await login(); // Espera a que login termine
-    // Después de que el usuario se loguee
-    handleNotifications();
+ 
   };
 
   const handleLogout = async () => {
@@ -205,7 +183,7 @@ const Home = () => {
         <li className="p-4">Contact</li>
       </ul>
       <div>
-    
+      <ToastContainer />
         {/* {<p>Principal: {whoami}</p>} */}
       </div>
     </header>

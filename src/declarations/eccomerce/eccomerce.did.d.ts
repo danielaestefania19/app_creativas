@@ -158,6 +158,8 @@ export type Result_get_profile = { 'Ok' : Profile } |
   { 'Err' : ItemError };
 export type Result_get_purchases = { 'Ok' : Array<Purchase> } |
   { 'Err' : ItemError };
+export type Result_get_tokens = { 'Ok' : Array<string> } |
+  { 'Err' : ItemError };
 export interface Review {
   'review' : string,
   'rating' : Rating,
@@ -199,6 +201,7 @@ export interface _SERVICE {
   'get_items_owner' : ActorMethod<[], ResultItems>,
   'get_private_chat' : ActorMethod<[Principal], Result_get_private_chat>,
   'get_profile_by_principal' : ActorMethod<[Principal], Result_get_profile>,
+  'get_tokens_for_principal' : ActorMethod<[string], Result_get_tokens>,
   'get_user_addresses' : ActorMethod<[], Result_get_address>,
   'get_user_profile' : ActorMethod<[], Result_get_profile>,
   'get_your_purchases' : ActorMethod<[], Result_get_purchases>,

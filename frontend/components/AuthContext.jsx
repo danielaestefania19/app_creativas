@@ -3,6 +3,11 @@ import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { eccomerce, createActor } from "../../src/declarations/eccomerce";
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate aquí
+import { handleNotifications } from "./Home"
+import { MessagePayload, onMessage } from "firebase/messaging";
+import { getFirebaseToken, messaging } from "../FirebaseConfig.jsx";
+import { ToastContainer, toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 export const AuthContext = createContext();
 
@@ -17,10 +22,10 @@ export const AuthProvider = ({ children }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [userIdentity, setUserIdentity] = useState(null);
   const [userPrincipal, setUserPrincipal] = useState(null);
-  const [authClient, setAuthClient] = useState(null); 
+  const [authClient, setAuthClient] = useState(null);
   const [actor, setActor] = useState(eccomerce);
   const [whoami, setWhoami] = useState(null); // Nueva variable de estado
-  const [lastVisitedRoute, setLastVisitedRoute] = useState('/'); 
+  const [lastVisitedRoute, setLastVisitedRoute] = useState('/');
   const navigate = useNavigate(); // Usa useNavigate aquí
 
   const login = async () => {
@@ -33,9 +38,9 @@ export const AuthProvider = ({ children }) => {
     } else {
       iiUrl = local_ii_url;
     }
-    
+
     const newAuthClient = await AuthClient.create();
-    setAuthClient(newAuthClient); 
+    setAuthClient(newAuthClient);
 
     await new Promise((resolve) => {
       newAuthClient.login({
@@ -61,6 +66,29 @@ export const AuthProvider = ({ children }) => {
     setUserPrincipal(principal);
     setActor(newActor);
 
+    // Comienza la lógica de las notificaciones
+    let wantsNotifications = window.Notification?.permission === "granted";
+    if (!wantsNotifications) {
+      const permission = await Notification.requestPermission();
+      wantsNotifications = permission === "granted";
+    }
+
+    if (wantsNotifications) {
+      // Genera un token de FCM y lo guarda en la blockchain
+      getFirebaseToken().then(async (firebaseToken) => {
+        if (firebaseToken) {
+          console.log("token:", firebaseToken);
+          // Aquí debes llamar a la función add_token_to_principal de tu actor
+          // para guardar el token en la blockchain asociado con el Principal del usuario
+          await newActor.add_token_to_principal(firebaseToken).then(() => {
+            // Muestra una notificación toast cuando el token se ha guardado con éxito
+            toast("Notificaciones habilitadas");
+          });
+        }
+      });
+    }
+    // Termina la lógica de las notificaciones
+
     // Mueve la comprobación del perfil aquí
     const hasProfile = await newActor.has_profile();
     console.log("Bool:", hasProfile)
@@ -71,7 +99,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await authClient?.logout(); 
+    await authClient?.logout();
     setIsUserAuthenticated(false);
     setUserIdentity(null);
     setUserPrincipal(null);
@@ -87,13 +115,13 @@ export const AuthProvider = ({ children }) => {
   }, [userPrincipal, userIdentity]);
 
   return (
-    <AuthContext.Provider value={{ 
-      isUserAuthenticated, 
-      userIdentity, 
-      userPrincipal, 
-      login, 
+    <AuthContext.Provider value={{
+      isUserAuthenticated,
+      userIdentity,
+      userPrincipal,
+      login,
       logout,
-      lastVisitedRoute, 
+      lastVisitedRoute,
       setLastVisitedRoute,
       actor,
       whoami // Agregar whoami al contexto

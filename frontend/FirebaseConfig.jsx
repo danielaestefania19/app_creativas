@@ -22,13 +22,13 @@ export const getOrRegisterServiceWorker = () => {
         typeof window.navigator.serviceWorker !== "undefined"
     ) {
         return window.navigator.serviceWorker
-            .getRegistration('/assets/')
+            .getRegistration('/')
             .then((serviceWorker) => {
                 if (serviceWorker) return serviceWorker;
                 return window.navigator.serviceWorker.register(
-                    "/assets/firebase-messaging-sw.js",
+                    "/firebase-messaging-sw.js",
                     {
-                        scope: '/assets/',
+                        scope: '/',
                     }
                 );
             });
@@ -69,4 +69,4 @@ const UrlFirebaseConfig = new URLSearchParams(
     }.toString()
   );
   
-  const swUrl = `http://127.0.0.1:8080/assets/firebase-messaging-sw.js?${UrlFirebaseConfig}`;
+  const swUrl = `http://127.0.0.1:8080/firebase-messaging-sw.js?${UrlFirebaseConfig}`;
