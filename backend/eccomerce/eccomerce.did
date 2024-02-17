@@ -209,6 +209,11 @@ type Result_get = variant {
     Ok: text;
     Err: ItemError;
 };
+type Result_get_tokens = variant {
+    Ok: vec text;
+    Err: ItemError;
+};
+
 
 type Result_get_owner = variant {
     Ok: principal;
@@ -290,6 +295,7 @@ service : (CreateProfile) -> {
     send_message: (SendMessage) -> (Result);
     send_message_by_canister: (SendMessage) -> (Result);
     add_token_to_principal: (text) -> (Result);
+    get_tokens_for_principal: (text) -> (Result_get_tokens) query;
     get_inbox: () -> (Result_get_inbox) query;
     whoami : () -> (principal) query;
     manager : () -> (principal) query;

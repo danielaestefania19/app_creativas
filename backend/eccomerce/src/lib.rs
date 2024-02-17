@@ -518,7 +518,7 @@ static PROFILES: RefCell<StableBTreeMap<KeyPrincipal, Profile, Memory>> = RefCel
 
         // Cambia el tipo de clave de u64 a Principal
 static FCM_TOKENS: RefCell<StableBTreeMap<KeyPrincipal, FcmTokens, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))),
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(6))),
 ));
 
 
@@ -540,7 +540,7 @@ fn create_profile_canister(profile: CreateProfile) {
         active: false,
         last_connection: None,
     };
-
+  
     // Usa KeyPrincipal en lugar de id
     PROFILES.with(|p| p.borrow_mut().insert(key_principal, value));
 }
@@ -569,6 +569,7 @@ fn set_item(item: CreateItem) -> Result<(), ItemError> {
         category, // Usa la categoría convertida aquí
     };
 
+    
     ITEMS.with(|p| p.borrow_mut().insert(id, value.clone()));
     Ok(())
 }
@@ -713,7 +714,7 @@ fn add_token_to_principal(token: String) -> Result<(), ItemError> {
         if let Some(fcm_tokens) = fcm_tokens_map.get(&principal) {
             // Si el token ya existe para el Principal, retorna un error.
             if fcm_tokens.tokens.contains(&token) {
-                return Err(ItemError::AlreadyExist);
+                return Ok(());
             }
 
             // Si el token no existe, clona los tokens, agrega el nuevo token y vuelve a insertarlos.
@@ -732,6 +733,28 @@ fn add_token_to_principal(token: String) -> Result<(), ItemError> {
         Ok(())
     })
 }
+
+#[ic_cdk::query]
+fn get_tokens_for_principal(principal_str: String) -> Result<Vec<String>, ItemError> {
+    // Parsea el Principal desde la cadena de texto
+    let principal = Principal::from_text(&principal_str).map_err(|_| ItemError::NotExist)?;
+
+    let key = KeyPrincipal { key: principal };
+
+    // Obtiene los tokens para el Principal
+    FCM_TOKENS.with(|fcm_tokens_map| {
+        let fcm_tokens_map = fcm_tokens_map.borrow();
+
+        if let Some(fcm_tokens) = fcm_tokens_map.get(&key) {
+            // Si el Principal existe en el mapa, retorna los tokens.
+            Ok(fcm_tokens.tokens.clone())
+        } else {
+            // Si el Principal no existe en el mapa, retorna un error.
+            Err(ItemError::NotExist)
+        }
+    })
+}
+
 
 
 #[ic_cdk::query]

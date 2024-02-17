@@ -24,6 +24,8 @@ import Checkout from './components/checkout.jsx'
 import UserProfile from './ecommerce/Profile.jsx';
 import Formulario from './components/CreateProfile.jsx'
 import Inbox from './ecommerce/Inbox.jsx';
+import { ToastContainer, toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 
 function App() {
@@ -89,6 +91,7 @@ function App() {
           <Route path="/status" element={<PaymentDetails />} />
           <Route path="/pay" element={<PaymentButton />} />
         </Routes>
+        <ToastContainer />
     </AuthProvider>
     </WalletProvider>
 
