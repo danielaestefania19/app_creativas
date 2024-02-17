@@ -3,9 +3,9 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
-import PaymentDetails from "./PaymentDetails";
-import { AuthContext } from './AuthContext';
-import { WalletContext } from './WalletContext.jsx';
+import PaymentDetails from "../components/PaymentDetails.jsx";
+import { AuthContext } from '../components/AuthContext.jsx';
+import { WalletContext } from '../components/WalletContext.jsx';
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;

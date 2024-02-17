@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useContext } from "react";
-import { eccomerce } from "../../src/declarations/eccomerce";
-import Item from "./Item";
+import { eccomerce } from "../../src/declarations/eccomerce/index.js";
+import Item from "./Item.jsx";
 import Cart from "./Card.jsx";
 import '../styles/styles.css';
 import { FiShoppingCart } from "react-icons/fi";
-import { Link } from 'react-router-dom';
-import { AuthContext } from './AuthContext';
-import { DefaultSidebar} from "../ecommerce/Sidebar.jsx";
+import { AuthContext } from '../components/AuthContext.jsx';
+import { DefaultSidebar } from "./Sidebar.jsx";
+import { Navbar } from "./Navbar.jsx";
+
 
 const Shop = () => {
   const [items, setItems] = useState([]);
@@ -63,13 +64,9 @@ const Shop = () => {
   };
 
   return (
-    <div className="flex flex-col mt-32 mb-2 mr-5 h-full">
-      <DefaultSidebar/>
-      <div className="mb-4">
-        <Link to="/other/createitems">
-          <button className='bg-[#c9398a] rounded-md p-2 text-white items-end' >Creativas Seller</button>
-        </Link>
-      </div>
+    <div className="flex flex-col mt-4 mb-2  h-full">
+      <Navbar />
+      <DefaultSidebar />
       <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-center mr-7">
         {loading ? (
           <div>Loading...</div>
@@ -80,16 +77,16 @@ const Shop = () => {
         )}
       </div>
       {cartVisible && cart.length > 0 && <Cart cart={cart} removeFromCart={removeFromCart} onHideCart={handleToggleCart} />}
-            <button
+      <button
         className="fixed bottom-4 right-4 bg-[#3490dc] text-white px-4 py-2 rounded-md "
         onClick={handleToggleCart}>
         {<>
-            <FiShoppingCart className="mr-2" />
-            <span className="absolute top-0 right-0 inline-block bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                {cart.reduce((total, item) => total + item.quantity, 0)}
-            </span>
+          <FiShoppingCart className="mr-2" />
+          <span className="absolute top-0 right-0 inline-block bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+            {cart.reduce((total, item) => total + item.quantity, 0)}
+          </span>
         </>}
-      </button> 
+      </button>
 
 
     </div>

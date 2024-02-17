@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
 import { contractAddress } from "../../utils/constans.js";
-import PaymentDetailsCard from "./PaymentsDetailsCard.jsx";
+import PaymentDetailsCard from "../components/PaymentsDetailsCard.jsx";
 import { Spinner } from "@material-tailwind/react";
-import { AuthContext } from './AuthContext';
+import { AuthContext } from '../components/AuthContext.jsx';
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;

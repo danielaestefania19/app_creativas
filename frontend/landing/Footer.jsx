@@ -14,7 +14,7 @@ const Footer = () => {
       <div className='grid lg:grid-cols-3 gap-8'>
         <h1 className='w-full text-3xl font-bold text-[#c9398a]'>CREATIVAS</h1>
         <div className='flex justify-between md:w-[75%] my-6'>
-            <FaFacebookSquare size={30} />
+            <FaFacebookSquare size={30} href='https://www.facebook.com/profile.php?id=100094501260813'/>
             <FaInstagram size={30} />
             <FaTwitterSquare size={30} />
             <FaGithubSquare size={30} />
