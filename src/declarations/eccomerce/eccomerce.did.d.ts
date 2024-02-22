@@ -91,6 +91,7 @@ export type ItemError = { 'AlreadyVoted' : null } |
   { 'NoVotes' : null } |
   { 'NotExist' : null } |
   { 'NoItemsAssociated' : null };
+export interface KeyPrincipal { 'key' : Principal }
 export interface LastChecked { 'key' : Principal }
 export type MensajeStatus = { 'Read' : null } |
   { 'Sent' : null };
@@ -106,7 +107,6 @@ export interface Profile {
   'about' : string,
   'username' : string,
   'profile_picture' : string,
-  'user' : [] | [Principal],
   'last_connection' : [] | [bigint],
 }
 export interface Purchase {
@@ -189,6 +189,7 @@ export interface _SERVICE {
   'add_review' : ActorMethod<[CreateReview], Result>,
   'add_token_to_principal' : ActorMethod<[string], Result>,
   'associate_address' : ActorMethod<[CreateUserAddress], undefined>,
+  'autocomplete_search' : ActorMethod<[string], Array<[string, Principal]>>,
   'create_profile' : ActorMethod<[CreateProfile], Result>,
   'create_purchase' : ActorMethod<[CreatePurchase], Result>,
   'desactivate_profile' : ActorMethod<[], Result>,
@@ -200,7 +201,7 @@ export interface _SERVICE {
   'get_items' : ActorMethod<[], Array<[bigint, Item]>>,
   'get_items_owner' : ActorMethod<[], ResultItems>,
   'get_private_chat' : ActorMethod<[Principal], Result_get_private_chat>,
-  'get_profile_by_principal' : ActorMethod<[Principal], Result_get_profile>,
+  'get_profile_key_by_principal' : ActorMethod<[Principal], Result_get_profile>,
   'get_tokens_for_principal' : ActorMethod<[string], Result_get_tokens>,
   'get_user_addresses' : ActorMethod<[], Result_get_address>,
   'get_user_profile' : ActorMethod<[], Result_get_profile>,

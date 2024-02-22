@@ -9,10 +9,8 @@ const Formulario = () => {
         profile_picture: null, // Inicializa a null
         about: null, // Inicializa a null
     });
-    const { whoami, actor } = useContext(AuthContext); // accede al actor aquí
+    const { whoami, actor, setIsUserAuthenticated } = useContext(AuthContext); // 
     const navigate = useNavigate(); // Usa useNavigate aquí
-
-    console.log("Hola", whoami)
 
     const handleChange = (e) => {
         if (e.target.name === 'profile_picture') {
@@ -75,6 +73,7 @@ const Formulario = () => {
             await actor.create_profile(profile);
             const hasProfile = await actor.has_profile();
             if (hasProfile) {
+                setIsUserAuthenticated(true); // Establece isUserAuthenticated en true
                 navigate('/'); // Navega a Home
             }
         } catch (error) {
@@ -82,7 +81,7 @@ const Formulario = () => {
             console.error(error);
         }
     };
-
+    
     return (
         <div className="flex items-center justify-center h-screen bg-pink-100">
             <form className="p-10 bg-white rounded shadow-md w-1/3" onSubmit={handleSubmit}>

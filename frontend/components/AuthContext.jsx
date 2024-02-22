@@ -1,32 +1,35 @@
 import React, { useState, useEffect, createContext } from 'react';
-import { AuthClient } from "@dfinity/auth-client";
+import { AuthClient, IdbStorage } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { eccomerce, createActor } from "../../src/declarations/eccomerce";
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate aquí
+import { useNavigate } from 'react-router-dom';
 import { handleNotifications } from "./Home"
 import { MessagePayload, onMessage } from "firebase/messaging";
 import { getFirebaseToken, messaging } from "../FirebaseConfig.jsx";
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { useIdleTimer } from 'react-idle-timer';
+
+// import useProfileActivity from './useProfileActivity.jsx'; // Importa useProfileActivity aquí
 
 export const AuthContext = createContext();
 
+const storage = new IdbStorage(); // Crea una nueva instancia de AuthClientStorage
+
+
 const canister_id = import.meta.env.VITE_CANISTER_ID;
 
-
 const network = import.meta.env.VITE_DFX_NETWORK;
-
-
-
 export const AuthProvider = ({ children }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [userIdentity, setUserIdentity] = useState(null);
   const [userPrincipal, setUserPrincipal] = useState(null);
   const [authClient, setAuthClient] = useState(null);
   const [actor, setActor] = useState(eccomerce);
-  const [whoami, setWhoami] = useState(null); // Nueva variable de estado
+  const [whoami, setWhoami] = useState(null);
   const [lastVisitedRoute, setLastVisitedRoute] = useState('/');
-  const navigate = useNavigate(); // Usa useNavigate aquí
+  const navigate = useNavigate();
+
 
   const login = async () => {
     const local_ii_url = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8080`;
@@ -39,15 +42,17 @@ export const AuthProvider = ({ children }) => {
       iiUrl = local_ii_url;
     }
 
+    let mainnet = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8080`;
+
     const newAuthClient = await AuthClient.create();
     setAuthClient(newAuthClient);
 
     await new Promise((resolve) => {
       newAuthClient.login({
-        identityProvider: iiUrl,
+        identityProvider: mainnet,
         onSuccess: resolve,
         onError: () => {
-          alert("Login error");
+          toast("Login error");
         },
       });
     });
@@ -58,65 +63,100 @@ export const AuthProvider = ({ children }) => {
     const newActor = createActor(canister_id, { agent });
 
     const principal = await newActor.whoami();
-    console.log(principal.toText());
+
+    console.log(principal.toText())
 
     setIsUserAuthenticated(await newAuthClient.isAuthenticated());
-    setWhoami(principal.toText()); // Guardar el valor de principal.toText() en whoami
+    setWhoami(principal.toText());
     setUserIdentity(identity);
     setUserPrincipal(principal);
     setActor(newActor);
-
-    // Comienza la lógica de las notificaciones
-    let wantsNotifications = window.Notification?.permission === "granted";
-    if (!wantsNotifications) {
-      const permission = await Notification.requestPermission();
-      wantsNotifications = permission === "granted";
-    }
-
-    if (wantsNotifications) {
-      // Genera un token de FCM y lo guarda en la blockchain
-      getFirebaseToken().then(async (firebaseToken) => {
-        if (firebaseToken) {
-          console.log("token:", firebaseToken);
-          // Aquí debes llamar a la función add_token_to_principal de tu actor
-          // para guardar el token en la blockchain asociado con el Principal del usuario
-          await newActor.add_token_to_principal(firebaseToken).then(() => {
-            // Muestra una notificación toast cuando el token se ha guardado con éxito
-            toast("Notificaciones habilitadas");
-          });
-        }
-      });
-    }
-    // Termina la lógica de las notificaciones
-
-    // Mueve la comprobación del perfil aquí
     const hasProfile = await newActor.has_profile();
-    console.log("Bool:", hasProfile)
-
     if (!hasProfile) {
-      navigate('/formulario'); // Navega al formulario
+        setIsUserAuthenticated(false); // Establece isUserAuthenticated en false
+        navigate('/formulario');
+    } else {
+        setIsUserAuthenticated(true); // Establece isUserAuthenticated en true
     }
-  };
+};
 
-  const logout = async () => {
+const logout = async () => {
     await authClient?.logout();
+
     setIsUserAuthenticated(false);
     setUserIdentity(null);
     setUserPrincipal(null);
     setActor(null);
-  };
 
-  useEffect(() => {
-    if (userPrincipal) {
-      const agent = new HttpAgent({ identity: userIdentity });
+    sessionStorage.clear();
+    localStorage.clear();
+
+    const dbs = await window.indexedDB.databases();
+    dbs.forEach(db => {
+      window.indexedDB.deleteDatabase(db.name);
+    });
+    window.location.reload();
+};
+// En AuthProvider
+useEffect(() => {
+  const fetchData = async () => {
+    const newAuthClient = await AuthClient.create();
+    if (newAuthClient.isAuthenticated()) {
+      const identity = await newAuthClient.getIdentity();
+      const agent = new HttpAgent({ identity });
+
       const newActor = createActor(canister_id, { agent });
-      setActor(newActor);
+
+      const principal = await newActor.whoami();
+      console.log(principal.toText())
+      // Verifica si el principal es anónimo
+      if (!principal.isAnonymous()) {
+        const hasProfile = await newActor.has_profile();
+        if (hasProfile) {
+          // Aquí es donde actualizas el estado
+          setIsUserAuthenticated(true);
+          setWhoami(principal.toText());
+          setUserIdentity(identity);
+          setUserPrincipal(principal);
+          setActor(newActor);
+        } else {
+          setIsUserAuthenticated(false);
+          navigate('/formulario');
+        }
+      } // Aquí es donde faltaba una llave de cierre
     }
-  }, [userPrincipal, userIdentity]);
+  };
+  fetchData();
+}, []); // Sin dependencias para que useEffect se ejecute solo una vez
+
+const onIdle = async () => {
+  console.log("Usuario inactivo");
+  if (isUserAuthenticated) {
+    console.log("Desactivando perfil...");
+    await actor.desactivate_profile();
+  }
+};
+
+const onActive = async () => {
+  console.log("Usuario activo");
+  if (isUserAuthenticated) {
+    console.log("Activando perfil...");
+    await actor.activate_profile();
+  }
+};
+
+useIdleTimer({
+  onIdle,
+  onActive,
+  timeout: 1000 * 60 * 5, // 5 minutos
+  debounce: 500
+});
+
 
   return (
     <AuthContext.Provider value={{
       isUserAuthenticated,
+      setIsUserAuthenticated, // Añade esto
       userIdentity,
       userPrincipal,
       login,
@@ -124,7 +164,7 @@ export const AuthProvider = ({ children }) => {
       lastVisitedRoute,
       setLastVisitedRoute,
       actor,
-      whoami // Agregar whoami al contexto
+      whoami
     }}>
       {children}
     </AuthContext.Provider>

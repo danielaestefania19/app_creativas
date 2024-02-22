@@ -1,0 +1,10 @@
+/home/alfredo/Documentos/app_creativas/target/debug/deps/libtantivy_stacker-b85dd2a4f91d1f75.rmeta: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/arena_hashmap.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/expull.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/fastcmp.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/fastcpy.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/memory_arena.rs
+
+/home/alfredo/Documentos/app_creativas/target/debug/deps/tantivy_stacker-b85dd2a4f91d1f75.d: /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/lib.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/arena_hashmap.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/expull.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/fastcmp.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/fastcpy.rs /home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/memory_arena.rs
+
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/lib.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/arena_hashmap.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/expull.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/fastcmp.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/fastcpy.rs:
+/home/alfredo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tantivy-stacker-0.2.0/src/memory_arena.rs:

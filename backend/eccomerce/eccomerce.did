@@ -11,14 +11,15 @@ type Review = record {
     review: text;
     reviewer: opt principal;
 };
-
+type KeyPrincipal = record{
+    key: principal;
+};
 type CreateReview = record {
     item_id: nat64;
     rating: nat64;
     review: text;
 };
 type Profile = record {
-    user: opt principal;
     username: text;
     profile_picture: text;
     about: text;
@@ -282,6 +283,7 @@ service : (CreateProfile) -> {
     add_review : (CreateReview) -> (Result); 
     add_picture : (nat64, AddProfilePicture) -> (Result);
     get_user_profile : () -> (Result_get_profile) query;
+    get_profile_key_by_principal : (principal) -> (Result_get_profile) query;
     update_address : (nat64, UserAddressEdit) -> (Result);
     update_item : (nat64, UpdateItem) -> (Result);
     remove_item : (nat64) -> (Result);
@@ -290,13 +292,13 @@ service : (CreateProfile) -> {
     mark_messages_as_read : (principal) -> (Result);
     activate_profile : () -> (Result);
     desactivate_profile : () -> (Result);
-    get_profile_by_principal : (principal) -> (Result_get_profile) query;
     is_active : (principal) -> (Result_Bool) query;
     send_message: (SendMessage) -> (Result);
     send_message_by_canister: (SendMessage) -> (Result);
     add_token_to_principal: (text) -> (Result);
     get_tokens_for_principal: (text) -> (Result_get_tokens) query;
     get_inbox: () -> (Result_get_inbox) query;
+    autocomplete_search: (text) -> ( vec record { text; principal}) query;
     whoami : () -> (principal) query;
     manager : () -> (principal) query;
 };

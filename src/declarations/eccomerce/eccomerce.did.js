@@ -123,7 +123,6 @@ export const idlFactory = ({ IDL }) => {
     'about' : IDL.Text,
     'username' : IDL.Text,
     'profile_picture' : IDL.Text,
-    'user' : IDL.Opt(IDL.Principal),
     'last_connection' : IDL.Opt(IDL.Nat64),
   });
   const Result_get_profile = IDL.Variant({ 'Ok' : Profile, 'Err' : ItemError });
@@ -198,6 +197,11 @@ export const idlFactory = ({ IDL }) => {
     'add_review' : IDL.Func([CreateReview], [Result], []),
     'add_token_to_principal' : IDL.Func([IDL.Text], [Result], []),
     'associate_address' : IDL.Func([CreateUserAddress], [], []),
+    'autocomplete_search' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Principal))],
+        ['query'],
+      ),
     'create_profile' : IDL.Func([CreateProfile], [Result], []),
     'create_purchase' : IDL.Func([CreatePurchase], [Result], []),
     'desactivate_profile' : IDL.Func([], [Result], []),
@@ -221,7 +225,7 @@ export const idlFactory = ({ IDL }) => {
         [Result_get_private_chat],
         ['query'],
       ),
-    'get_profile_by_principal' : IDL.Func(
+    'get_profile_key_by_principal' : IDL.Func(
         [IDL.Principal],
         [Result_get_profile],
         ['query'],

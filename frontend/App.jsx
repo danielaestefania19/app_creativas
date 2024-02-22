@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { Route, Routes, Link, useNavigate } from 'react-router-dom';
 import Home from './components/Home.jsx';
 import Body from './components/Body.jsx';
@@ -26,17 +26,14 @@ import Formulario from './components/CreateProfile.jsx'
 import Inbox from './ecommerce/Inbox.jsx';
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import useProfileActivity from './components/useProfileActivity'; // Importa useProfileActivity aquí
 
 
 function App() {
 
 
 
-
- 
-  
-  
-  const AddAssetWithAuth = withAuthentication(AddAsset);
+  const Eccomerce = withAuthentication(Shop);
   const ItemsUploaderWithAuth = withAuthentication(ItemsUploader);
 
   const navigate = useNavigate();
@@ -58,7 +55,7 @@ function App() {
 
   return (
     <WalletProvider>
-    <AuthProvider> {/* envuelve tu aplicación con el AuthProvider */}
+    <AuthProvider>
         <Routes>
         <Route
               path="/"
@@ -77,7 +74,7 @@ function App() {
                 </>
               }
             />
-          <Route path="/other/shop" element={<Shop/>} />
+            <Route path="/other/shop" element={<Eccomerce/>} /> {/* Usa eccomerce aquí */}
           <Route path="/other/createtokens" element={<AddAsset/>} />
           <Route path="/other/profile" element={<UserProfile/>} />
           <Route path="/other/invests" element={<YourInvest/>} />
@@ -90,6 +87,7 @@ function App() {
           <Route path="/login" element={<LoggedOut />} />
           <Route path="/status" element={<PaymentDetails />} />
           <Route path="/pay" element={<PaymentButton />} />
+ 
         </Routes>
         <ToastContainer />
     </AuthProvider>
