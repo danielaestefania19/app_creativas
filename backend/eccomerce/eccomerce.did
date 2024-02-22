@@ -60,6 +60,11 @@ type SendMessage = record {
     addressee: principal;
 };
 
+type SendMessage2 = record {
+    content: text;
+    addressee_text: text;
+};
+
 
 type LastChecked = record {
     key: principal;
@@ -296,6 +301,7 @@ service : (CreateProfile) -> {
     send_message_by_canister: (SendMessage) -> (Result);
     add_token_to_principal: (text) -> (Result);
     get_tokens_for_principal: (text) -> (Result_get_tokens) query;
+    send_message_2 : (SendMessage2) -> (Result); 
     get_inbox: () -> (Result_get_inbox) query;
     whoami : () -> (principal) query;
     manager : () -> (principal) query;

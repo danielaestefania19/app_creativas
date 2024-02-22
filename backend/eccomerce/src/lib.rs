@@ -201,6 +201,13 @@ pub struct SendMessage {
 }
 
 #[derive(CandidType, Deserialize, Clone)]
+pub struct SendMessage2 {
+    content: String,
+    addressee_text: String,
+
+}
+
+#[derive(CandidType, Deserialize, Clone)]
 pub struct Conversation {
     other_user: Principal,
     last_message: Message,
@@ -648,6 +655,49 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     LAST_SEEN.with(|ls| {
         let mut ls = ls.borrow_mut();
         ls.insert(KeyPrincipal { key: message.addressee.clone() }, 0);
+    });
+
+    // Inicializa last_seen a 0 para el remitente del mensaje
+    LAST_SEEN.with(|ls| {
+        let mut ls = ls.borrow_mut();
+        ls.insert(KeyPrincipal { key: sender }, 0);
+    });
+
+    Ok(())
+}
+
+#[ic_cdk::update]
+fn send_message_2(message: SendMessage2) -> Result<(), ItemError> {
+    let principal = Principal::from_text(&message.addressee_text).map_err(|_| ItemError::NotExist)?;
+    let sender = ic_cdk::api::caller();
+    let new_message = Message {
+        sender: Some(sender.clone()),
+        content: message.content,
+        addressee: Some(principal),
+        time: ic_cdk::api::time(),
+        status: MensajeStatus::Sent,
+    };
+
+    // Añade el nuevo mensaje a los mensajes del usuario receptor
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
+        let mut user_messages = um.get(&KeyPrincipal { key: principal.clone() }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        user_messages.messages.push(new_message.clone());
+        um.insert(KeyPrincipal { key: principal.clone() }, user_messages);
+    });
+
+    // Añade el nuevo mensaje a los mensajes del usuario que envía
+    USER_MESSAGES.with(|um| {
+        let mut um = um.borrow_mut();
+        let mut user_messages = um.get(&KeyPrincipal { key: sender }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        user_messages.messages.push(new_message);
+        um.insert(KeyPrincipal { key: sender }, user_messages);
+    });
+
+    // Inicializa last_seen a 0 para el receptor del mensaje
+    LAST_SEEN.with(|ls| {
+        let mut ls = ls.borrow_mut();
+        ls.insert(KeyPrincipal { key: principal.clone() }, 0);
     });
 
     // Inicializa last_seen a 0 para el remitente del mensaje

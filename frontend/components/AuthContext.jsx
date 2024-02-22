@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate(); // Usa useNavigate aquí
 
   const login = async () => {
-    const local_ii_url = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8080`;
+    const local_ii_url = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:7070`;
     let iiUrl;
     if (process.env.DFX_NETWORK === "local") {
       iiUrl = local_ii_url;

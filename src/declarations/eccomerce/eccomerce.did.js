@@ -167,6 +167,10 @@ export const idlFactory = ({ IDL }) => {
     'content' : IDL.Text,
     'addressee' : IDL.Principal,
   });
+  const SendMessage2 = IDL.Record({
+    'content' : IDL.Text,
+    'addressee_text' : IDL.Text,
+  });
   const CreateItem = IDL.Record({
     'billing_address' : IDL.Text,
     'item' : IDL.Text,
@@ -241,6 +245,7 @@ export const idlFactory = ({ IDL }) => {
     'mark_messages_as_read' : IDL.Func([IDL.Principal], [Result], []),
     'remove_item' : IDL.Func([IDL.Nat64], [Result], []),
     'send_message' : IDL.Func([SendMessage], [Result], []),
+    'send_message_2' : IDL.Func([SendMessage2], [Result], []),
     'send_message_by_canister' : IDL.Func([SendMessage], [Result], []),
     'set_item' : IDL.Func([CreateItem], [Result], []),
     'update_address' : IDL.Func([IDL.Nat64, UserAddressEdit], [Result], []),

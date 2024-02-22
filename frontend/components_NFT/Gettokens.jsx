@@ -27,19 +27,19 @@ const FetchAllAssets = () => {
                 const owner = await contract.ownerOf(asset.assetId);
                 const approval = await contract.assetApprovals(asset.assetId);
                 const status = await contract.projectStatus(asset.assetId); 
-                const endCrowfundingAsset = Math.floor(Date.now() / 1000) > asset.end_crowfunding;
+                // const endCrowfundingAsset = Math.floor(Date.now() / 1000) > asset.end_crowfunding;
                 
-                if (endCrowfundingAsset && status !== "End_Crowfunding_Asset" && !finalizingAssets[asset.assetId]) {
-                    setFinalizingAssets(prevState => ({ ...prevState, [asset.assetId]: true })); 
-                    finalizePromises.push(contract.finalize(asset.assetId)); 
-                }
+                // if (endCrowfundingAsset && status !== "End_Crowfunding_Asset" && !finalizingAssets[asset.assetId]) {
+                //     setFinalizingAssets(prevState => ({ ...prevState, [asset.assetId]: true })); 
+                //     finalizePromises.push(contract.finalize(asset.assetId)); 
+                // }
 
                 if (status !== "End_Crowfunding_Asset") {
                     newAssets.push({ ...asset, owner, approval });
                 }
             }
 
-            await Promise.allSettled(finalizePromises);
+            // await Promise.allSettled(finalizePromises);
 
             setAssets(newAssets);
         };

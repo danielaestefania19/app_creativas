@@ -166,6 +166,7 @@ export interface Review {
   'reviewer' : [] | [Principal],
 }
 export interface SendMessage { 'content' : string, 'addressee' : Principal }
+export interface SendMessage2 { 'content' : string, 'addressee_text' : string }
 export interface UpdateItem {
   'description' : [] | [string],
   'stock' : [] | [bigint],
@@ -212,6 +213,7 @@ export interface _SERVICE {
   'mark_messages_as_read' : ActorMethod<[Principal], Result>,
   'remove_item' : ActorMethod<[bigint], Result>,
   'send_message' : ActorMethod<[SendMessage], Result>,
+  'send_message_2' : ActorMethod<[SendMessage2], Result>,
   'send_message_by_canister' : ActorMethod<[SendMessage], Result>,
   'set_item' : ActorMethod<[CreateItem], Result>,
   'update_address' : ActorMethod<[bigint, UserAddressEdit], Result>,

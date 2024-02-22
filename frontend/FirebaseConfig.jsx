@@ -69,4 +69,4 @@ const UrlFirebaseConfig = new URLSearchParams(
     }.toString()
   );
   
-  const swUrl = `http://127.0.0.1:8080/firebase-messaging-sw.js?${UrlFirebaseConfig}`;
+  const swUrl = `http://127.0.0.1:7070/firebase-messaging-sw.js?${UrlFirebaseConfig}`;
