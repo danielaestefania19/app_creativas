@@ -16,6 +16,8 @@ ic-stable-structures = "0.6.1"
 serde_json = "1.0"
 serde_derive = "1.0"
 b3_utils = { version = "0.8.0", features = ["ledger", "stable_memory"] }
+unicode-normalization = "0.1.19"
+strsim = "0.10.0"
 
 
 

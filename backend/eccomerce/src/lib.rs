@@ -1,19 +1,25 @@
-use b3_utils::{call, caller_is_controller};
+// use b3_utils::{call, caller_is_controller};
 use candid::Principal;
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{
-    storable::Bound, BTreeMap, DefaultMemoryImpl, StableBTreeMap, Storable,
+    storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable,
+
 };
+use std::collections::HashSet;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+use strsim::levenshtein;
+use unicode_normalization::UnicodeNormalization;
 
 use serde_derive::Serialize;
 use std::collections::HashMap;
 use std::{borrow::Cow, cell::RefCell};
 
-use ic_cdk::api::management_canister::http_request::{
-    http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
-    TransformContext,
-};
+// use ic_cdk::api::management_canister::http_request::{
+//     http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
+//     TransformContext,
+// };
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
@@ -25,6 +31,7 @@ const MAX_VALUE_SIZE_PROFILE: u32 = 5000;
 const MAX_VALUE_SIZE_PRINCIPAL: u32 = 200;
 const MAX_VALUE_SIZE_USER_MESSAGES: u32 = 800;
 const MAX_VALUE_SIZE_FCM_TOKENS: u32 = 8000;
+const MAX_VALUE_SIZE_PRINCIPAL_INDEX: u32 = 200;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Hash, PartialEq)]
 enum RatingError {
@@ -102,7 +109,6 @@ pub struct CreateReview {
 
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Profile {
-    user: Option<Principal>,
     username: String,
     profile_picture: String,
     about: String,
@@ -135,6 +141,11 @@ impl Storable for Profile {
         max_size: MAX_VALUE_SIZE_PROFILE,
         is_fixed_size: false,
     };
+}
+#[derive(Default)]
+struct Trie {
+    children: HashMap<char, Trie>,
+    is_end_of_word: bool,
 }
 
 #[derive(CandidType, Deserialize, Clone)]
@@ -176,7 +187,7 @@ pub struct Message {
 pub struct UserMessages {
     messages: Vec<Message>,
     last_checked: u64, // Cambia a u64
-    unread: u64, // Cambia a u64
+    unread: u64,       // Cambia a u64
 }
 
 impl Storable for UserMessages {
@@ -215,7 +226,7 @@ pub struct Conversation {
     unread_count: u64, // Nuevo campo para el número de mensajes no leídos
 }
 
-#[derive(CandidType, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
+#[derive(CandidType, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord, Copy, Hash)]
 pub struct KeyPrincipal {
     key: Principal,
 }
@@ -235,6 +246,45 @@ impl Storable for KeyPrincipal {
     };
 }
 
+#[derive(CandidType, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
+pub struct IndexUserName {
+    field: Vec<String>,
+}
+impl Storable for IndexUserName {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_PRINCIPAL_INDEX,
+        is_fixed_size: false,
+    };
+}
+
+#[derive(Eq, PartialEq, CandidType, Deserialize, Clone, PartialOrd, Ord)]
+struct UsernameKey {
+    username: String,
+    key_principal: KeyPrincipal,
+}
+
+impl Storable for  UsernameKey {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_PRINCIPAL_INDEX,
+        is_fixed_size: false,
+    };
+}
 #[derive(CandidType, Deserialize, Clone)]
 pub struct InboxResult {
     conversations: Vec<Conversation>,
@@ -350,7 +400,6 @@ pub struct CreatePurchase {
     payment_id: u64,
     id_shipping_address: u64, // Cambia usize a u64
 }
-
 
 // Implementación de trait para la serialización y deserialización de Item
 
@@ -493,7 +542,6 @@ impl PurchaseIDManager {
     }
 }
 
-
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
         RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
@@ -518,7 +566,7 @@ static PROFILES: RefCell<StableBTreeMap<KeyPrincipal, Profile, Memory>> = RefCel
     static LAST_SEEN: RefCell<StableBTreeMap<KeyPrincipal, u64, Memory>> = RefCell::new(StableBTreeMap::init(
         MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(4))),
     ));
- 
+
     static USER_MESSAGES: RefCell<StableBTreeMap<KeyPrincipal, UserMessages, Memory>> = RefCell::new(StableBTreeMap::init(
         MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(5))),
     ));
@@ -528,26 +576,42 @@ static FCM_TOKENS: RefCell<StableBTreeMap<KeyPrincipal, FcmTokens, Memory>> = Re
     MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(6))),
 ));
 
+static PREFIX_INDEX: RefCell<StableBTreeMap<String, IndexUserName, Memory>> = RefCell::new(StableBTreeMap::init(
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(7))),
+));
 
+static USERNAME_TO_KEY: RefCell<StableBTreeMap<UsernameKey, KeyPrincipal, Memory>> = RefCell::new(StableBTreeMap::init(
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(8))),
+));
 
     static ID_MANAGER: IDManager = IDManager::new();
     static PURCHASE_ID_MANAGER: PurchaseIDManager = PurchaseIDManager::new();
 }
 
+
+fn get_prefixes(s: &str, min_length: u64) -> Vec<String> {
+    let mut prefixes = Vec::new();
+    for i in (min_length as usize)..=s.len() {
+        prefixes.push(s[..i].to_string());
+    }
+    prefixes
+}
+
 #[ic_cdk::init]
 fn create_profile_canister(profile: CreateProfile) {
     let caller_principal = ic_cdk::id();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     let value: Profile = Profile {
-        user: Some(caller_principal),
         username: profile.username,
         profile_picture: profile.profile_picture, // Ahora es String
         about: profile.about,                     // Ahora es String
         active: false,
         last_connection: None,
     };
-  
+
     // Usa KeyPrincipal en lugar de id
     PROFILES.with(|p| p.borrow_mut().insert(key_principal, value));
 }
@@ -576,7 +640,6 @@ fn set_item(item: CreateItem) -> Result<(), ItemError> {
         category, // Usa la categoría convertida aquí
     };
 
-    
     ITEMS.with(|p| p.borrow_mut().insert(id, value.clone()));
     Ok(())
 }
@@ -584,14 +647,17 @@ fn set_item(item: CreateItem) -> Result<(), ItemError> {
 #[ic_cdk::update]
 fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     // Buscar si el usuario tiene una entrada en la libreta de direcciones
     let user_address_opt = ADDRESS_BOOK.with(|book| book.borrow().get(&key_principal));
     let user_address = user_address_opt.ok_or(ItemError::NotExist)?;
 
     // Obtener la dirección de envío específica usando el índice proporcionado
-    let shipping_address = user_address.addresses
+    let shipping_address = user_address
+        .addresses
         .as_ref()
         .and_then(|addresses| addresses.get(purchase.id_shipping_address as usize)) // Convierte u64 a usize
         .ok_or(ItemError::NotExist)?
@@ -623,7 +689,6 @@ fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
     Ok(())
 }
 
-
 #[ic_cdk::update]
 fn send_message(message: SendMessage) -> Result<(), ItemError> {
     let sender = ic_cdk::api::caller();
@@ -638,15 +703,36 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     // Añade el nuevo mensaje a los mensajes del usuario receptor
     USER_MESSAGES.with(|um| {
         let mut um = um.borrow_mut();
-        let mut user_messages = um.get(&KeyPrincipal { key: message.addressee.clone() }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        let mut user_messages = um
+            .get(&KeyPrincipal {
+                key: message.addressee.clone(),
+            })
+            .clone()
+            .unwrap_or(UserMessages {
+                messages: vec![],
+                last_checked: 0,
+                unread: 0,
+            });
         user_messages.messages.push(new_message.clone());
-        um.insert(KeyPrincipal { key: message.addressee.clone() }, user_messages);
+        um.insert(
+            KeyPrincipal {
+                key: message.addressee.clone(),
+            },
+            user_messages,
+        );
     });
 
     // Añade el nuevo mensaje a los mensajes del usuario que envía
     USER_MESSAGES.with(|um| {
         let mut um = um.borrow_mut();
-        let mut user_messages = um.get(&KeyPrincipal { key: sender }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        let mut user_messages =
+            um.get(&KeyPrincipal { key: sender })
+                .clone()
+                .unwrap_or(UserMessages {
+                    messages: vec![],
+                    last_checked: 0,
+                    unread: 0,
+                });
         user_messages.messages.push(new_message);
         um.insert(KeyPrincipal { key: sender }, user_messages);
     });
@@ -654,7 +740,12 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     // Inicializa last_seen a 0 para el receptor del mensaje
     LAST_SEEN.with(|ls| {
         let mut ls = ls.borrow_mut();
-        ls.insert(KeyPrincipal { key: message.addressee.clone() }, 0);
+        ls.insert(
+            KeyPrincipal {
+                key: message.addressee.clone(),
+            },
+            0,
+        );
     });
 
     // Inicializa last_seen a 0 para el remitente del mensaje
@@ -666,6 +757,7 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     Ok(())
 }
 
+<<<<<<< HEAD
 #[ic_cdk::update]
 fn send_message_2(message: SendMessage2) -> Result<(), ItemError> {
     let principal = Principal::from_text(&message.addressee_text).map_err(|_| ItemError::NotExist)?;
@@ -710,6 +802,8 @@ fn send_message_2(message: SendMessage2) -> Result<(), ItemError> {
 }
 
 
+=======
+>>>>>>> c272f5a35b497a39ec53d2f12cd68f3520c35aad
 #[ic_cdk::update]
 fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
     let sender = ic_cdk::id(); // El remitente es el Principal del canister
@@ -724,15 +818,36 @@ fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
     // Añade el nuevo mensaje a los mensajes del usuario receptor
     USER_MESSAGES.with(|um| {
         let mut um = um.borrow_mut();
-        let mut user_messages = um.get(&KeyPrincipal { key: message.addressee.clone() }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        let mut user_messages = um
+            .get(&KeyPrincipal {
+                key: message.addressee.clone(),
+            })
+            .clone()
+            .unwrap_or(UserMessages {
+                messages: vec![],
+                last_checked: 0,
+                unread: 0,
+            });
         user_messages.messages.push(new_message.clone());
-        um.insert(KeyPrincipal { key: message.addressee.clone() }, user_messages);
+        um.insert(
+            KeyPrincipal {
+                key: message.addressee.clone(),
+            },
+            user_messages,
+        );
     });
 
     // Añade el nuevo mensaje a los mensajes del canister
     USER_MESSAGES.with(|um| {
         let mut um = um.borrow_mut();
-        let mut user_messages = um.get(&KeyPrincipal { key: sender }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
+        let mut user_messages =
+            um.get(&KeyPrincipal { key: sender })
+                .clone()
+                .unwrap_or(UserMessages {
+                    messages: vec![],
+                    last_checked: 0,
+                    unread: 0,
+                });
         user_messages.messages.push(new_message);
         um.insert(KeyPrincipal { key: sender }, user_messages);
     });
@@ -740,7 +855,12 @@ fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
     // Inicializa last_seen a 0 para el receptor del mensaje
     LAST_SEEN.with(|ls| {
         let mut ls = ls.borrow_mut();
-        ls.insert(KeyPrincipal { key: message.addressee.clone() }, 0);
+        ls.insert(
+            KeyPrincipal {
+                key: message.addressee.clone(),
+            },
+            0,
+        );
     });
 
     // Inicializa last_seen a 0 para el canister
@@ -805,8 +925,6 @@ fn get_tokens_for_principal(principal_str: String) -> Result<Vec<String>, ItemEr
     })
 }
 
-
-
 #[ic_cdk::query]
 fn get_inbox() -> Result<InboxResult, ItemError> {
     let caller_principal = ic_cdk::api::caller();
@@ -815,7 +933,10 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
 
     let user_messages = USER_MESSAGES.with(|um| {
         let um = um.borrow();
-        um.get(&KeyPrincipal { key: caller_principal }).clone()
+        um.get(&KeyPrincipal {
+            key: caller_principal,
+        })
+        .clone()
     });
 
     let mut user_messages = match user_messages {
@@ -844,8 +965,7 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
                 *existing_unread
             };
             if existing_message.time < message.time {
-                conversations
-                    .insert(other_user, (message.clone(), new_unread_count, new_unread));
+                conversations.insert(other_user, (message.clone(), new_unread_count, new_unread));
             }
         } else {
             let new_unread_count = if message.status == MensajeStatus::Sent {
@@ -858,8 +978,7 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
             } else {
                 false
             };
-            conversations
-                .insert(other_user, (message.clone(), new_unread_count, new_unread));
+            conversations.insert(other_user, (message.clone(), new_unread_count, new_unread));
         }
 
         if message.status == MensajeStatus::Sent {
@@ -885,7 +1004,12 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
     // Vuelve a insertar user_messages en el mapa
     USER_MESSAGES.with(|um| {
         let mut um = um.borrow_mut();
-        um.insert(KeyPrincipal { key: caller_principal }, user_messages);
+        um.insert(
+            KeyPrincipal {
+                key: caller_principal,
+            },
+            user_messages,
+        );
     });
 
     let conversations: Vec<Conversation> = conversations
@@ -905,7 +1029,6 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
     })
 }
 
-
 #[ic_cdk::query]
 fn get_private_chat(other_user: Principal) -> Result<Vec<Message>, ItemError> {
     let caller_principal = ic_cdk::api::caller();
@@ -915,9 +1038,12 @@ fn get_private_chat(other_user: Principal) -> Result<Vec<Message>, ItemError> {
     USER_MESSAGES.with(|um| {
         let um = um.borrow();
 
-        if let Some(user_messages) = um.get(&KeyPrincipal { key: caller_principal }) {
+        if let Some(user_messages) = um.get(&KeyPrincipal {
+            key: caller_principal,
+        }) {
             for message in &user_messages.messages {
-                if (message.addressee == Some(caller_principal) && message.sender == Some(other_user.clone()))
+                if (message.addressee == Some(caller_principal)
+                    && message.sender == Some(other_user.clone()))
                     || (message.addressee == Some(other_user.clone())
                         && message.sender == Some(caller_principal.clone()))
                 {
@@ -944,11 +1070,20 @@ async fn mark_messages_as_read(other_user: Principal) -> Result<(), ItemError> {
     USER_MESSAGES.with(|um| {
         let mut um = um.borrow_mut();
 
-        if let Some(mut user_messages) = um.get(&KeyPrincipal { key: caller_principal }).clone() {
+        if let Some(mut user_messages) = um
+            .get(&KeyPrincipal {
+                key: caller_principal,
+            })
+            .clone()
+        {
             // Obtiene el último mensaje visto en esta conversación
             let last_seen = LAST_SEEN.with(|ls| {
                 let ls = ls.borrow();
-                ls.get(&KeyPrincipal { key: other_user.clone() }).unwrap_or(0).clone()
+                ls.get(&KeyPrincipal {
+                    key: other_user.clone(),
+                })
+                .unwrap_or(0)
+                .clone()
             });
 
             for (i, message) in user_messages.messages.iter_mut().enumerate() {
@@ -956,41 +1091,64 @@ async fn mark_messages_as_read(other_user: Principal) -> Result<(), ItemError> {
                     continue; // Salta los mensajes ya vistos
                 }
 
-                if (message.addressee == Some(caller_principal) && message.sender == Some(other_user.clone()))
-                    || (message.addressee == Some(other_user.clone()) && message.sender == Some(caller_principal))
-                    && message.status != MensajeStatus::Read
+                if (message.addressee == Some(caller_principal)
+                    && message.sender == Some(other_user.clone()))
+                    || (message.addressee == Some(other_user.clone())
+                        && message.sender == Some(caller_principal))
+                        && message.status != MensajeStatus::Read
                 {
                     message.status = MensajeStatus::Read;
                     LAST_SEEN.with(|ls| {
                         let mut ls = ls.borrow_mut();
-                        ls.insert(KeyPrincipal { key: other_user.clone() }, i as u64); // Actualiza el último mensaje visto
+                        ls.insert(
+                            KeyPrincipal {
+                                key: other_user.clone(),
+                            },
+                            i as u64,
+                        ); // Actualiza el último mensaje visto
                     });
                 }
             }
 
             // Vuelve a insertar el UserMessages actualizado en el mapa
-            um.insert(KeyPrincipal { key: caller_principal }, user_messages.clone());
+            um.insert(
+                KeyPrincipal {
+                    key: caller_principal,
+                },
+                user_messages.clone(),
+            );
 
             // Actualiza los mensajes en la lista de mensajes del otro usuario
-            if let Some(mut other_user_messages) = um.get(&KeyPrincipal { key: other_user.clone() }).clone() {
+            if let Some(mut other_user_messages) = um
+                .get(&KeyPrincipal {
+                    key: other_user.clone(),
+                })
+                .clone()
+            {
                 for message in other_user_messages.messages.iter_mut() {
-                    if (message.addressee == Some(other_user.clone()) && message.sender == Some(caller_principal))
-                        || (message.addressee == Some(caller_principal) && message.sender == Some(other_user.clone()))
-                        && message.status != MensajeStatus::Read
+                    if (message.addressee == Some(other_user.clone())
+                        && message.sender == Some(caller_principal))
+                        || (message.addressee == Some(caller_principal)
+                            && message.sender == Some(other_user.clone()))
+                            && message.status != MensajeStatus::Read
                     {
                         message.status = MensajeStatus::Read;
                     }
                 }
 
                 // Vuelve a insertar el UserMessages actualizado en el mapa
-                um.insert(KeyPrincipal { key: other_user.clone() }, other_user_messages);
+                um.insert(
+                    KeyPrincipal {
+                        key: other_user.clone(),
+                    },
+                    other_user_messages,
+                );
             }
         }
     });
 
     Ok(())
 }
-
 
 #[ic_cdk::update]
 fn add_review(review: CreateReview) -> Result<(), ItemError> {
@@ -1057,7 +1215,10 @@ fn update_purchase_status_to_shipped(id: u64) -> Result<(), ItemError> {
         // Envía un mensaje al comprador
         if let Some(buyer_principal) = purchase.buyer {
             let message = SendMessage {
-                content: format!("¡Buenas noticias! Tu producto ha sido enviado. ID de la compra: {}", id),
+                content: format!(
+                    "¡Buenas noticias! Tu producto ha sido enviado. ID de la compra: {}",
+                    id
+                ),
                 addressee: buyer_principal,
             };
             send_message_by_canister(message)?;
@@ -1188,7 +1349,9 @@ fn purchase_item(id: u64, quantity: u64) -> Result<ItemSuccess, ItemError> {
 #[ic_cdk::query]
 fn has_profile() -> bool {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
     PROFILES.with(|p| {
         // Usa KeyPrincipal en lugar de Principal
         p.borrow().get(&key_principal).is_some()
@@ -1203,23 +1366,140 @@ fn create_profile(profile: CreateProfile) -> Result<(), ItemError> {
     }
 
     let value: Profile = Profile {
-        user: Some(caller_principal),
-        username: profile.username,
+        username: profile.username.clone(),
         profile_picture: profile.profile_picture,
         about: profile.about,
         active: false,
         last_connection: None,
     };
 
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
-    // Usa KeyPrincipal en lugar de Principal
-    PROFILES.with(|p| p.borrow_mut().insert(key_principal, value));
+    let key_principal = KeyPrincipal {
+        key: caller_principal.clone(),
+    }; // Crea un KeyPrincipal
+       // Usa KeyPrincipal en lugar de Principal
+    PROFILES.with(|p| p.borrow_mut().insert(key_principal.clone(), value));
+
+    // Actualiza PREFIX_INDEX y USERNAME_TO_KEY
+    let username_prefixes = get_prefixes(&profile.username, 3); // Asume un min_length de 3
+    for prefix in username_prefixes {
+        PREFIX_INDEX.with(|p| {
+            let mut index = p.borrow_mut();
+            if let Some(_) = index.get(&prefix) {
+                let mut new_entry = index.remove(&prefix).unwrap();
+                new_entry.field.push(profile.username.clone());
+                index.insert(prefix, new_entry);
+            } else {
+                index.insert(
+                    prefix,
+                    IndexUserName {
+                        field: vec![profile.username.clone()],
+                    },
+                );
+            }
+        });
+    }
+    USERNAME_TO_KEY.with(|u| {
+        u.borrow_mut()
+            .insert(
+                UsernameKey {
+                    username: profile.username.clone(),
+                    key_principal: key_principal.clone(),
+                },
+                key_principal,
+            );
+    });
+
     Ok(())
 }
+
+
+#[ic_cdk::query]
+fn autocomplete_search(prefix: String) -> Vec<(String, Principal)> {
+    // Convierte el prefijo a minúsculas
+    let prefix = prefix.to_lowercase();
+
+    // Normaliza el prefijo (por ejemplo, reemplaza "ñ" por "n")
+    let prefix: String = prefix.nfkd().collect();
+
+    let mut usernames = Vec::new();
+    PREFIX_INDEX.with(|p| {
+        let index = p.borrow();
+        for (key, entry) in index.iter() {
+            // Calcula la distancia de Levenshtein entre el prefijo y la clave
+            let distance = levenshtein(&prefix, &key);
+
+            // Si la distancia es menor que un cierto umbral, añade los nombres de usuario a los resultados
+            if distance <= 3 {  // Asume un umbral de 3
+                for username in &entry.field {
+                    USERNAME_TO_KEY.with(|u| {
+                        let map = u.borrow();
+                        for (username_key, key_principal) in map.iter() {
+                            if username_key.username == *username {
+                                usernames.push((username.clone(), key_principal.key.clone()));
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+    // Si no se encontraron resultados, devuelve sugerencias "aleatorias"
+    if usernames.is_empty() {
+        let all_usernames: Vec<(String, Principal)> = USERNAME_TO_KEY.with(|u| {
+            u.borrow()
+                .iter()
+                .map(|(username_key, key_principal)| (username_key.username.clone(), key_principal.key.clone()))
+                .collect()
+        });
+
+        // Filtra los nombres de usuario que comienzan con la letra ingresada por el usuario
+        let all_usernames: Vec<(String, Principal)> = all_usernames.into_iter().filter(|(username, _)| username.starts_with(&prefix)).collect();
+
+        // Usa una función hash en el prefijo para obtener un índice de inicio "aleatorio"
+        let mut hasher = DefaultHasher::new();
+        prefix.hash(&mut hasher);
+        let hash = hasher.finish();
+
+        // Usa el hash para seleccionar un índice de inicio en la lista de nombres de usuario
+        let start_index = if !all_usernames.is_empty() {
+            (hash as usize) % all_usernames.len()
+        } else {
+            0
+        };
+
+        // Toma los siguientes 5 nombres de usuario a partir del índice de inicio
+        let end_index = start_index + 5;
+        for i in start_index..end_index {
+            let index = i % all_usernames.len(); // Usa el operador de módulo para envolver alrededor del final de la lista
+            usernames.push(all_usernames[index].clone());
+        }
+    }
+
+    // Elimina duplicados y ordena los nombres de usuario de tal manera que los que comienzan con la letra ingresada por el usuario aparezcan primero
+    usernames.sort_by(|(a, _), (b, _)| {
+        let a_starts_with_prefix = a.starts_with(&prefix);
+        let b_starts_with_prefix = b.starts_with(&prefix);
+        match (a_starts_with_prefix, b_starts_with_prefix) {
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            _ => a.cmp(b),
+        }
+    });
+
+    usernames
+}
+
+
+
+
+
 #[ic_cdk::update]
 fn add_picture(picture: AddProfilePicture) -> Result<(), ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     PROFILES.with(|p| {
         let old_profile_opt = p.borrow().get(&key_principal);
@@ -1231,7 +1511,6 @@ fn add_picture(picture: AddProfilePicture) -> Result<(), ItemError> {
         }
 
         let value: Profile = Profile {
-            user: old_profile.user,
             username: old_profile.username,
             profile_picture: picture.profile_picture,
             about: old_profile.about,
@@ -1251,38 +1530,6 @@ fn add_picture(picture: AddProfilePicture) -> Result<(), ItemError> {
 
 
 #[ic_cdk::query]
-fn get_user_profile() -> Result<Profile, ItemError> {
-    let user_principal = ic_cdk::api::caller();
-
-    // Buscar si el usuario tiene un perfil
-    PROFILES.with(|profiles| {
-        let profiles = profiles.borrow();
-        for (_id, profile) in profiles.iter() {
-            if profile.user == Some(user_principal) {
-                // Si el usuario existe, devolver su perfil
-                return Ok(profile.clone());
-            }
-        }
-        // Si no se encontró un perfil, devolver un error
-        Err(ItemError::NotExist)
-    })
-}
-#[ic_cdk::query]
-fn get_profile_by_principal(principal: Principal) -> Result<Profile, ItemError> {
-    // Buscar si el usuario tiene un perfil
-    PROFILES.with(|profiles| {
-        let profiles = profiles.borrow();
-        for (_id, profile) in profiles.iter() {
-            if profile.user == Some(principal) {
-                // Si el usuario existe, devolver su perfil
-                return Ok(profile.clone());
-            }
-        }
-        // Si no se encontró un perfil, devolver un error
-        Err(ItemError::NotExist)
-    })
-}
-#[ic_cdk::query]
 fn get_profile_key_by_principal(principal: Principal) -> Result<Profile, ItemError> {
     let key_principal = KeyPrincipal { key: principal }; // Crea un KeyPrincipal
 
@@ -1290,7 +1537,21 @@ fn get_profile_key_by_principal(principal: Principal) -> Result<Profile, ItemErr
         // Intenta obtener el perfil directamente usando el KeyPrincipal
         match profiles.borrow().get(&key_principal) {
             Some(profile) => Ok(profile.clone()), // Si el perfil existe, devolverlo
-            None => Err(ItemError::NotExist), // Si no se encontró un perfil, devolver un error
+            None => Err(ItemError::NotExist),     // Si no se encontró un perfil, devolver un error
+        }
+    })
+}
+
+#[ic_cdk::query]
+fn get_user_profile() -> Result<Profile, ItemError> {
+    let principal = ic_cdk::api::caller();
+    let key_principal = KeyPrincipal { key: principal }; // Crea un KeyPrincipal
+
+    PROFILES.with(|profiles| {
+        // Intenta obtener el perfil directamente usando el KeyPrincipal
+        match profiles.borrow().get(&key_principal) {
+            Some(profile) => Ok(profile.clone()), // Si el perfil existe, devolverlo
+            None => Err(ItemError::NotExist),     // Si no se encontró un perfil, devolver un error
         }
     })
 }
@@ -1299,7 +1560,9 @@ fn get_profile_key_by_principal(principal: Principal) -> Result<Profile, ItemErr
 #[ic_cdk::update]
 fn activate_profile() -> Result<(), ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     PROFILES.with(|profiles| {
         let mut profiles = profiles.borrow_mut();
@@ -1317,7 +1580,9 @@ fn activate_profile() -> Result<(), ItemError> {
 #[ic_cdk::update]
 fn desactivate_profile() -> Result<(), ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     PROFILES.with(|profiles| {
         let mut profiles = profiles.borrow_mut();
@@ -1335,14 +1600,16 @@ fn desactivate_profile() -> Result<(), ItemError> {
 
 #[ic_cdk::query]
 fn is_active(principal: Principal) -> Result<bool, ItemError> {
-    let profile = get_profile_by_principal(principal)?;
+    let profile = get_profile_key_by_principal(principal)?;
     Ok(profile.active)
 }
 
 #[ic_cdk::update]
 fn associate_address(new_address: CreateUserAddress) -> Result<ItemSuccess, ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     ADDRESS_BOOK.with(|book| {
         let mut book = book.borrow_mut();
@@ -1400,7 +1667,9 @@ fn get_item_owner(item_id: u64) -> Result<Principal, ItemError> {
 #[ic_cdk::query]
 fn get_user_addresses() -> Result<Vec<(u64, Address)>, ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     // Buscar si el usuario tiene una entrada en la libreta de direcciones
     ADDRESS_BOOK.with(|book| {
@@ -1408,19 +1677,23 @@ fn get_user_addresses() -> Result<Vec<(u64, Address)>, ItemError> {
         if let Some(user_address) = book.get(&key_principal) {
             // Si el usuario existe, devolver todas sus direcciones junto con su índice
             if let Some(user_addresses) = &user_address.addresses {
-                return Ok(user_addresses.iter().enumerate().map(|(i, addr)| (i as u64, addr.clone())).collect());
+                return Ok(user_addresses
+                    .iter()
+                    .enumerate()
+                    .map(|(i, addr)| (i as u64, addr.clone()))
+                    .collect());
             }
         }
         Err(ItemError::NotExist)
     })
 }
 
-
-
 #[ic_cdk::update]
 fn update_address(new_address: UserAddressEdit) -> Result<(), ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal { key: caller_principal }; // Crea un KeyPrincipal
+    let key_principal = KeyPrincipal {
+        key: caller_principal,
+    }; // Crea un KeyPrincipal
 
     ADDRESS_BOOK.with(|p| {
         let old_address_opt = p.borrow().get(&key_principal);
@@ -1504,7 +1777,6 @@ fn check_if_profile_exists(principal: Principal) -> bool {
     let key_principal = KeyPrincipal { key: principal }; // Crea un KeyPrincipal
     PROFILES.with(|p| p.borrow().contains_key(&key_principal)) // Usa KeyPrincipal en lugar de id
 }
-
 
 #[ic_cdk::query]
 fn get_items() -> Vec<(u64, Item)> {

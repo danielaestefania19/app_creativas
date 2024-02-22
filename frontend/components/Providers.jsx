@@ -110,7 +110,7 @@ const ItemsUploader = () => {
           description,
           image: response.data.IpfsHash,
           contract_address: contract_frac.address,
-          billing_address: defaultAccount.toString(),
+          billing_address: defaultAccount,
           stock,
           category
 
