@@ -140,6 +140,10 @@ export type Result = { 'Ok' : null } |
   { 'Err' : ItemError };
 export type ResultItems = { 'Ok' : Array<[bigint, Item]> } |
   { 'Err' : ItemError };
+export interface ResultSearch {
+  'matches' : boolean,
+  'users' : Array<[string, Principal]>,
+}
 export type Result_Bool = { 'Ok' : boolean } |
   { 'Err' : ItemError };
 export type Result_get = { 'Ok' : string } |
@@ -190,7 +194,7 @@ export interface _SERVICE {
   'add_review' : ActorMethod<[CreateReview], Result>,
   'add_token_to_principal' : ActorMethod<[string], Result>,
   'associate_address' : ActorMethod<[CreateUserAddress], undefined>,
-  'autocomplete_search' : ActorMethod<[string], Array<[string, Principal]>>,
+  'autocomplete_search' : ActorMethod<[string], ResultSearch>,
   'create_profile' : ActorMethod<[CreateProfile], Result>,
   'create_purchase' : ActorMethod<[CreatePurchase], Result>,
   'desactivate_profile' : ActorMethod<[], Result>,

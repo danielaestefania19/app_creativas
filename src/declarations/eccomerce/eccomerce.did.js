@@ -33,6 +33,10 @@ export const idlFactory = ({ IDL }) => {
     'phone_number' : IDL.Text,
   });
   const CreateUserAddress = IDL.Record({ 'address' : Address });
+  const ResultSearch = IDL.Record({
+    'matches' : IDL.Bool,
+    'users' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Principal)),
+  });
   const CreatePurchase = IDL.Record({
     'id_shipping_address' : IDL.Nat64,
     'name' : IDL.Text,
@@ -201,11 +205,7 @@ export const idlFactory = ({ IDL }) => {
     'add_review' : IDL.Func([CreateReview], [Result], []),
     'add_token_to_principal' : IDL.Func([IDL.Text], [Result], []),
     'associate_address' : IDL.Func([CreateUserAddress], [], []),
-    'autocomplete_search' : IDL.Func(
-        [IDL.Text],
-        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Principal))],
-        ['query'],
-      ),
+    'autocomplete_search' : IDL.Func([IDL.Text], [ResultSearch], ['query']),
     'create_profile' : IDL.Func([CreateProfile], [Result], []),
     'create_purchase' : IDL.Func([CreatePurchase], [Result], []),
     'desactivate_profile' : IDL.Func([], [Result], []),

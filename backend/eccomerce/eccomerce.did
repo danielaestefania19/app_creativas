@@ -204,6 +204,12 @@ type ItemError = variant {
     InvalidRating;
 };
 
+type ResultSearch = record {
+    matches: bool;
+    users: vec record { text; principal};
+};
+
+
 
 type Result = variant {
     Ok;
@@ -253,7 +259,7 @@ type Result_get_purchases = variant {
 
 type InboxResult = record {
     conversations: vec Conversation;
-    total_unread_chats: nat64;
+    
 };
 
 type Result_get_private_chat = variant {
@@ -270,6 +276,7 @@ type Result_Bool = variant {
     Ok: bool;
     Err: ItemError;
 };
+
 
 service : (CreateProfile) -> {
     get_items : () -> (vec record { nat64; Item }) query;
@@ -304,7 +311,7 @@ service : (CreateProfile) -> {
     get_tokens_for_principal: (text) -> (Result_get_tokens) query;
     send_message_2 : (SendMessage2) -> (Result); 
     get_inbox: () -> (Result_get_inbox) query;
-    autocomplete_search: (text) -> ( vec record { text; principal}) query;
+    autocomplete_search: (text) -> (ResultSearch) query;
     whoami : () -> (principal) query;
     manager : () -> (principal) query;
 };
