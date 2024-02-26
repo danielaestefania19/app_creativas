@@ -95,6 +95,11 @@ impl Rating {
     }
 }
 #[derive(CandidType, Deserialize, Clone)]
+pub struct ResultSearch {
+    matches: bool, 
+    users: Vec<(String, Principal)>
+}
+#[derive(CandidType, Deserialize, Clone)]
 pub struct Review {
     rating: Rating,
     review: String,
@@ -141,11 +146,6 @@ impl Storable for Profile {
         max_size: MAX_VALUE_SIZE_PROFILE,
         is_fixed_size: false,
     };
-}
-#[derive(Default)]
-struct Trie {
-    children: HashMap<char, Trie>,
-    is_end_of_word: bool,
 }
 
 #[derive(CandidType, Deserialize, Clone)]
@@ -209,13 +209,6 @@ impl Storable for UserMessages {
 pub struct SendMessage {
     content: String,
     addressee: Principal,
-}
-
-#[derive(CandidType, Deserialize, Clone)]
-pub struct SendMessage2 {
-    content: String,
-    addressee_text: String,
-
 }
 
 #[derive(CandidType, Deserialize, Clone)]
@@ -288,7 +281,7 @@ impl Storable for  UsernameKey {
 #[derive(CandidType, Deserialize, Clone)]
 pub struct InboxResult {
     conversations: Vec<Conversation>,
-    total_unread_chats: u64,
+    
 }
 
 impl Storable for Message {
@@ -757,6 +750,12 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     Ok(())
 }
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> 34cf13c6f2962b3d2c8b83fd84a52fe874c93eca
 #[ic_cdk::update]
 fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
     let sender = ic_cdk::id(); // El remitente es el Principal del canister
@@ -882,7 +881,6 @@ fn get_tokens_for_principal(principal_str: String) -> Result<Vec<String>, ItemEr
 fn get_inbox() -> Result<InboxResult, ItemError> {
     let caller_principal = ic_cdk::api::caller();
     let mut conversations: HashMap<Principal, (Message, u64, bool)> = HashMap::new();
-    let mut total_unread_chats = 0;
 
     let user_messages = USER_MESSAGES.with(|um| {
         let um = um.borrow();
@@ -933,11 +931,6 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
             };
             conversations.insert(other_user, (message.clone(), new_unread_count, new_unread));
         }
-
-        if message.status == MensajeStatus::Sent {
-            user_messages.unread += 1;
-            total_unread_chats += 1;
-        }
     }
 
     // Si conversations está vacío, añade el último mensaje comprobado
@@ -978,7 +971,6 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
         .collect();
     Ok(InboxResult {
         conversations,
-        total_unread_chats,
     })
 }
 
@@ -1365,30 +1357,25 @@ fn create_profile(profile: CreateProfile) -> Result<(), ItemError> {
     Ok(())
 }
 
-
 #[ic_cdk::query]
-fn autocomplete_search(prefix: String) -> Vec<(String, Principal)> {
-    // Convierte el prefijo a minúsculas
+fn autocomplete_search(prefix: String) -> ResultSearch {
     let prefix = prefix.to_lowercase();
-
-    // Normaliza el prefijo (por ejemplo, reemplaza "ñ" por "n")
     let prefix: String = prefix.nfkd().collect();
 
-    let mut usernames = Vec::new();
+    let mut usernames = HashSet::new();
+
     PREFIX_INDEX.with(|p| {
         let index = p.borrow();
         for (key, entry) in index.iter() {
-            // Calcula la distancia de Levenshtein entre el prefijo y la clave
             let distance = levenshtein(&prefix, &key);
 
-            // Si la distancia es menor que un cierto umbral, añade los nombres de usuario a los resultados
-            if distance <= 3 {  // Asume un umbral de 3
+            if distance <= 3 {
                 for username in &entry.field {
                     USERNAME_TO_KEY.with(|u| {
                         let map = u.borrow();
                         for (username_key, key_principal) in map.iter() {
                             if username_key.username == *username {
-                                usernames.push((username.clone(), key_principal.key.clone()));
+                                usernames.insert((username.clone(), key_principal.key.clone()));
                             }
                         }
                     });
@@ -1397,7 +1384,8 @@ fn autocomplete_search(prefix: String) -> Vec<(String, Principal)> {
         }
     });
 
-    // Si no se encontraron resultados, devuelve sugerencias "aleatorias"
+    let matches = !usernames.is_empty();
+
     if usernames.is_empty() {
         let all_usernames: Vec<(String, Principal)> = USERNAME_TO_KEY.with(|u| {
             u.borrow()
@@ -1406,33 +1394,38 @@ fn autocomplete_search(prefix: String) -> Vec<(String, Principal)> {
                 .collect()
         });
 
-        // Filtra los nombres de usuario que comienzan con la letra ingresada por el usuario
-        let all_usernames: Vec<(String, Principal)> = all_usernames.into_iter().filter(|(username, _)| username.starts_with(&prefix)).collect();
-
-        // Usa una función hash en el prefijo para obtener un índice de inicio "aleatorio"
         let mut hasher = DefaultHasher::new();
         prefix.hash(&mut hasher);
         let hash = hasher.finish();
 
-        // Usa el hash para seleccionar un índice de inicio en la lista de nombres de usuario
         let start_index = if !all_usernames.is_empty() {
-            (hash as usize) % all_usernames.len()
+            let len = all_usernames.len();
+            if len > 1 {
+                (hash as usize) % len
+            } else {
+                0
+            }
         } else {
             0
         };
 
-        // Toma los siguientes 5 nombres de usuario a partir del índice de inicio
         let end_index = start_index + 5;
-        for i in start_index..end_index {
-            let index = i % all_usernames.len(); // Usa el operador de módulo para envolver alrededor del final de la lista
-            usernames.push(all_usernames[index].clone());
+        if !all_usernames.is_empty() {
+            for i in start_index..end_index {
+                let index = i % all_usernames.len();
+                // Comprueba si el Principal ya está en el HashSet antes de insertarlo
+                if !usernames.contains(&all_usernames[index]) {
+                    usernames.insert(all_usernames[index].clone());
+                }
+            }
         }
     }
 
-    // Elimina duplicados y ordena los nombres de usuario de tal manera que los que comienzan con la letra ingresada por el usuario aparezcan primero
+    let mut usernames: Vec<_> = usernames.into_iter().collect();
+
     usernames.sort_by(|(a, _), (b, _)| {
-        let a_starts_with_prefix = a.starts_with(&prefix);
-        let b_starts_with_prefix = b.starts_with(&prefix);
+        let a_starts_with_prefix = a.to_lowercase().starts_with(&prefix);
+        let b_starts_with_prefix = b.to_lowercase().starts_with(&prefix);
         match (a_starts_with_prefix, b_starts_with_prefix) {
             (true, false) => std::cmp::Ordering::Less,
             (false, true) => std::cmp::Ordering::Greater,
@@ -1440,46 +1433,12 @@ fn autocomplete_search(prefix: String) -> Vec<(String, Principal)> {
         }
     });
 
-    usernames
+    ResultSearch {
+        matches: matches,
+        users: usernames
+    }
 }
 
-
-
-
-
-#[ic_cdk::update]
-fn add_picture(picture: AddProfilePicture) -> Result<(), ItemError> {
-    let caller_principal = ic_cdk::api::caller();
-    let key_principal = KeyPrincipal {
-        key: caller_principal,
-    }; // Crea un KeyPrincipal
-
-    PROFILES.with(|p| {
-        let old_profile_opt = p.borrow().get(&key_principal);
-        let old_profile: Profile;
-
-        match old_profile_opt {
-            Some(value) => old_profile = value.clone(),
-            None => return Err(ItemError::NotExist),
-        }
-
-        let value: Profile = Profile {
-            username: old_profile.username,
-            profile_picture: picture.profile_picture,
-            about: old_profile.about,
-            active: old_profile.active,
-            last_connection: old_profile.last_connection,
-        };
-
-        // Usa KeyPrincipal en lugar de id
-        let result = p.borrow_mut().insert(key_principal, value);
-
-        match result {
-            Some(_) => Ok(()),
-            None => Err(ItemError::UpdateError),
-        }
-    })
-}
 
 
 #[ic_cdk::query]

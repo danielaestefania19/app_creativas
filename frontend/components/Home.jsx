@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
-import { useAuth } from './Login'; // Importa useAuth aquí
 import { AuthContext } from './AuthContext.jsx';
 import { Img } from '@chakra-ui/react';
 import favicon from '../assets/favicon.png';
