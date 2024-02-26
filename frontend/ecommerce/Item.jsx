@@ -6,6 +6,7 @@ import Crypay from "../../utils/abi/Crypay.json";
 import PaymentDetails from "../components/PaymentDetails.jsx";
 import { AuthContext } from '../components/AuthContext.jsx';
 import { WalletContext } from '../components/WalletContext.jsx';
+import { useCart } from "./CartContext.jsx";
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -13,14 +14,14 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
-const Item = ({ id, name, price, description, image, contract_address, addToCart }) => {
+const Item = ({ id, name, price, description, image, contract_address }) => {
   const navigate = useNavigate();
   const [externalPaymentId, setExternalPaymentId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const { whoami, isUserAuthenticated } = useContext(AuthContext);
-
+  const { addToCart } = useCart();
 
   console.log(id)
 
@@ -99,6 +100,12 @@ const Item = ({ id, name, price, description, image, contract_address, addToCart
       setError("Error starting payment: " + err.message);
     }
   };
+
+  const handleAddToCart = () => {
+    const item = { id, name, price, description, image, contract_address };
+    addToCart(item);
+  }
+
   return (
     <div className="h-[300px] relative bg-cover bg-center w-full flex flex-col justify-between rounded-lg overflow-hidden shadow-md bg-white p-4 mt-2">
       <h2 className='text-center text-xl font-bold text-black'>{name}</h2>
@@ -118,16 +125,15 @@ const Item = ({ id, name, price, description, image, contract_address, addToCart
         </button>
         <button
           className="bg-blue-500 text-white px-3 py-1 rounded"
-          onClick={() => addToCart()}
+          onClick={handleAddToCart}
         >
-         Add to cart
+          Add to cart
         </button>
       </div>
-      {showPaymentDetails && <PaymentDetails user={whoami} item_id={id} externalPaymentId={externalPaymentId} contractAddress={contract_address} closeModal={() => setShowPaymentDetails(false)}/>}
+      {showPaymentDetails && <PaymentDetails user={whoami} item_id={id} externalPaymentId={externalPaymentId} contractAddress={contract_address} closeModal={() => setShowPaymentDetails(false)} />}
       {error && <div className="error">{error}</div>}
     </div>
   );
 };
 
 export default Item;
-

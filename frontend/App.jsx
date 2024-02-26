@@ -74,7 +74,7 @@ function App() {
                 </>
               }
             />
-            <Route path="/other/shop" element={<Eccomerce/>} /> {/* Usa eccomerce aquí */}
+            <Route path="/other/shop" element={<Shop/>} /> {/* Usa eccomerce aquí */}
           <Route path="/other/createtokens" element={<AddAsset/>} />
           <Route path="/other/profile" element={<UserProfile/>} />
           <Route path="/other/invests" element={<YourInvest/>} />

@@ -26,10 +26,10 @@ type Memory = VirtualMemory<DefaultMemoryImpl>;
 const MAX_VALUE_SIZE_ITEM: u32 = 5000;
 const MAX_VALUE_SIZE_ADDRESS: u32 = 5000;
 const MAX_VALUE_SIZE_PURCHASE: u32 = 8000;
-const MAX_VALUE_SIZE_MESSAGE: u32 = 5000;
+const MAX_VALUE_SIZE_MESSAGE: u32 = 8000;
 const MAX_VALUE_SIZE_PROFILE: u32 = 5000;
 const MAX_VALUE_SIZE_PRINCIPAL: u32 = 200;
-const MAX_VALUE_SIZE_USER_MESSAGES: u32 = 800;
+const MAX_VALUE_SIZE_USER_MESSAGES: u32 = 8000;
 const MAX_VALUE_SIZE_FCM_TOKENS: u32 = 8000;
 const MAX_VALUE_SIZE_PRINCIPAL_INDEX: u32 = 200;
 
@@ -757,53 +757,6 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     Ok(())
 }
 
-<<<<<<< HEAD
-#[ic_cdk::update]
-fn send_message_2(message: SendMessage2) -> Result<(), ItemError> {
-    let principal = Principal::from_text(&message.addressee_text).map_err(|_| ItemError::NotExist)?;
-    let sender = ic_cdk::api::caller();
-    let new_message = Message {
-        sender: Some(sender.clone()),
-        content: message.content,
-        addressee: Some(principal),
-        time: ic_cdk::api::time(),
-        status: MensajeStatus::Sent,
-    };
-
-    // Añade el nuevo mensaje a los mensajes del usuario receptor
-    USER_MESSAGES.with(|um| {
-        let mut um = um.borrow_mut();
-        let mut user_messages = um.get(&KeyPrincipal { key: principal.clone() }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
-        user_messages.messages.push(new_message.clone());
-        um.insert(KeyPrincipal { key: principal.clone() }, user_messages);
-    });
-
-    // Añade el nuevo mensaje a los mensajes del usuario que envía
-    USER_MESSAGES.with(|um| {
-        let mut um = um.borrow_mut();
-        let mut user_messages = um.get(&KeyPrincipal { key: sender }).clone().unwrap_or(UserMessages { messages: vec![], last_checked: 0, unread: 0 });
-        user_messages.messages.push(new_message);
-        um.insert(KeyPrincipal { key: sender }, user_messages);
-    });
-
-    // Inicializa last_seen a 0 para el receptor del mensaje
-    LAST_SEEN.with(|ls| {
-        let mut ls = ls.borrow_mut();
-        ls.insert(KeyPrincipal { key: principal.clone() }, 0);
-    });
-
-    // Inicializa last_seen a 0 para el remitente del mensaje
-    LAST_SEEN.with(|ls| {
-        let mut ls = ls.borrow_mut();
-        ls.insert(KeyPrincipal { key: sender }, 0);
-    });
-
-    Ok(())
-}
-
-
-=======
->>>>>>> c272f5a35b497a39ec53d2f12cd68f3520c35aad
 #[ic_cdk::update]
 fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
     let sender = ic_cdk::id(); // El remitente es el Principal del canister
