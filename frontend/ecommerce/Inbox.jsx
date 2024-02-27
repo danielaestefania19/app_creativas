@@ -4,6 +4,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RiChatNewLine } from "react-icons/ri";
 import { eccomerce } from "../../src/declarations/eccomerce/index.js";
+import { AuthClient, IdbStorage } from "@dfinity/auth-client";
+import { HttpAgent, Actor } from "@dfinity/agent";
 
 
 const Inbox = () => {
@@ -11,7 +13,7 @@ const Inbox = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [privateChat, setPrivateChat] = useState([]);
   const [profiles, setProfiles] = useState({});
-  const { whoami, actor } = useContext(AuthContext);
+  const { whoami, actor, userPrincipal } = useContext(AuthContext);
   const [messageContent, setMessageContent] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [directResults, setDirectResults] = useState([]); // Nuevo estado para almacenar los resultados directos
@@ -20,28 +22,28 @@ const Inbox = () => {
   const [showAllResults, setShowAllResults] = useState(false);
 
   const handleSearchChange = async (event) => {
-      setSearchTerm(event.target.value);
-      if (event.target.value !== "") {
-          const results = await eccomerce.autocomplete_search(event.target.value);
-          if (results.matches) {
-              setDirectResults(results.users);
-              setRandomResults([]);
-          } else {
-              setDirectResults([]);
-              setRandomResults(results.users);
-          }
+    setSearchTerm(event.target.value);
+    if (event.target.value !== "") {
+      const results = await eccomerce.autocomplete_search(event.target.value);
+      if (results.matches) {
+        setDirectResults(results.users);
+        setRandomResults([]);
       } else {
-          setDirectResults([]);
-          setRandomResults([]);
+        setDirectResults([]);
+        setRandomResults(results.users);
       }
+    } else {
+      setDirectResults([]);
+      setRandomResults([]);
+    }
   };
 
   const handleNewMessageClick = () => {
-      setShowSearch(true);
+    setShowSearch(true);
   };
 
   const handleShowAllResults = () => {
-      setShowAllResults(true);
+    setShowAllResults(true);
   };
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -54,7 +56,6 @@ const Inbox = () => {
           // Obtén y guarda los perfiles para todos los chats
           chats.forEach((chat) => {
             actor.get_profile_key_by_principal(chat.other_user).then((profile) => {
-              console.log(profile)
               console.log(chat.other_user)
               if (profile && profile.Ok) {
                 setProfiles((prevProfiles) => ({
@@ -80,6 +81,7 @@ const Inbox = () => {
     const intervalId = setInterval(() => {
       if (selectedChat) {
         actor.get_private_chat(selectedChat.other_user).then((data) => {
+          console.log(data)
           if (data && data.Ok && Array.isArray(data.Ok)) {
             setPrivateChat(data.Ok);
           } else {
@@ -89,7 +91,6 @@ const Inbox = () => {
 
         // Llama a get_profile_by_principal con selectedChat.other_user
         actor.get_profile_key_by_principal(selectedChat.other_user).then((profile) => {
-          console.log(profile)
           if (profile && profile.Ok) {
             // Guarda el perfil en el estado
             setProfiles((prevProfiles) => ({
@@ -141,53 +142,13 @@ const Inbox = () => {
             <div className="mx-3 my-3">
               <div className="relative text-gray-600">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-2">
-                  <svg
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                    className="w-6 h-6 text-gray-300"
-                  >
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" className="w-6 h-6 text-gray-300" >
                     <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                   </svg>
                 </span>
-                <input
-                  type="search"
-                  className="block w-full py-2 pl-10 bg-gray-100 rounded outline-none"
-                  name="search"
-                  placeholder="Search"
-                  required
-                />
-                <div class="relative w-full p-6 overflow-y-auto h-[40rem]">
-                  <ul class="space-y-2">
-                    <li class="flex justify-start">
-                      <div class="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow">
-                        <span class="block">Hi</span>
-                      </div>
-                    </li>
-                    <li class="flex justify-end">
-                      <div class="relative max-w-xl px-4 py-2 text-gray-700 bg-gray-100 rounded shadow">
-                        <span class="block">Hiiii</span>
-                      </div>
-                    </li>
-                    <li class="flex justify-end">
-                      <div class="relative max-w-xl px-4 py-2 text-gray-700 bg-gray-100 rounded shadow">
-                        <span class="block">how are you?</span>
-                      </div>
-                    </li>
-                    <li class="flex justify-start">
-                      <div class="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow">
-                        <span class="block">Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                        </span>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
+                <input type="search" className="block w-full py-2 pl-10 bg-gray-100 rounded outline-none" name="search" placeholder="Search" required />
               </div>
             </div>
-
 
             <ul className="overflow-auto h-[32rem]">
               <h2 className="my-2 mb-2 ml-2 text-lg text-gray-600">Chats</h2>
@@ -195,33 +156,69 @@ const Inbox = () => {
                 <li key={index}>
                   <a
                     onClick={() => setSelectedChat(chat)}
-                    className={`flex items-center px-3 py-2 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer ${chat.unread ? 'bg-gray-100' : ''} focus:outline-none`}
-                  >
-                    <div>
-                      {/* Muestra el nombre de usuario del perfil en lugar de chat.other_user */}
-                      <h3>{profiles[chat.other_user]?.username}</h3>
-                      <p>{chat.last_message.content}</p>
+                    className={`flex items-center px-3 py-2 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer ${chat.unread ? 'bg-gray-100' : ''} focus:outline-none`}>
+                    <img class="object-cover w-10 h-10 rounded-full"
+                      src="https://cdn.pixabay.com/photo/2018/09/12/12/14/man-3672010__340.jpg" alt="username" />
+
+                    <div className="w-full pb-2">
+                      <div class="flex justify-between">
+
+                        {/* Muestra el nombre de usuario del perfil en lugar de chat.other_user */}
+                        <h3 className="block ml-2 font-semibold text-gray-600">{profiles[chat.other_user]?.username}</h3>
+                        <p>{chat.last_message.content}</p>
+                        <span className="block ml-2 text-sm text-gray-600">25 minutes</span>
+                      </div>
+                      {chat.unread_count > 0 && <span className="block ml-2 text-sm text-gray-600">{chat.unread_count}</span>}
                     </div>
-                    {chat.unread_count > 0 && <span>{chat.unread_count}</span>}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
+
+
           <div className="hidden lg:col-span-2 lg:block">
             <div className="w-full">
               <div className="relative flex items-center p-3 border-b border-gray-300">
+                <img class="object-cover w-10 h-10 rounded-full"
+                  src="https://cdn.pixabay.com/photo/2018/01/15/07/51/woman-3083383__340.jpg" alt="username" />
+                <span class="block ml-2 font-bold text-gray-600">Emma</span>
+                <span class="absolute w-3 h-3 bg-green-600 rounded-full left-10 top-3">
+                </span>
                 {/* ... Contenido del encabezado del chat ... */}
               </div>
               <div className="relative w-full p-6 overflow-y-auto h-[40rem]">
                 <ul className="space-y-2">
-                  {privateChat.map((message, index) => (
-                    <li key={index}>
-                      <p>{message.content}</p>
-                    </li>
-                  ))}
+                  {privateChat.map((message, index) => {
+                    // Convierte message.sender a texto
+                    const senderText = message.sender[0].toText();
+                    console.log(senderText)
+                    console.log(whoami)
+
+                    if (senderText === whoami) {
+                      // Mensajes del sender
+                      return (
+                        <li className="flex justify-end" key={index}>
+                          <div className="relative max-w-xl px-4 py-2 text-gray-700 bg-gray-100 rounded shadow">
+                            <span className="block">{message.content}</span>
+                          </div>
+                        </li>
+                      );
+                    } else {
+                      // Mensajes del addressee
+                      return (
+                        <li className="flex justify-start" key={index}>
+                          <div className="relative max-w-xl px-4 py-2 text-gray-700 bg-green-200 rounded shadow">
+                            <span className="block">{message.content}</span>
+                          </div>
+                        </li>
+                      );
+                    }
+                  })}
                 </ul>
               </div>
+
+
 
               <div className="flex items-center justify-between w-full p-3 border-t border-gray-300">
                 <button>
@@ -263,24 +260,24 @@ const Inbox = () => {
                   </svg>
                 </button>
                 <button onClick={handleNewMessageClick}><RiChatNewLine /></button>
-            {showSearch && (
-                <div>
+                {showSearch && (
+                  <div>
                     <input type="text" value={searchTerm} onChange={handleSearchChange} placeholder="Buscar usuario..." />
                     {directResults.map((user, index) => (
-                        <div key={index}>
-                            <p>{user[0]}</p>
-                        </div>
+                      <div key={index}>
+                        <p>{user[0]}</p>
+                      </div>
                     ))}
                     {showAllResults && randomResults.map((user, index) => (
-                        <div key={index}>
-                            <p>{user[0]}</p>
-                        </div>
+                      <div key={index}>
+                        <p>{user[0]}</p>
+                      </div>
                     ))}
                     {randomResults.length > 0 && !showAllResults && (
-                        <button onClick={handleShowAllResults}>Ver todos los resultados</button>
+                      <button onClick={handleShowAllResults}>Ver todos los resultados</button>
                     )}
-                </div>
-            )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

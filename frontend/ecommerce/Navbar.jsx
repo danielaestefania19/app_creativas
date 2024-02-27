@@ -1,52 +1,18 @@
 import React, { useState } from 'react';
 import Logo from '../assets/Logo.png';
 import shopping from '../assets/shopping.png';
+import { useCart } from './CartContext.jsx'
+import Cart from './Card.jsx';
 
 export function Navbar() {
-  const [cart, setCart] = useState([]);
   const [cartVisible, setCartVisible] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const { cart, removeFromCart } = useCart();
 
-  const addToCart = (item) => {
-    const existingItemIndex = cart.findIndex((cartItem) => cartItem.id === item.id);
 
-    if (existingItemIndex !== -1) {
-      setCart((prevCart) =>
-        prevCart.map((cartItem, index) =>
-          index === existingItemIndex
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        )
-      );
-    } else {
-      setCart((prevCart) => [...prevCart, { ...item, quantity: 1 }]);
-    }
-
-    updateCartCount();
-  };
-
-  const removeFromCart = (index) => {
-    const newCart = [...cart];
-    newCart[index].quantity--;
-
-    if (newCart[index].quantity === 0) {
-      newCart.splice(index, 1);
-    }
-
-    setCart(newCart);
-
-    updateCartCount();
-  };
-
-  const updateCartCount = () => {
-    const count = cart.reduce((total, item) => total + item.quantity, 0);
-    setCartCount(count);
-  };
 
   const handleToggleCart = () => {
     setCartVisible(!cartVisible);
   };
-
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-0">
@@ -95,13 +61,14 @@ export function Navbar() {
             placeholder="Search..."
           />
         </div>
-        <div className='flex relative' onClick={handleToggleCart}>
+        {cartVisible && cart.length > 0 && (
+          <Cart cart={cart} removeFromCart={removeFromCart} onHideCart={handleToggleCart} />
+        )}
+        <div className='flex relative'
+          onClick={() => setCartVisible(!cartVisible)}
+        >
           <img className="h-7 w-auto ml-2" alt="Icono" src={shopping} />
-          {cartCount > 0 && (
-            <span className="absolute top-0 right-0 inline-block bg-red-500 text-black text-xs px-2 py-1 rounded-full">
-              {cartCount}
-            </span>
-          )}
+          {cart.length > 0 && <span className="badge">{cart.length}</span>}
         </div>
       </div>
     </nav>

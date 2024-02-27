@@ -25,10 +25,10 @@ const MAX_VALUE_SIZE_SHIPPING_CARD: u32 = 5000;
 const MAX_VALUE_SIZE_CATEGORY: u32 = 5000;
 const MAX_VALUE_SIZE_ADDRESS: u32 = 5000;
 const MAX_VALUE_SIZE_PURCHASE: u32 = 8000;
-const MAX_VALUE_SIZE_MESSAGE: u32 = 5000;
+const MAX_VALUE_SIZE_MESSAGE: u32 = 8000;
 const MAX_VALUE_SIZE_PROFILE: u32 = 5000;
 const MAX_VALUE_SIZE_PRINCIPAL: u32 = 200;
-const MAX_VALUE_SIZE_USER_MESSAGES: u32 = 800;
+const MAX_VALUE_SIZE_USER_MESSAGES: u32 = 8000;
 const MAX_VALUE_SIZE_FCM_TOKENS: u32 = 8000;
 const MAX_VALUE_SIZE_PRINCIPAL_INDEX: u32 = 200;
 const MAX_VALUE_SIZE_VEC_STORABLE: u32 = 8000;
@@ -1257,6 +1257,15 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     Ok(())
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> 34cf13c6f2962b3d2c8b83fd84a52fe874c93eca
+>>>>>>> c0284a3bb66c619039d96c55a0c9a389da8c6c74
 #[ic_cdk::update]
 fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
     let sender = ic_cdk::id(); // El remitente es el Principal del canister
