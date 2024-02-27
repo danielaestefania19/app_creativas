@@ -2,12 +2,9 @@
 use candid::Principal;
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
-use ic_stable_structures::{
-    storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable,
-
-};
-use std::collections::HashSet;
+use ic_stable_structures::{storable::Bound, DefaultMemoryImpl, StableBTreeMap, Storable};
 use std::collections::hash_map::DefaultHasher;
+use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use strsim::levenshtein;
 use unicode_normalization::UnicodeNormalization;
@@ -24,6 +21,8 @@ use std::{borrow::Cow, cell::RefCell};
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 const MAX_VALUE_SIZE_ITEM: u32 = 5000;
+const MAX_VALUE_SIZE_SHIPPING_CARD: u32 = 5000;
+const MAX_VALUE_SIZE_CATEGORY: u32 = 5000;
 const MAX_VALUE_SIZE_ADDRESS: u32 = 5000;
 const MAX_VALUE_SIZE_PURCHASE: u32 = 8000;
 const MAX_VALUE_SIZE_MESSAGE: u32 = 5000;
@@ -32,6 +31,10 @@ const MAX_VALUE_SIZE_PRINCIPAL: u32 = 200;
 const MAX_VALUE_SIZE_USER_MESSAGES: u32 = 800;
 const MAX_VALUE_SIZE_FCM_TOKENS: u32 = 8000;
 const MAX_VALUE_SIZE_PRINCIPAL_INDEX: u32 = 200;
+const MAX_VALUE_SIZE_VEC_STORABLE: u32 = 8000;
+const MAX_VALUE_SIZE_BOOL_STORABLE: u32 = 500;
+const MAX_VALUE_SIZE_IEM_CARD_NUMBER_STORABLE: u32 = 500;
+const MAX_VALUE_SIZE_IEM_CARD_BOOL_STORABLE: u32 = 500;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Hash, PartialEq)]
 enum RatingError {
@@ -53,6 +56,7 @@ enum ItemError {
     ItemNotFound,
     AlreadyVoted,
     InvalidRating,
+    OutOfStock,
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Hash, PartialEq)]
@@ -96,8 +100,8 @@ impl Rating {
 }
 #[derive(CandidType, Deserialize, Clone)]
 pub struct ResultSearch {
-    matches: bool, 
-    users: Vec<(String, Principal)>
+    matches: bool,
+    users: Vec<(String, Principal)>,
 }
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Review {
@@ -264,7 +268,7 @@ struct UsernameKey {
     key_principal: KeyPrincipal,
 }
 
-impl Storable for  UsernameKey {
+impl Storable for UsernameKey {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
@@ -281,7 +285,6 @@ impl Storable for  UsernameKey {
 #[derive(CandidType, Deserialize, Clone)]
 pub struct InboxResult {
     conversations: Vec<Conversation>,
-    
 }
 
 impl Storable for Message {
@@ -358,7 +361,6 @@ impl Storable for UserAddress {
 
 #[derive(CandidType, Deserialize, Clone, PartialEq)]
 pub enum PurchaseStatus {
-    Started,
     Paid,
     Shipped,
     Delivered,
@@ -411,7 +413,26 @@ impl Storable for Purchase {
     };
 }
 
-#[derive(CandidType, Deserialize, Clone, PartialEq)]
+#[derive(CandidType, Deserialize, Clone, Default)]
+pub struct VecStorable {
+    ids: Vec<u64>,
+}
+impl Storable for VecStorable {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_VEC_STORABLE,
+        is_fixed_size: false,
+    };
+}
+
+#[derive(CandidType, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub enum Category {
     Electronics,
     ClothingShoesAccessories,
@@ -441,6 +462,21 @@ impl Category {
             _ => None,
         }
     }
+}
+
+impl Storable for Category {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_CATEGORY,
+        is_fixed_size: false,
+    };
 }
 
 #[derive(CandidType, Deserialize, Clone)]
@@ -493,6 +529,115 @@ impl Storable for Item {
         is_fixed_size: false,
     };
 }
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct Card {
+    item_id: u64,
+    item: Item,
+    amount: u64,
+}
+
+impl Storable for Card {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_SHIPPING_CARD,
+        is_fixed_size: false,
+    };
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct AddItem {
+    item: u64,
+    amount: u64,
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct ShippingCard {
+    card: Vec<Card>,
+    total_price: u64,
+}
+
+impl Storable for ShippingCard {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_SHIPPING_CARD,
+        is_fixed_size: false,
+    };
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct OwnerItemCardBoolStorable {
+    owner: HashMap<u64, BoolStorable>,
+}
+
+impl Storable for OwnerItemCardBoolStorable {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_IEM_CARD_BOOL_STORABLE,
+        is_fixed_size: false,
+    };
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct OwnerItemCardNumberStorable {
+    owner: HashMap<u64, u64>,
+}
+
+impl Storable for OwnerItemCardNumberStorable {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_IEM_CARD_NUMBER_STORABLE,
+        is_fixed_size: false,
+    };
+}
+
+#[derive(Eq, PartialEq, CandidType, Deserialize, Clone, PartialOrd, Ord)]
+pub struct BoolStorable {
+    bool: bool,
+}
+impl Storable for BoolStorable {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE_BOOL_STORABLE,
+        is_fixed_size: false,
+    };
+}
+
 pub struct IDManager {
     next_id: std::cell::Cell<u64>,
 }
@@ -542,45 +687,74 @@ thread_local! {
         MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
 
     ));
-    // Cambia el tipo de clave de u64 a Principal
-static ADDRESS_BOOK: RefCell<StableBTreeMap<KeyPrincipal, UserAddress, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))),
-));
 
-     static PURCHASES: RefCell<StableBTreeMap<u64, Purchase, Memory>> = RefCell::new(StableBTreeMap::init(
-        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(2))),
-
+    static OWNER_ITEMS: RefCell<StableBTreeMap<KeyPrincipal, VecStorable, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))),
     ));
 
-    // Cambia el tipo de clave de u64 a Principal
-static PROFILES: RefCell<StableBTreeMap<KeyPrincipal, Profile, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))),
-));
-    static LAST_SEEN: RefCell<StableBTreeMap<KeyPrincipal, u64, Memory>> = RefCell::new(StableBTreeMap::init(
+    static CATEGORY_ITEMS: RefCell<StableBTreeMap<Category, VecStorable, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(2))),
+    ));
+
+    static OWNER_SHIPPING_CARD: RefCell<StableBTreeMap<KeyPrincipal, ShippingCard, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))),
+    ));
+    static OWNER_ITEM_IN_CART: RefCell<StableBTreeMap<KeyPrincipal, OwnerItemCardBoolStorable, Memory>> = RefCell::new(StableBTreeMap::init(
         MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(4))),
     ));
 
-    static USER_MESSAGES: RefCell<StableBTreeMap<KeyPrincipal, UserMessages, Memory>> = RefCell::new(StableBTreeMap::init(
+    static OWNER_ITEM_INDEX: RefCell<StableBTreeMap<KeyPrincipal, OwnerItemCardNumberStorable, Memory>> = RefCell::new(StableBTreeMap::init(
         MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(5))),
+    ));
+
+
+    // Cambia el tipo de clave de u64 a Principal
+static ADDRESS_BOOK: RefCell<StableBTreeMap<KeyPrincipal, UserAddress, Memory>> = RefCell::new(StableBTreeMap::init(
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(6))),
+));
+
+     static PURCHASES: RefCell<StableBTreeMap<u64, Purchase, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(7))),
+
+    ));
+
+    static BUYER_PURCHASES: RefCell<StableBTreeMap<KeyPrincipal, VecStorable, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(8))),
+    ));
+
+    static SELLER_SALES: RefCell<StableBTreeMap<KeyPrincipal, VecStorable, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(9))),
+    ));
+
+
+    // Cambia el tipo de clave de u64 a Principal
+static PROFILES: RefCell<StableBTreeMap<KeyPrincipal, Profile, Memory>> = RefCell::new(StableBTreeMap::init(
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(10))),
+));
+    static LAST_SEEN: RefCell<StableBTreeMap<KeyPrincipal, u64, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(11))),
+    ));
+
+    static USER_MESSAGES: RefCell<StableBTreeMap<KeyPrincipal, UserMessages, Memory>> = RefCell::new(StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(12))),
     ));
 
         // Cambia el tipo de clave de u64 a Principal
 static FCM_TOKENS: RefCell<StableBTreeMap<KeyPrincipal, FcmTokens, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(6))),
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(13))),
 ));
 
 static PREFIX_INDEX: RefCell<StableBTreeMap<String, IndexUserName, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(7))),
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(14))),
 ));
 
 static USERNAME_TO_KEY: RefCell<StableBTreeMap<UsernameKey, KeyPrincipal, Memory>> = RefCell::new(StableBTreeMap::init(
-    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(8))),
+    MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(15))),
 ));
 
     static ID_MANAGER: IDManager = IDManager::new();
     static PURCHASE_ID_MANAGER: PurchaseIDManager = PurchaseIDManager::new();
 }
-
 
 fn get_prefixes(s: &str, min_length: u64) -> Vec<String> {
     let mut prefixes = Vec::new();
@@ -611,6 +785,7 @@ fn create_profile_canister(profile: CreateProfile) {
 
 #[ic_cdk::update]
 fn set_item(item: CreateItem) -> Result<(), ItemError> {
+    let principal = ic_cdk::api::caller();
     // Verifica que el stock sea al menos 1
     if item.stock < 1 {
         return Err(ItemError::Unauthorized);
@@ -626,7 +801,7 @@ fn set_item(item: CreateItem) -> Result<(), ItemError> {
         description: item.description,
         image: item.image,
         reviews: Vec::new(), // Inicializa reviews como un vector vacío
-        owner: Some(ic_cdk::api::caller()),
+        owner: Some(principal),
         contract_address: item.contract_address,
         billing_address: item.billing_address,
         stock: item.stock,
@@ -634,8 +809,304 @@ fn set_item(item: CreateItem) -> Result<(), ItemError> {
     };
 
     ITEMS.with(|p| p.borrow_mut().insert(id, value.clone()));
+
+    OWNER_ITEMS.with(|items| {
+        let mut items = items.borrow_mut();
+        let key_principal = KeyPrincipal {
+            key: principal.clone(),
+        };
+        if !items.contains_key(&key_principal) {
+            items.insert(key_principal.clone(), VecStorable { ids: Vec::new() });
+        }
+        let owner_items = items.get(&key_principal).unwrap().clone();
+        let mut updated_owner_items = owner_items;
+        updated_owner_items.ids.push(id);
+        items.insert(key_principal.clone(), updated_owner_items);
+    });
+
+    CATEGORY_ITEMS.with(|items| {
+        let mut items = items.borrow_mut();
+        if !items.contains_key(&category) {
+            items.insert(category.clone(), VecStorable { ids: Vec::new() });
+        }
+        let category_items = items.get(&category).unwrap().clone();
+        let mut updated_category_items = category_items;
+        updated_category_items.ids.push(id);
+        items.insert(category.clone(), updated_category_items);
+    });
+
     Ok(())
 }
+
+#[ic_cdk::update]
+fn add_item_card(add_item: AddItem) -> Result<(), ItemError> {
+    let owner = ic_cdk::api::caller();
+    let item_id = add_item.item;
+    let amount = add_item.amount;
+
+    // Obtén el item
+    let item = get_item(item_id)?;
+
+    // Verifica si el item ya está en el carrito
+    let key_principal = KeyPrincipal { key: owner.clone() }; // Convertir Principal a KeyPrincipal
+
+    OWNER_SHIPPING_CARD.with(|c| {
+        let mut c = c.borrow_mut();
+        if !c.contains_key(&key_principal) {
+            c.insert(
+                key_principal.clone(),
+                ShippingCard {
+                    card: Vec::new(),
+                    total_price: 0,
+                },
+            );
+        }
+        let shipping_card = c.get(&key_principal).unwrap().clone();
+        let mut updated_shipping_card = shipping_card;
+        if item_in_cart(owner.clone(), item_id) {
+            // Si el item ya está en el carrito, actualiza la cantidad
+            if let Some(user_index_map) =
+                OWNER_ITEM_INDEX.with(|c| c.borrow().get(&key_principal).clone())
+            {
+                if let Some(index) = user_index_map.owner.get(&item_id) {
+                    updated_shipping_card.card[*index as usize].amount += amount;
+                    updated_shipping_card.total_price += item.price * amount; // Actualiza el precio total
+                }
+            }
+        } else {
+            // Si el item no está en el carrito, agrega un nuevo item
+            let card = Card {
+                item_id,
+                item: item.clone(),
+                amount,
+            };
+            updated_shipping_card.card.push(card);
+            updated_shipping_card.total_price += item.price * amount; // Actualiza el precio total
+            let new_index = (updated_shipping_card.card.len() - 1) as u64;
+            OWNER_ITEM_INDEX.with(|c| {
+                let mut c = c.borrow_mut();
+                if !c.contains_key(&key_principal) {
+                    c.insert(
+                        key_principal.clone(),
+                        OwnerItemCardNumberStorable {
+                            owner: HashMap::new(),
+                        },
+                    );
+                }
+                if let Some(user_index_map) = c.get(&key_principal).clone() {
+                    let mut new_user_index_map = user_index_map.clone();
+                    new_user_index_map.owner.insert(item_id, new_index);
+                    c.insert(key_principal.clone(), new_user_index_map);
+                }
+            });
+        }
+        c.insert(key_principal, updated_shipping_card);
+    });
+
+    // Actualiza OWNER_ITEM_IN_CART
+    OWNER_ITEM_IN_CART.with(|c| {
+        let mut c = c.borrow_mut();
+        if !c.contains_key(&key_principal) {
+            c.insert(
+                key_principal.clone(),
+                OwnerItemCardBoolStorable {
+                    owner: HashMap::new(),
+                },
+            );
+        }
+        if let Some(user_cart_map) = c.get(&key_principal).clone() {
+            let mut new_user_cart_map = user_cart_map.clone();
+            new_user_cart_map
+                .owner
+                .insert(item_id, BoolStorable { bool: true });
+            c.insert(key_principal.clone(), new_user_cart_map);
+        }
+    });
+
+    Ok(())
+}
+
+#[ic_cdk::query]
+fn item_in_cart(user: Principal, item_id: u64) -> bool {
+    let key_principal = KeyPrincipal { key: user.clone() }; // Convertir Principal a KeyPrincipal
+
+    OWNER_ITEM_IN_CART.with(|c| {
+        if let Some(user_cart_map) = c.borrow().get(&key_principal) {
+            user_cart_map.owner.contains_key(&item_id)
+        } else {
+            false
+        }
+    })
+}
+
+#[ic_cdk::query]
+fn get_user_cart() -> Result<ShippingCard, ItemError> {
+    let owner = ic_cdk::api::caller();
+    let key_principal = KeyPrincipal { key: owner.clone() }; // Convertir Principal a KeyPrincipal
+
+    let shipping_card_opt = OWNER_SHIPPING_CARD.with(|c| c.borrow().get(&key_principal).clone());
+
+    match shipping_card_opt {
+        Some(shipping_card) => Ok(shipping_card),
+        None => Err(ItemError::NotExist),
+    }
+}
+
+#[ic_cdk::query]
+fn get_total_items_in_cart() -> Result<u64, ItemError> {
+    let owner = ic_cdk::api::caller();
+    let key_principal = KeyPrincipal { key: owner.clone() }; // Convertir Principal a KeyPrincipal
+
+    let shipping_card_opt = OWNER_SHIPPING_CARD.with(|c| c.borrow().get(&key_principal).clone());
+
+    match shipping_card_opt {
+        Some(shipping_card) => Ok(shipping_card.card.len() as u64),
+        None => Err(ItemError::NotExist),
+    }
+}
+#[ic_cdk::update]
+fn remove_item_from_cart(item_id: u64) -> Result<(), ItemError> {
+    let owner = ic_cdk::api::caller();
+    let key_principal = KeyPrincipal { key: owner.clone() }; // Convertir Principal a KeyPrincipal
+
+    // Verifica si el item ya está en el carrito
+    if !item_in_cart(owner.clone(), item_id) {
+        return Err(ItemError::NotExist);
+    }
+
+    OWNER_SHIPPING_CARD.with(|c| {
+        let mut c = c.borrow_mut();
+        let shipping_card = c.get(&key_principal).unwrap().clone();
+        let mut updated_shipping_card = shipping_card;
+        if let Some(user_index_map) =
+            OWNER_ITEM_INDEX.with(|c| c.borrow().get(&key_principal).clone())
+        {
+            if let Some(index) = user_index_map.owner.get(&item_id) {
+                updated_shipping_card.total_price -=
+                    updated_shipping_card.card[*index as usize].item.price
+                        * updated_shipping_card.card[*index as usize].amount; // Actualiza el precio total
+                updated_shipping_card.card[*index as usize].amount = 0;
+            }
+        }
+        updated_shipping_card
+            .card
+            .retain(|card| card.item_id != item_id);
+        c.insert(key_principal.clone(), updated_shipping_card);
+    });
+
+    // Prepara los nuevos mapas para OWNER_ITEM_IN_CART y OWNER_ITEM_INDEX
+    let (new_user_cart_map, new_user_index_map) = OWNER_ITEM_IN_CART.with(|c| {
+        if let Some(user_cart_map) = c.borrow().get(&key_principal).clone() {
+            let mut new_user_cart_map = user_cart_map.clone();
+            new_user_cart_map.owner.remove(&item_id);
+            let new_user_index_map = OWNER_ITEM_INDEX.with(|c| {
+                if let Some(user_index_map) = c.borrow().get(&key_principal).clone() {
+                    let mut new_user_index_map = user_index_map.clone();
+                    new_user_index_map.owner.remove(&item_id);
+                    new_user_index_map
+                } else {
+                    OwnerItemCardNumberStorable {
+                        owner: HashMap::new(),
+                    }
+                }
+            });
+            (Some(new_user_cart_map), Some(new_user_index_map))
+        } else {
+            (None, None)
+        }
+    });
+
+    // Actualiza OWNER_ITEM_IN_CART y OWNER_ITEM_INDEX
+    if let Some(new_user_cart_map) = new_user_cart_map {
+        OWNER_ITEM_IN_CART.with(|c| {
+            c.borrow_mut()
+                .insert(key_principal.clone(), new_user_cart_map);
+        });
+    }
+    if let Some(new_user_index_map) = new_user_index_map {
+        OWNER_ITEM_INDEX.with(|c| {
+            c.borrow_mut()
+                .insert(key_principal.clone(), new_user_index_map);
+        });
+    }
+
+    Ok(())
+}
+
+#[ic_cdk::update]
+fn clear_cart() -> Result<(), ItemError> {
+    let owner = ic_cdk::api::caller();
+    let key_principal = KeyPrincipal { key: owner.clone() }; // Convertir Principal a KeyPrincipal
+
+    // Verifica si el usuario tiene un carrito
+    if !OWNER_SHIPPING_CARD.with(|c| c.borrow().contains_key(&key_principal)) {
+        return Err(ItemError::NotExist);
+    }
+
+    // Vacía el carrito del usuario
+    OWNER_SHIPPING_CARD.with(|c| {
+        let mut c = c.borrow_mut();
+        c.insert(
+            key_principal.clone(),
+            ShippingCard {
+                card: Vec::new(),
+                total_price: 0,
+            },
+        );
+    });
+
+    // Prepara los nuevos mapas para OWNER_ITEM_IN_CART y OWNER_ITEM_INDEX
+    let (new_user_cart_map, new_user_index_map) = OWNER_ITEM_IN_CART.with(|c| {
+        if let Some(user_cart_map) = c.borrow().get(&key_principal).clone() {
+            let mut new_user_cart_map = user_cart_map.clone();
+            new_user_cart_map.owner.clear();
+            let new_user_index_map = OWNER_ITEM_INDEX.with(|c| {
+                if let Some(user_index_map) = c.borrow().get(&key_principal).clone() {
+                    let mut new_user_index_map = user_index_map.clone();
+                    new_user_index_map.owner.clear();
+                    new_user_index_map
+                } else {
+                    OwnerItemCardNumberStorable {
+                        owner: HashMap::new(),
+                    }
+                }
+            });
+            (Some(new_user_cart_map), Some(new_user_index_map))
+        } else {
+            (None, None)
+        }
+    });
+
+    // Actualiza OWNER_ITEM_IN_CART y OWNER_ITEM_INDEX
+    if let Some(new_user_cart_map) = new_user_cart_map {
+        OWNER_ITEM_IN_CART.with(|c| {
+            c.borrow_mut()
+                .insert(key_principal.clone(), new_user_cart_map);
+        });
+    }
+    if let Some(new_user_index_map) = new_user_index_map {
+        OWNER_ITEM_INDEX.with(|c| {
+            c.borrow_mut()
+                .insert(key_principal.clone(), new_user_index_map);
+        });
+    }
+
+    Ok(())
+}
+
+#[ic_cdk::query]
+fn get_total_price() -> Result<u64, ItemError> {
+    let owner = ic_cdk::api::caller();
+    let key_principal = KeyPrincipal { key: owner.clone() }; // Convertir Principal a KeyPrincipal
+
+    let shipping_card_opt = OWNER_SHIPPING_CARD.with(|c| c.borrow().get(&key_principal).clone());
+
+    match shipping_card_opt {
+        Some(shipping_card) => Ok(shipping_card.total_price),
+        None => Err(ItemError::NotExist),
+    }
+}
+
 
 #[ic_cdk::update]
 fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
@@ -669,7 +1140,7 @@ fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
         lastname: purchase.lastname,
         buyer: Some(caller_principal),
         account_buyer: purchase.account_buyer,
-        status: PurchaseStatus::Started,
+        status: PurchaseStatus::Paid,
         payment_id: purchase.payment_id,
         seller: Some(seller_principal),
         account_seller: account_seller,
@@ -679,7 +1150,43 @@ fn create_purchase(purchase: CreatePurchase) -> Result<(), ItemError> {
 
     PURCHASES.with(|p| p.borrow_mut().insert(id, value.clone()));
 
-    Ok(())
+    let mut new_ids_purchases = VecStorable { ids: Vec::new() };
+    new_ids_purchases.ids.push(id);
+
+    BUYER_PURCHASES.with(|purchases| {
+        let mut purchases = purchases.borrow_mut();
+        let key_principal = KeyPrincipal {
+            key: caller_principal.clone(),
+        };
+        if !purchases.contains_key(&key_principal) {
+            purchases.insert(key_principal.clone(), new_ids_purchases.clone());
+        } else {
+            let buyer_purchases = purchases.get(&key_principal).unwrap().clone();
+            let mut updated_buyer_purchases = buyer_purchases;
+            updated_buyer_purchases.ids.push(id);
+            purchases.insert(key_principal.clone(), updated_buyer_purchases);
+        }
+    });
+
+    SELLER_SALES.with(|sales| {
+        let mut sales = sales.borrow_mut();
+        let key_principal = KeyPrincipal {
+            key: seller_principal.clone(),
+        };
+        if !sales.contains_key(&key_principal) {
+            sales.insert(key_principal.clone(), new_ids_purchases.clone());
+        } else {
+            let seller_sales = sales.get(&key_principal).unwrap().clone();
+            let mut updated_seller_sales = seller_sales;
+            updated_seller_sales.ids.push(id);
+            sales.insert(key_principal.clone(), updated_seller_sales);
+        }
+    });
+
+    match message_to_paid(id) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
 }
 
 #[ic_cdk::update]
@@ -749,9 +1256,6 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
 
     Ok(())
 }
-
-
-
 
 #[ic_cdk::update]
 fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
@@ -966,9 +1470,7 @@ fn get_inbox() -> Result<InboxResult, ItemError> {
             },
         )
         .collect();
-    Ok(InboxResult {
-        conversations,
-    })
+    Ok(InboxResult { conversations })
 }
 
 #[ic_cdk::query]
@@ -1124,18 +1626,23 @@ fn add_review(review: CreateReview) -> Result<(), ItemError> {
         Err(ItemError::NotExist)
     }
 }
-
 #[ic_cdk::update]
-fn update_purchase_status_to_paid(id: u64) -> Result<(), ItemError> {
+fn message_to_paid(id: u64) -> Result<(), ItemError> {
     let purchase_opt = PURCHASES.with(|p| p.borrow().get(&id).clone());
 
-    if let Some(mut purchase) = purchase_opt {
-        if purchase.buyer != Some(ic_cdk::api::caller()) {
-            return Err(ItemError::Unauthorized);
+    if let Some(purchase) = purchase_opt {
+        // Envía un mensaje al vendedor
+        if let Some(seller_principal) = purchase.seller {
+            let message = SendMessage {
+                content: format!(
+                    "¡Buenas noticias! Alguien ha comprado tu producto. ID de la compra: {}",
+                    id
+                ),
+                addressee: seller_principal,
+            };
+            send_message_by_canister(message)?;
         }
 
-        purchase.status = PurchaseStatus::Paid;
-        PURCHASES.with(|p| p.borrow_mut().insert(id, purchase));
         Ok(())
     } else {
         Err(ItemError::NotExist)
@@ -1226,23 +1733,25 @@ fn update_purchase_status_to_refunded(id: u64) -> Result<(), ItemError> {
 #[ic_cdk::query]
 fn get_your_sales() -> Result<Vec<Purchase>, ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let mut sales = Vec::new();
+    let key_principal = KeyPrincipal {
+        key: caller_principal.clone(),
+    };
 
-    PURCHASES.with(|p| {
-        let purchases = p.borrow();
+    let sales_ids =
+        SELLER_SALES.with(|sales| sales.borrow().get(&key_principal).unwrap_or_default());
 
-        for purchase in purchases.iter().map(|(_, v)| v) {
-            if let Some(seller) = purchase.seller {
-                if seller == caller_principal {
-                    sales.push(purchase.clone());
-                }
-            }
-        }
-    });
-
-    if sales.is_empty() {
+    if sales_ids.ids.is_empty() {
         return Err(ItemError::NotExist);
     }
+
+    let sales = PURCHASES.with(|purchases_map| {
+        let purchases_map = purchases_map.borrow();
+        sales_ids
+            .ids
+            .into_iter()
+            .filter_map(|id| purchases_map.get(&id).clone())
+            .collect()
+    });
 
     Ok(sales)
 }
@@ -1250,21 +1759,25 @@ fn get_your_sales() -> Result<Vec<Purchase>, ItemError> {
 #[ic_cdk::query]
 fn get_your_purchases() -> Result<Vec<Purchase>, ItemError> {
     let caller_principal = ic_cdk::api::caller();
-    let mut purchases = Vec::new();
+    let key_principal = KeyPrincipal {
+        key: caller_principal.clone(),
+    };
 
-    PURCHASES.with(|p| {
-        let purchases_map = p.borrow();
+    let purchase_ids = BUYER_PURCHASES
+        .with(|purchases| purchases.borrow().get(&key_principal).unwrap_or_default());
 
-        for purchase in purchases_map.iter().map(|(_, v)| v) {
-            if purchase.buyer == Some(caller_principal) {
-                purchases.push(purchase.clone());
-            }
-        }
-    });
-
-    if purchases.is_empty() {
+    if purchase_ids.ids.is_empty() {
         return Err(ItemError::NotExist);
     }
+
+    let purchases = PURCHASES.with(|purchases_map| {
+        let purchases_map = purchases_map.borrow();
+        purchase_ids
+            .ids
+            .into_iter()
+            .filter_map(|id| purchases_map.get(&id).clone())
+            .collect()
+    });
 
     Ok(purchases)
 }
@@ -1341,14 +1854,13 @@ fn create_profile(profile: CreateProfile) -> Result<(), ItemError> {
         });
     }
     USERNAME_TO_KEY.with(|u| {
-        u.borrow_mut()
-            .insert(
-                UsernameKey {
-                    username: profile.username.clone(),
-                    key_principal: key_principal.clone(),
-                },
-                key_principal,
-            );
+        u.borrow_mut().insert(
+            UsernameKey {
+                username: profile.username.clone(),
+                key_principal: key_principal.clone(),
+            },
+            key_principal,
+        );
     });
 
     Ok(())
@@ -1387,7 +1899,9 @@ fn autocomplete_search(prefix: String) -> ResultSearch {
         let all_usernames: Vec<(String, Principal)> = USERNAME_TO_KEY.with(|u| {
             u.borrow()
                 .iter()
-                .map(|(username_key, key_principal)| (username_key.username.clone(), key_principal.key.clone()))
+                .map(|(username_key, key_principal)| {
+                    (username_key.username.clone(), key_principal.key.clone())
+                })
                 .collect()
         });
 
@@ -1432,11 +1946,9 @@ fn autocomplete_search(prefix: String) -> ResultSearch {
 
     ResultSearch {
         matches: matches,
-        users: usernames
+        users: usernames,
     }
 }
-
-
 
 #[ic_cdk::query]
 fn get_profile_key_by_principal(principal: Principal) -> Result<Profile, ItemError> {
@@ -1464,7 +1976,6 @@ fn get_user_profile() -> Result<Profile, ItemError> {
         }
     })
 }
-
 
 #[ic_cdk::update]
 fn activate_profile() -> Result<(), ItemError> {
@@ -1696,20 +2207,43 @@ fn get_items() -> Vec<(u64, Item)> {
             .collect()
     })
 }
+
 #[ic_cdk::query]
-fn get_items_by_category(category: String) -> Vec<Item> {
-    let mut items_in_category = Vec::new();
-    let category = Category::from_str(&category);
-    if let Some(category) = category {
-        ITEMS.with(|p| {
-            for (_, item) in p.borrow().iter() {
-                if item.category == category {
-                    items_in_category.push(item.clone());
-                }
-            }
-        });
+fn get_item(id: u64) -> Result<Item, ItemError> {
+    let item_opt = ITEMS.with(|p| p.borrow().get(&id).clone());
+
+    match item_opt {
+        Some(item) => Ok(item),
+        None => Err(ItemError::NotExist),
     }
-    items_in_category
+}
+
+#[ic_cdk::query]
+fn get_items_by_category(category: String) -> Result<Vec<(u64, Item)>, ItemError> {
+    let category = Category::from_str(&category).ok_or(ItemError::NotExist)?;
+
+    let item_ids = CATEGORY_ITEMS.with(|items| {
+        items
+            .borrow()
+            .get(&category)
+            .unwrap_or_default()
+            .ids
+            .clone()
+    });
+
+    if item_ids.is_empty() {
+        return Err(ItemError::NoItemsAssociated);
+    }
+
+    let items_in_category = ITEMS.with(|items_map| {
+        let items_map = items_map.borrow();
+        item_ids
+            .into_iter()
+            .filter_map(|id| items_map.get(&id).map(|item| (id, item.clone())))
+            .collect()
+    });
+
+    Ok(items_in_category)
 }
 
 #[ic_cdk::update]
@@ -1792,22 +2326,33 @@ fn remove_item(id: u64) -> Result<(), ItemError> {
 
 #[ic_cdk::query]
 fn get_items_owner() -> Result<Vec<(u64, Item)>, ItemError> {
-    let caller_principal = ic_cdk::api::caller(); // Usa la función string_a_principal para convertir el String owner a un Principal
-    let mut items_owned = Vec::new();
+    let caller_principal = ic_cdk::api::caller();
+    let key_principal = KeyPrincipal {
+        key: caller_principal.clone(),
+    };
 
-    ITEMS.with(|p| {
-        for (id, item) in p.borrow().iter() {
-            if item.owner == Some(caller_principal) {
-                items_owned.push((id.clone(), item.clone()));
-            }
-        }
+    let item_ids = OWNER_ITEMS.with(|items| {
+        items
+            .borrow()
+            .get(&key_principal)
+            .unwrap_or_default()
+            .ids
+            .clone()
     });
 
-    if items_owned.is_empty() {
-        Err(ItemError::NoItemsAssociated)
-    } else {
-        Ok(items_owned)
+    if item_ids.is_empty() {
+        return Err(ItemError::NoItemsAssociated);
     }
+
+    let items_owned = ITEMS.with(|items_map| {
+        let items_map = items_map.borrow();
+        item_ids
+            .into_iter()
+            .filter_map(|id| items_map.get(&id).map(|item| (id, item.clone())))
+            .collect()
+    });
+
+    Ok(items_owned)
 }
 
 #[ic_cdk::query]

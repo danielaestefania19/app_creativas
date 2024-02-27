@@ -1,6 +1,7 @@
 import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
+export interface AddItem { 'item' : bigint, 'amount' : bigint }
 export interface AddProfilePicture { 'profile_picture' : string }
 export interface Address {
   'country' : string,
@@ -18,6 +19,8 @@ export interface AddressEdit {
   'address' : [] | [string],
   'phone_number' : [] | [string],
 }
+export interface BoolStorable { 'bool' : boolean }
+export interface Card { 'item' : Item, 'amount' : bigint, 'item_id' : bigint }
 export type Category = { 'Baby' : null } |
   { 'ClothingShoesAccessories' : null } |
   { 'HomeKitchen' : null } |
@@ -64,10 +67,7 @@ export interface CreateReview {
   'item_id' : bigint,
 }
 export interface CreateUserAddress { 'address' : Address }
-export interface InboxResult {
-  'total_unread_chats' : bigint,
-  'conversations' : Array<Conversation>,
-}
+export interface InboxResult { 'conversations' : Array<Conversation> }
 export interface Item {
   'reviews' : Array<Review>,
   'owner' : [] | [Principal],
@@ -102,6 +102,7 @@ export interface Message {
   'sender' : [] | [Principal],
   'addressee' : [] | [Principal],
 }
+export interface OwnerItemCard { 'owner' : Principal, 'item' : bigint }
 export interface Profile {
   'active' : boolean,
   'about' : string,
@@ -152,7 +153,11 @@ export type Result_get_address = { 'Ok' : Array<[bigint, Address]> } |
   { 'Err' : ItemError };
 export type Result_get_address_by_id = { 'Ok' : [] | [Address] } |
   { 'Err' : ItemError };
+export type Result_get_category = { 'Ok' : Array<[bigint, Item]> } |
+  { 'Err' : ItemError };
 export type Result_get_inbox = { 'Ok' : InboxResult } |
+  { 'Err' : ItemError };
+export type Result_get_len_card = { 'Ok' : bigint } |
   { 'Err' : ItemError };
 export type Result_get_owner = { 'Ok' : Principal } |
   { 'Err' : ItemError };
@@ -164,6 +169,8 @@ export type Result_get_purchases = { 'Ok' : Array<Purchase> } |
   { 'Err' : ItemError };
 export type Result_get_tokens = { 'Ok' : Array<string> } |
   { 'Err' : ItemError };
+export type Result_get_user_card = { 'Ok' : ShippingCard } |
+  { 'Err' : ItemError };
 export interface Review {
   'review' : string,
   'rating' : Rating,
@@ -171,6 +178,7 @@ export interface Review {
 }
 export interface SendMessage { 'content' : string, 'addressee' : Principal }
 export interface SendMessage2 { 'content' : string, 'addressee_text' : string }
+export interface ShippingCard { 'card' : Array<Card>, 'total_price' : bigint }
 export interface UpdateItem {
   'description' : [] | [string],
   'stock' : [] | [bigint],
@@ -190,11 +198,13 @@ export interface UserMessages {
 export interface Vote { 'voter' : Principal, 'rating' : Rating }
 export interface _SERVICE {
   'activate_profile' : ActorMethod<[], Result>,
+  'add_item_card' : ActorMethod<[AddItem], Result>,
   'add_picture' : ActorMethod<[bigint, AddProfilePicture], Result>,
   'add_review' : ActorMethod<[CreateReview], Result>,
   'add_token_to_principal' : ActorMethod<[string], Result>,
   'associate_address' : ActorMethod<[CreateUserAddress], undefined>,
   'autocomplete_search' : ActorMethod<[string], ResultSearch>,
+  'clear_cart' : ActorMethod<[], Result>,
   'create_profile' : ActorMethod<[CreateProfile], Result>,
   'create_purchase' : ActorMethod<[CreatePurchase], Result>,
   'desactivate_profile' : ActorMethod<[], Result>,
@@ -204,19 +214,25 @@ export interface _SERVICE {
   'get_item_billing_address' : ActorMethod<[bigint], Result_get>,
   'get_item_owner' : ActorMethod<[bigint], Result_get_owner>,
   'get_items' : ActorMethod<[], Array<[bigint, Item]>>,
+  'get_items_by_category' : ActorMethod<[string], Result_get_category>,
   'get_items_owner' : ActorMethod<[], ResultItems>,
   'get_private_chat' : ActorMethod<[Principal], Result_get_private_chat>,
   'get_profile_key_by_principal' : ActorMethod<[Principal], Result_get_profile>,
   'get_tokens_for_principal' : ActorMethod<[string], Result_get_tokens>,
+  'get_total_items_in_cart' : ActorMethod<[], Result_get_len_card>,
+  'get_total_price' : ActorMethod<[], Result_get_len_card>,
   'get_user_addresses' : ActorMethod<[], Result_get_address>,
+  'get_user_cart' : ActorMethod<[], Result_get_user_card>,
   'get_user_profile' : ActorMethod<[], Result_get_profile>,
   'get_your_purchases' : ActorMethod<[], Result_get_purchases>,
   'get_your_sales' : ActorMethod<[], Result_get_purchases>,
   'has_profile' : ActorMethod<[], boolean>,
   'is_active' : ActorMethod<[Principal], Result_Bool>,
+  'item_in_cart' : ActorMethod<[Principal, bigint], boolean>,
   'manager' : ActorMethod<[], Principal>,
   'mark_messages_as_read' : ActorMethod<[Principal], Result>,
   'remove_item' : ActorMethod<[bigint], Result>,
+  'remove_item_from_cart' : ActorMethod<[bigint], Result>,
   'send_message' : ActorMethod<[SendMessage], Result>,
   'send_message_2' : ActorMethod<[SendMessage2], Result>,
   'send_message_by_canister' : ActorMethod<[SendMessage], Result>,

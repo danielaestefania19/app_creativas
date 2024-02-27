@@ -83,7 +83,6 @@ function App() {
           <Route path="/formulario" element={<Formulario />} />
           <Route path="/other/items" element={<ItemsUploader/>} />
           <Route path="/other/gettokens" element={<FetchAllAssets/>} /> 
-          <Route path="/login" element={<LoggedOut />} />
           <Route path="/status" element={<PaymentDetails />} />
           <Route path="/pay" element={<PaymentButton />} />
  

@@ -188,6 +188,37 @@ type Item = record {
     category: Category;
 };
 
+type Card = record {
+
+    item_id: nat64;
+    item: Item;
+    amount: nat64;
+};
+
+
+type AddItem = record {
+ 
+ item: nat64;
+ amount: nat64;
+};
+
+
+type ShippingCard = record {
+  card: vec Card;
+  total_price: nat64;
+};
+
+type OwnerItemCard = record {
+  
+  owner: principal;
+  item: nat64;
+};
+
+type BoolStorable = record {
+  
+ bool: bool;
+};
+
 
 
 type ItemError = variant {
@@ -209,7 +240,10 @@ type ResultSearch = record {
     users: vec record { text; principal};
 };
 
-
+type Result_get_category = variant {
+    Ok: vec record { nat64; Item };
+    Err: ItemError;
+};
 
 type Result = variant {
     Ok;
@@ -277,11 +311,28 @@ type Result_Bool = variant {
     Err: ItemError;
 };
 
+type Result_get_user_card = variant {
+    Ok: ShippingCard;
+    Err: ItemError;
+};
+
+type Result_get_len_card = variant {
+    Ok: nat64;
+    Err: ItemError;
+};
+
 
 service : (CreateProfile) -> {
     get_items : () -> (vec record { nat64; Item }) query;
     get_user_addresses : () -> (Result_get_address) query;
     set_item : (CreateItem) -> (Result);
+    add_item_card : (AddItem) -> (Result);
+    item_in_cart : (principal, nat64) -> (bool) query;
+    get_user_cart : () -> (Result_get_user_card) query;
+    get_total_price : () -> (Result_get_len_card) query;
+    get_total_items_in_cart : () -> (Result_get_len_card) query;
+    remove_item_from_cart : (nat64) -> (Result); 
+    clear_cart : () -> (Result);
     associate_address : (CreateUserAddress) -> ();
     get_contract_address : (nat64) -> (Result_get) query;
     get_address_by_id : (nat64) -> (Result_get_address_by_id) query;
@@ -312,6 +363,7 @@ service : (CreateProfile) -> {
     send_message_2 : (SendMessage2) -> (Result); 
     get_inbox: () -> (Result_get_inbox) query;
     autocomplete_search: (text) -> (ResultSearch) query;
+    get_items_by_category: (text) -> (Result_get_category) query;
     whoami : () -> (principal) query;
     manager : () -> (principal) query;
 };

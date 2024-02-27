@@ -22,8 +22,6 @@ const Item = ({ id, name, price, description, image, contract_address, addToCart
   const { whoami, isUserAuthenticated } = useContext(AuthContext);
 
 
-  console.log(id)
-
   const contract = new ethers.Contract(contract_address, Crypay, wallet);
   let decimalString = price + ".0";
   let wei = ethers.utils.parseEther(decimalString);
