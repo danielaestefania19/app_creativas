@@ -9,7 +9,6 @@ import PaymentDetails from "./components/PaymentDetails.jsx";
 import Card from './landing/Card.jsx';
 import PaymentButton from "./components/Pay.jsx"
 import { ChakraProvider } from "@chakra-ui/react";
-import LoggedOut from './components/LoggetOut.jsx';
 import ItemsUploader from "./components/Providers.jsx"
 import AddAsset from "./components_NFT/CreateToken.jsx"
 import FetchAllAssets from "./components_NFT/Gettokens.jsx"
@@ -26,7 +25,6 @@ import Formulario from './components/CreateProfile.jsx'
 import Inbox from './ecommerce/Inbox.jsx';
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import useProfileActivity from './components/useProfileActivity'; // Importa useProfileActivity aquí
 import { CartProvider } from "../frontend/ecommerce/CartContext.jsx";
 
 
@@ -90,7 +88,6 @@ function App() {
           <Route path="/formulario" element={<Formulario />} />
           <Route path="/other/items" element={<ItemsUploader />} />
           <Route path="/other/gettokens" element={<FetchAllAssets />} />
-          <Route path="/login" element={<LoggedOut />} />
           <Route path="/status" element={<PaymentDetails />} />
           <Route path="/pay" element={<PaymentButton />} />
 

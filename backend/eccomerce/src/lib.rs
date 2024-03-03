@@ -619,7 +619,6 @@ impl Storable for OwnerItemCardNumberStorable {
     };
 }
 
-<<<<<<< HEAD
 
 #[derive(CandidType, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 enum UpdateAction {
@@ -638,8 +637,6 @@ impl UpdateAction {
     }
 }
 
-=======
->>>>>>> 19d1c5e665bb0208a3287d46e8c72409313bced4
 #[derive(Eq, PartialEq, CandidType, Deserialize, Clone, PartialOrd, Ord)]
 pub struct BoolStorable {
     bool: bool,
@@ -947,7 +944,6 @@ fn add_item_card(add_item: AddItem) -> Result<(), ItemError> {
     Ok(())
 }
 
-<<<<<<< HEAD
 
 #[ic_cdk::update]
 fn update_item_card(update_item: AddItem, action_str: String) -> Result<(), ItemError> {
@@ -1004,8 +1000,6 @@ fn update_item_card(update_item: AddItem, action_str: String) -> Result<(), Item
 
 
 
-=======
->>>>>>> 19d1c5e665bb0208a3287d46e8c72409313bced4
 #[ic_cdk::query]
 fn item_in_cart(user: Principal, item_id: u64) -> bool {
     let key_principal = KeyPrincipal { key: user.clone() }; // Convertir Principal a KeyPrincipal
@@ -1337,19 +1331,8 @@ fn send_message(message: SendMessage) -> Result<(), ItemError> {
     Ok(())
 }
 
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 
 
-
->>>>>>> 34cf13c6f2962b3d2c8b83fd84a52fe874c93eca
->>>>>>> c0284a3bb66c619039d96c55a0c9a389da8c6c74
->>>>>>> 19d1c5e665bb0208a3287d46e8c72409313bced4
 #[ic_cdk::update]
 fn send_message_by_canister(message: SendMessage) -> Result<(), ItemError> {
     let sender = ic_cdk::id(); // El remitente es el Principal del canister
