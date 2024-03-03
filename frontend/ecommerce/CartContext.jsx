@@ -1,24 +1,19 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useReducer, useEffect, useState } from "react";
+import { AuthContext } from '../components/AuthContext';
 
 const CartContext = createContext();
 
 const initialState = {
-  cart: [],
+  totalPrice: 0,
 };
 
 const cartReducer = (state, action) => {
   switch (action.type) {
-    case "ADD_TO_CART":
+    case "SET_TOTAL_PRICE":
       return {
         ...state,
-        cart: [...state.cart, action.payload],
+        totalPrice: action.payload,
       };
-    case "REMOVE_FROM_CART":
-      // Implementar la lógica para eliminar un elemento del carrito
-      return state;
-    case "CLEAR_CART":
-      // Implementar la lógica para limpiar todo el carrito
-      return state;
     default:
       return state;
   }
@@ -26,26 +21,66 @@ const cartReducer = (state, action) => {
 
 const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const { actor } = useContext(AuthContext);
+  const [cartState, setCartState] = useState(null);
 
-  const addToCart = (item) => {
-    dispatch({ type: "ADD_TO_CART", payload: item });
-  };
+  useEffect(() => {
+    const fetchTotalPrice = async () => {
+      try {
+        const totalPrice = await actor.get_total_price();
+        dispatch({ type: "SET_TOTAL_PRICE", payload: totalPrice });
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  const removeFromCart = (index) => {
-    dispatch({ type: "REMOVE_FROM_CART", payload: index });
-  };
+    fetchTotalPrice();
+  }, [actor]);
 
-  const clearCart = () => {
-    dispatch({ type: "CLEAR_CART" });
-  };
+ 
+const addToCart = async (item) => {
+  try {
+    await actor.add_item_card({item: item.id, amount: 1});
+    const totalPrice = await actor.get_total_price();
+    dispatch({ type: "SET_TOTAL_PRICE", payload: totalPrice });
+    setCartState(prevState => prevState + 1); // Actualiza `cartState`
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const removeFromCart = async (item) => {
+  try {
+    await actor.remove_item_from_cart(item);
+    const totalPrice = await actor.get_total_price();
+    dispatch({ type: "SET_TOTAL_PRICE", payload: totalPrice });
+    setCartState(prevState => prevState - 1); // Actualiza `cartState`
+  } catch (err) {
+    console.error(err);
+  }
+};
+  
+
+const clearCart = async () => {
+  try {
+    await actor.clear_cart();
+    const totalPrice = await actor.get_total_price();
+    dispatch({ type: "SET_TOTAL_PRICE", payload: totalPrice });
+    setCartState(0); // Actualiza `cartState` a 0
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   return (
     <CartContext.Provider
-      value={{ cart: state.cart, addToCart, removeFromCart, clearCart }}
+      value={{ totalPrice: state.totalPrice, addToCart, removeFromCart, clearCart, cartState, setCartState }}
     >
       {children}
     </CartContext.Provider>
   );
+  
 };
 
 const useCart = () => {

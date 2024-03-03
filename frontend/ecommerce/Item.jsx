@@ -8,11 +8,7 @@ import { AuthContext } from '../components/AuthContext.jsx';
 import { WalletContext } from '../components/WalletContext.jsx';
 import { useCart } from "./CartContext.jsx";
 
-const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
-const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-const provider = new ethers.providers.JsonRpcProvider(API_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
 const Item = ({ id, name, price, description, image, contract_address }) => {
   const navigate = useNavigate();
@@ -23,9 +19,7 @@ const Item = ({ id, name, price, description, image, contract_address }) => {
   const { whoami, isUserAuthenticated } = useContext(AuthContext);
   const { addToCart } = useCart();
 
-  console.log(id)
 
-  const contract = new ethers.Contract(contract_address, Crypay, wallet);
   let decimalString = price + ".0";
   let wei = ethers.utils.parseEther(decimalString);
 
@@ -34,18 +28,7 @@ const Item = ({ id, name, price, description, image, contract_address }) => {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchPaymentCount = async () => {
-      try {
-        const paymentCount = await contract.paymentCount();
-        setExternalPaymentId(parseInt(paymentCount));
-      } catch (error) {
-        return error.message;
-      }
-    };
 
-    fetchPaymentCount();
-  }, []);
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -59,48 +42,7 @@ const Item = ({ id, name, price, description, image, contract_address }) => {
 
     fetchImage();
   }, [image]);
-
-  const checkIfPaymentExists = async (id) => {
-    return await contract.checkIfPaymentExists(id);
-  };
-
-  const startNewPayment = async () => {
-    setIsLoading(true);
-    try {
-      let paymentExists = await checkIfPaymentExists(externalPaymentId);
-      while (paymentExists) {
-        setExternalPaymentId(prevId => prevId + 1);
-        paymentExists = await checkIfPaymentExists(externalPaymentId);
-      }
-
-      const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, localPrice);
-      const tx = await contract.startNewPayment(externalPaymentId, localPrice, { gasLimit: gasEstimate.toNumber() });
-      const receipt = await tx.wait();
-      console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
-      setPaymentStarted(true);
-      setShowPaymentDetails(true);
-    } catch (error) {
-      alert("Something went wrong when sending your transaction: " + error.message);
-    }
-    setIsLoading(false);
-  };
-
-  const handleBuyClick = async () => {
-    if (!isUserAuthenticated || whoami === null) {
-      setError("You must log in before purchasing.");
-      console.log("You must log in before purchasing.")
-      return;
-    }
-    try {
-      await startNewPayment();
-      if (paymentStarted) {
-        navigate(`/pay/${externalPaymentId}`);
-      }
-    } catch (err) {
-      setError("Error starting payment: " + err.message);
-    }
-  };
-
+ 
   const handleAddToCart = () => {
     const item = { id, name, price, description, image, contract_address };
     addToCart(item);
@@ -114,24 +56,12 @@ const Item = ({ id, name, price, description, image, contract_address }) => {
       <p className='mx-4 text-center'>{description}</p>
       <div className='flex justify-center mt-2 mb-4'>
         <button
-          className="bg-[#c9398a] text-white px-3 py-1 rounded mr-2"
-          onClick={() => {
-            handleBuyClick();
-            setExpanded(!expanded);
-          }}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Processing the transaction...' : 'Buy'}
-        </button>
-        <button
           className="bg-blue-500 text-white px-3 py-1 rounded"
           onClick={handleAddToCart}
         >
           Add to cart
         </button>
       </div>
-      {showPaymentDetails && <PaymentDetails user={whoami} item_id={id} externalPaymentId={externalPaymentId} contractAddress={contract_address} closeModal={() => setShowPaymentDetails(false)} />}
-      {error && <div className="error">{error}</div>}
     </div>
   );
 };

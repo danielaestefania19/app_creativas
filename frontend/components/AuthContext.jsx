@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       iiUrl = local_ii_url;
     }
 
-    let mainnet = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8080`;
+    let mainnet = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8000`;
 
     const newAuthClient = await AuthClient.create();
     setAuthClient(newAuthClient);

@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Logo from '../assets/Logo.png';
 import shopping from '../assets/shopping.png';
 import { useCart } from './CartContext.jsx'
 import Cart from './Card.jsx';
+import { AuthContext } from '../components/AuthContext';
 
 export function Navbar() {
   const [cartVisible, setCartVisible] = useState(false);
-  const { cart, removeFromCart } = useCart();
+  const { removeFromCart, cartState, setCartState } = useCart();
+
+  const [totalItems, setTotalItems] = useState(null);
+  const { actor } = useContext(AuthContext);
+
+  useEffect(() => {
+    const fetchTotalItems = async () => {
+      try {
+        const totalItems = await actor.get_total_items_in_cart();
+        setTotalItems(totalItems.Ok);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    fetchTotalItems();
+  }, [actor, cartState]); // Agrega `cartState` como dependencia
 
 
+console.log("Total Items en el carrito: ", totalItems)
 
   const handleToggleCart = () => {
     setCartVisible(!cartVisible);
@@ -60,16 +78,18 @@ export function Navbar() {
             className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search..."
           />
-        </div>
-        {cartVisible && cart.length > 0 && (
-          <Cart cart={cart} removeFromCart={removeFromCart} onHideCart={handleToggleCart} />
-        )}
-        <div className='flex relative'
-          onClick={() => setCartVisible(!cartVisible)}
-        >
-          <img className="h-7 w-auto ml-2" alt="Icono" src={shopping} />
-          {cart.length > 0 && <span className="badge">{cart.length}</span>}
-        </div>
+          </div>
+          {cartVisible && totalItems > 0 && ( // Cambia cart.length por totalItems aquí
+            <Cart removeFromCart={removeFromCart} onHideCart={handleToggleCart} />
+          )}
+          <div className='flex relative'
+            onClick={() => setCartVisible(!cartVisible)}
+          >
+            <img className="h-7 w-auto ml-2" alt="Icono" src={shopping} />
+            {totalItems && Number(totalItems) > 0 && <span className="badge">{Number(totalItems)}</span>}
+
+
+          </div>
       </div>
     </nav>
   );

@@ -28,7 +28,6 @@ const Shop = () => {
     fetchItems();
   }, []);
 
-
   return (
     <div className="flex flex-col mt-4 mb-2 h-full">
       <Navbar />

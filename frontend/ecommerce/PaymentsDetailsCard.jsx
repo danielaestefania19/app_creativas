@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from 'ethers';
 import Crypay from "../../utils/abi/Crypay.json";
-import WalletPayCard from './PayCard';
+import WalletPayCard from '../components/PayCard';
 
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 const API_URL = import.meta.env.VITE_BACKEND_URL;

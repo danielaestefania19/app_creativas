@@ -1,18 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ethers } from 'ethers';
-import Crypay from "../../utils/abi/Crypay.json";
-import { contractAddress } from "../../utils/constans.js";
-import PaymentDetailsCard from "../components/PaymentsDetailsCard.jsx";
+import PaymentDetailsCard from "./PaymentsDetailsCard.jsx";
 import { Spinner } from "@material-tailwind/react";
 import { AuthContext } from '../components/AuthContext.jsx';
+import { Link } from 'react-router-dom';
+import { useCart } from "./CartContext.jsx";
 
-const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
-const API_URL = import.meta.env.VITE_BACKEND_URL;
-
-const provider = new ethers.providers.JsonRpcProvider(API_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
 const Cart = ({ cart, removeFromCart, onHideCart }) => {
   const navigate = useNavigate();
@@ -21,46 +15,53 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
   const [paymentStarted, setPaymentStarted] = useState(false);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [error, setError] = useState(null);
-  const { whoami, isUserAuthenticated } = useContext(AuthContext);
+  const { whoami, isUserAuthenticated, actor } = useContext(AuthContext);
+  const [userCarts, setUserCarts] = useState(null);
+  const [imageUrls, setImageUrls] = useState(null);
 
-  const handleCheckout = async () => {
-    if (!isUserAuthenticated || whoami === null) {
-      alert("You must log in before purchasing.");
-      console.log("You must log in before purchasing.");
-      return;
-    }
-    setIsLoading(true);
-    const payments = [];
-    try {
-      for (const item of cart) {
-        const contract = new ethers.Contract(item.contract_address, Crypay, wallet);
-        let decimalString = item.price + ".0";
-        let wei = ethers.utils.parseEther(decimalString);
-        let paymentCount = await contract.paymentCount();
-        let externalPaymentId = parseInt(paymentCount);
-        let paymentExists = await contract.checkIfPaymentExists(externalPaymentId);
-        while (paymentExists) {
-          externalPaymentId++;
-          paymentExists = await contract.checkIfPaymentExists(externalPaymentId);
-        }
-        const gasEstimate = await contract.estimateGas.startNewPayment(externalPaymentId, wei);
 
-        // Crea una nueva instancia de wallet para cada transacción
-        const newWallet = new ethers.Wallet(PRIVATE_KEY, provider);
+  const { totalPrice } = useCart();
 
-        const tx = await contract.connect(newWallet).startNewPayment(externalPaymentId, wei, { gasLimit: gasEstimate.toNumber() });
-        const receipt = await tx.wait();
-        console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
-        payments.push({ id: externalPaymentId, address: item.contract_address });
+  console.log(totalPrice)
+
+  const [isCartLoaded, setIsCartLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchUserCart = async () => {
+      try {
+        const userCart = await actor.get_user_cart();
+        console.log(userCart)
+        setUserCarts(userCart.Ok); // Accede a la propiedad Ok aquí
+        setIsCartLoaded(true); // Indica que userCart ha sido cargado
+      } catch (err) {
+        console.error(err);
       }
-      setPaymentStarted(true);
-      setShowPaymentDetails(true);
-      setExternalPaymentIds(payments);
-    } catch (error) {
-      alert("Something went wrong when sending your transaction: " + error.message);
-    }
-    setIsLoading(false);
-  };
+    };
+
+    fetchUserCart();
+  }, [actor]);
+
+  
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      if (isCartLoaded && userCarts && userCarts.card) {
+        try {
+          const imageUrls = [];
+          for (const item of userCarts.card) {
+            const imageHash = item.item.image;
+            const url = `https://green-capable-vole-518.mypinata.cloud/ipfs/${imageHash}`;
+            imageUrls.push(url);
+          }
+          setImageUrls(imageUrls);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    fetchImages();
+  }, [userCarts, isCartLoaded]);
 
 
   return (
@@ -87,36 +88,36 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
                         </button>
                       </div>
                     </div>
-                    {cart.length === 0 ? (
+                    {userCarts && userCarts.card.length === 0 ? (
                       <p>The cart is empty</p>
                     ) : (
                       <>
-                        {cart.map((item, index) => (
-
+                        {userCarts && userCarts.card.map((item, index) => (
                           <div key={index} class="mt-8">
                             <div class="flow-root">
                               <ul role="list" class="-my-6 divide-y divide-gray-200">
                                 <li class="flex py-6">
                                   <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                                    <img class="h-full w-full object-cover object-center">{item.imageUrl}</img>
+                                    {imageUrls && imageUrls[index] && <img src={imageUrls[index]} class="h-full w-full object-cover object-center"></img>}
                                   </div>
 
                                   <div class="ml-4 flex flex-1 flex-col">
                                     <div>
                                       <div class="flex justify-between text-base font-medium text-gray-900">
                                         <h3>
-                                          <a href="#">{item.name}</a>
+                                          <a href="#">{item.item.name}</a>
                                         </h3>
-                                        <p class="ml-4">${item.price}</p>
+                                        <p class="ml-4">${item.item.price && Number(item.item.price)}</p>
+
                                       </div>
-                                      <p class="mt-1 text-sm text-gray-500">{item.description}</p>
+                                      <p class="mt-1 text-sm text-gray-500">{item.item.description}</p>
                                     </div>
                                     <div class="flex flex-1 items-end justify-between text-sm">
-                                      <p class="text-gray-500">Qty 1</p>
+                                      <p class="text-gray-500">Qty {item.amount && Number(item.amount)}</p>
 
                                       <div class="flex">
-                                        <button type="button" class="font-medium text-indigo-600 hover:text-indigo-500" onClick={() => removeFromCart(index)} >Remove</button>
-                                        <span className="mx-2">{item.quantity}</span>
+                                        <button type="button" class="font-medium text-indigo-600 hover:text-indigo-500" onClick={() => removeFromCart(item.item_id)} >Remove</button>
+
                                       </div>
                                     </div>
                                   </div>
@@ -129,16 +130,18 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
                     )}
                     <div class="border-t border-gray-200 px-4 py-6 sm:px-6">
                       <div class="flex justify-between text-base font-medium text-gray-900">
-                        <p>Subtotal</p>
-                        <p>$262.00</p>
+                        <p>Total</p>
+                        <p>${totalPrice && Number(totalPrice.Ok)}</p>
                       </div>
                       <p class="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
                       <div class="mt-6">
-                        <a href="#" class="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700" onClick={handleCheckout}
+                        <Link to="/other/checkout">
+                          <a href="#" class="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700" 
 
-                          disabled={isLoading}
-                        >  {isLoading ? <Spinner /> : 'Buy'}
-                        </a>
+                            disabled={isLoading}
+                          >  {isLoading ? <Spinner /> : 'Buy'}
+                          </a>
+                        </Link>
 
                       </div>
                       <div class="mt-6 flex justify-center text-center text-sm text-gray-500">
@@ -154,7 +157,7 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
                   </div>
                 </div>
 
-                {showPaymentDetails && <PaymentDetailsCard externalPaymentIds={externalPaymentIds} cart={cart} closeModal={() => setShowPaymentDetails(false)} />}
+                {showPaymentDetails && <PaymentDetailsCard externalPaymentIds={externalPaymentIds} closeModal={() => setShowPaymentDetails(false)} />}
                 {error && <div className="error">{error}</div>}
               </div>
 
@@ -175,3 +178,7 @@ const Cart = ({ cart, removeFromCart, onHideCart }) => {
 };
 
 export default Cart;
+
+
+
+
