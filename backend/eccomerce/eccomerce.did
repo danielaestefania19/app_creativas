@@ -189,6 +189,39 @@ type Item = record {
 };
 
 type Card = record {
+<<<<<<< HEAD
+=======
+
+    item_id: nat64;
+    item: Item;
+    amount: nat64;
+};
+
+
+type AddItem = record {
+ 
+ item: nat64;
+ amount: nat64;
+};
+
+
+type ShippingCard = record {
+  card: vec Card;
+  total_price: nat64;
+};
+
+type OwnerItemCard = record {
+  
+  owner: principal;
+  item: nat64;
+};
+
+type BoolStorable = record {
+  
+ bool: bool;
+};
+
+>>>>>>> 19d1c5e665bb0208a3287d46e8c72409313bced4
 
     item_id: nat64;
     item: Item;
@@ -333,7 +366,10 @@ service : (CreateProfile) -> {
     item_in_cart : (principal, nat64) -> (bool) query;
     get_user_cart : () -> (Result_get_user_card) query;
     get_total_price : () -> (Result_get_len_card) query;
+<<<<<<< HEAD
     update_item_card : (AddItem, text) -> (Result);
+=======
+>>>>>>> 19d1c5e665bb0208a3287d46e8c72409313bced4
     get_total_items_in_cart : () -> (Result_get_len_card) query;
     remove_item_from_cart : (nat64) -> (Result); 
     clear_cart : () -> (Result);

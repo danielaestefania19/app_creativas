@@ -179,8 +179,11 @@ export interface Review {
 export interface SendMessage { 'content' : string, 'addressee' : Principal }
 export interface SendMessage2 { 'content' : string, 'addressee_text' : string }
 export interface ShippingCard { 'card' : Array<Card>, 'total_price' : bigint }
+<<<<<<< HEAD
 export type UpdateAction = { 'Add' : null } |
   { 'Remove' : null };
+=======
+>>>>>>> 19d1c5e665bb0208a3287d46e8c72409313bced4
 export interface UpdateItem {
   'description' : [] | [string],
   'stock' : [] | [bigint],

@@ -62,7 +62,7 @@ const WalletPay = ({ item_id, id, amount, contractAddress }) => {
                 disabled={isLoading}>
                 {isLoading ? 'Making transaction...' : 'Pay'}
                 </button>
-                {paymentId && <CompletePayment id={paymentId} contractAddress={contractAddress} />}
+                {/* {paymentId && <CompletePayment id={paymentId} contractAddress={contractAddress} />} */}
  
         </div>
     )

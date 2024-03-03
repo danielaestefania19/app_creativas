@@ -19,7 +19,6 @@ const Item = ({ id, name, price, description, image, contract_address }) => {
   const { whoami, isUserAuthenticated } = useContext(AuthContext);
   const { addToCart } = useCart();
 
-
   let decimalString = price + ".0";
   let wei = ethers.utils.parseEther(decimalString);
 
