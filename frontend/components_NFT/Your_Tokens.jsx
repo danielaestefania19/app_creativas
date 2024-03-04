@@ -27,20 +27,12 @@ const YourTokens = () => {
 
     useEffect(() => {
         const fetchOwnedAssets = async () => {
-            const length = await contract_RES4.assetsCount();
-            const newOwnedAssets = [];
-
-            for (let i = 0; i < length; i++) {
-                const asset = await contract_RES4.assetMap(i);
-                const owner = await contract_RES4.ownerOf(i);
-                const status = await contract_RES4.projectStatus(i);
-                console.log(`Asset ${i} status: ${status}`);
-
-                if (owner === defaultAccount) {
-                    newOwnedAssets.push({ ...asset, status });
-                }
-            }
-
+            const assetIds = await contract_RES4.getAssetsOfOwner(defaultAccount);
+            const newOwnedAssets = await Promise.all(assetIds.map(async id => {
+                const asset = await contract_RES4.assetMap(id);
+                const status = await contract_RES4.projectStatus(id);
+                return { ...asset, status };
+            }));
             setOwnedAssets(newOwnedAssets);
         };
 

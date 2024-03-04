@@ -56,6 +56,25 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "externalPaymentId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getBillingAddress",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getBillingAddress",
     "outputs": [
@@ -98,9 +117,9 @@
     "name": "getStatus",
     "outputs": [
       {
-        "internalType": "string",
+        "internalType": "uint8",
         "name": "",
-        "type": "string"
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",

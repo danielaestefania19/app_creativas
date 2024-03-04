@@ -11,6 +11,8 @@ const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
 const CompletePaymentCard = ({ paymentInfo }) => {
     const [isLoading, setIsLoading] = useState(false);
+
+    console.log("Holaa completemos el pago", paymentInfo)
   
     const completeHandler = async () => {
       setIsLoading(true);
@@ -18,8 +20,11 @@ const CompletePaymentCard = ({ paymentInfo }) => {
       try {
         // Inicializa el contrato Crypay con la dirección del contrato del artículo
         const crypayContract = new ethers.Contract(paymentInfo.contractAddress, Crypay, wallet);
-  
-        const tx = await crypayContract.complete(paymentInfo.externalPaymentId);
+
+        console.log("PaymentsId:", paymentInfo.externalPaymentId)
+        const gasLimit = ethers.utils.hexlify(300000);
+
+        const tx = await crypayContract.complete(paymentInfo.externalPaymentId, { gasLimit });
   
         await tx.wait();
   
@@ -33,19 +38,18 @@ const CompletePaymentCard = ({ paymentInfo }) => {
     }
 
     return (
-        <button 
-          className="CompletePayment" 
-          style={{ 
-            width: '100%', 
-            display: 'flex', 
-            justifyContent: 'center' 
-          }}
-          onClick={completeHandler}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Completing transaction...' : `Completar Pago ${paymentInfo.externalPaymentId}`}
-        </button>
-      )
+      <div className="fixed inset-0 flex items-center justify-center ">
+      <button 
+        className="bg-black text-white w-48 rounded-md font-medium my-1.5 mx-auto py-3 mt-56 flex items-center justify-center z-10"  
+        onClick={completeHandler}
+        disabled={isLoading}
+      >
+        {isLoading ? 'Completing transaction...' : `Completar Pago`}
+      </button>
+      </div>
+
+    )
+    
 }
 
 export default CompletePaymentCard;

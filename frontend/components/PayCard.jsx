@@ -11,7 +11,7 @@ const WalletPayCard = ({ paymentInfo }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPaymentComplete, setIsPaymentComplete] = useState(false); // Nuevo estado para rastrear si el pago se ha completado
 
-  console.log(paymentInfo)
+  console.log("Hola vamos a pagar", paymentInfo)
 
   const payHandler = async () => {
     setIsLoading(true);
@@ -21,11 +21,11 @@ const WalletPayCard = ({ paymentInfo }) => {
 
     // Prepara los arrays para la función batchPay
     const externalPaymentIds = paymentInfo.map(info => parseInt(info.externalPaymentId));
-    console.log(externalPaymentIds)
+    console.log("Ids:", externalPaymentIds)
     const prices = paymentInfo.map(info => info.price);
-    console.log(prices)
+    console.log("Precios:", prices)
     const contractAddresses = paymentInfo.map(info => info.contractAddress);
-    console.log(contractAddresses)
+    console.log("Addresses", contractAddresses)
 
     // Realiza el pago
     const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
@@ -38,9 +38,12 @@ const WalletPayCard = ({ paymentInfo }) => {
       prices.forEach(price => {
         totalAmount = totalAmount.add(price);
       });
-
+ 
+      const gasLimit = ethers.utils.hexlify(300000);
       // Ahora puedes pasar totalAmount directamente a la función batchPay
-      const tx = await cardCrypayContractWithSigner.batchPay(externalPaymentIds, prices, contractAddresses, { value: totalAmount });
+
+      console.log("Precio Total", ethers.utils.formatEther(totalAmount), 0)
+      const tx = await cardCrypayContractWithSigner.batchpay(externalPaymentIds, prices, contractAddresses, { gasLimit, value: totalAmount });
 
       await tx.wait();
 

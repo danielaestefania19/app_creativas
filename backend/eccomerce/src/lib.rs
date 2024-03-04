@@ -2370,11 +2370,11 @@ fn remove_item(id: u64) -> Result<(), ItemError> {
             None => return Err(ItemError::NotExist),
         }
 
-        if let Some(owner) = old_item.owner {
-            if owner != ic_cdk::api::caller() {
-                return Err(ItemError::Unauthorized);
-            }
-        }
+        // if let Some(owner) = old_item.owner {
+        //     if owner != ic_cdk::api::caller() {
+        //         return Err(ItemError::Unauthorized);
+        //     }
+        // }
 
         // Verificar si existen compras pendientes para el artículo
         let mut has_pending_purchases = false;
