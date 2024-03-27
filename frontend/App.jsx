@@ -6,7 +6,6 @@ import Footer from './landing/Footer.jsx';
 import './styles/styles.css'
 import Shop from "./ecommerce/Shop.jsx"
 import PaymentDetails from "./components/PaymentDetails.jsx";
-import Card from './landing/Card.jsx';
 import PaymentButton from "./components/Pay.jsx"
 import { ChakraProvider } from "@chakra-ui/react";
 import ItemsUploader from "./components/Providers.jsx"
@@ -16,7 +15,6 @@ import Balance from "./components_NFT/balance.jsx"
 import { WalletProvider } from './components/WalletContext.jsx';
 import { AuthProvider } from './components/AuthContext.jsx'; // importa el AuthProvider
 import withAuthentication from './components/withAuthentication.jsx';
-import Mediun from './landing/Mediun.jsx';
 import YourInvest from './components_NFT/YourInvest.jsx'
 import YourTokens from './components_NFT/Your_Tokens.jsx'
 import Checkout from './ecommerce/Checkout.jsx'
@@ -29,7 +27,6 @@ import { CartProvider } from "../frontend/ecommerce/CartContext.jsx";
 
 
 function App() {
-
 
 
   const Eccomerce = withAuthentication(Shop);
@@ -60,15 +57,13 @@ function App() {
             path="/"
             element={
               <>
-                <Home className="bg-white" />
+                <Home/>
                 <Body
                   onCreatePayment={handleCreatePayment}
                   getTokens={GetTokens}
                   onCreateTokens={handleCreateTokens}
                   onCreateItems={handleuploaderClick}
                 />
-                <Mediun />
-                <Card />
                 <Footer />
               </>
             }

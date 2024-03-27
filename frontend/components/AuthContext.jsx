@@ -3,12 +3,15 @@ import { AuthClient, IdbStorage } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { eccomerce, createActor } from "../../src/declarations/eccomerce";
 import { useNavigate } from 'react-router-dom';
-import { handleNotifications } from "./Home"
+import { handleNotifications } from "./Home.jsx"
 import { MessagePayload, onMessage } from "firebase/messaging";
 import { getFirebaseToken, messaging } from "../FirebaseConfig.jsx";
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { useIdleTimer } from 'react-idle-timer';
+import Formulario  from './CreateProfile.jsx';
+import Modal from './Modal.jsx';
+
 
 // import useProfileActivity from './useProfileActivity.jsx'; // Importa useProfileActivity aquí
 
@@ -29,6 +32,8 @@ export const AuthProvider = ({ children }) => {
   const [whoami, setWhoami] = useState(null);
   const [lastVisitedRoute, setLastVisitedRoute] = useState('/');
   const navigate = useNavigate();
+  const [showForm, setShowForm] = useState(false);
+
 
 
   const login = async () => {
@@ -74,9 +79,10 @@ export const AuthProvider = ({ children }) => {
     const hasProfile = await newActor.has_profile();
     if (!hasProfile) {
         setIsUserAuthenticated(false); // Establece isUserAuthenticated en false
-        navigate('/formulario');
+        setShowForm(true); // Muestra el formulario
     } else {
         setIsUserAuthenticated(true); // Establece isUserAuthenticated en true
+        setShowForm(false); // Oculta el formulario
     }
 };
 
@@ -121,7 +127,7 @@ useEffect(() => {
           setActor(newActor);
         } else {
           setIsUserAuthenticated(false);
-          navigate('/formulario');
+          setShowForm(true);
         }
       } // Aquí es donde faltaba una llave de cierre
     }
@@ -164,9 +170,14 @@ useIdleTimer({
       lastVisitedRoute,
       setLastVisitedRoute,
       actor,
-      whoami
+      whoami,
+      setShowForm
     }}>
-      {children}
+       <Modal show={showForm} onClose={() => setShowForm(false)}>
+      <Formulario />
+    </Modal>
+    {children}
+      
     </AuthContext.Provider>
   );
 };
