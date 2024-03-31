@@ -1,7 +1,9 @@
 import React, { useState, useEffect, createContext } from 'react';
 import { AuthClient, IdbStorage } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
-import { eccomerce, createActor } from "../../src/declarations/eccomerce";
+import { eccomerce, createActor as createEccomerceActor } from "../../src/declarations/eccomerce";
+import { messages, createActor as createMessagesActor } from '../../src/declarations/messages';
+import { nft_venture, createActor as createNftVentureActor } from '../../src/declarations/nft_venture';
 import { useNavigate } from 'react-router-dom';
 import { handleNotifications } from "./Home.jsx"
 import { MessagePayload, onMessage } from "firebase/messaging";
@@ -9,53 +11,57 @@ import { getFirebaseToken, messaging } from "../FirebaseConfig.jsx";
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { useIdleTimer } from 'react-idle-timer';
-import Formulario  from './CreateProfile.jsx';
+import Formulario from './CreateProfile.jsx';
 import Modal from './Modal.jsx';
 
 
-// import useProfileActivity from './useProfileActivity.jsx'; // Importa useProfileActivity aquí
 
 export const AuthContext = createContext();
 
-const storage = new IdbStorage(); // Crea una nueva instancia de AuthClientStorage
 
+const canister_id_1 = import.meta.env.VITE_CANISTER_ECCOMERCE;
+const canister_id_2 = import.meta.env.VITE_CANISTER_MESSAGES;
+const canister_id_3 = import.meta.env.VITE_CANISTER_NFT_VENTURE;
 
-const canister_id = import.meta.env.VITE_CANISTER_ID;
-
-const network = import.meta.env.VITE_DFX_NETWORK;
 export const AuthProvider = ({ children }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [userIdentity, setUserIdentity] = useState(null);
-  const [userPrincipal, setUserPrincipal] = useState(null);
   const [authClient, setAuthClient] = useState(null);
-  const [actor, setActor] = useState(eccomerce);
-  const [whoami, setWhoami] = useState(null);
+  const [actor_ecomerce, setActor_Eccomerce] = useState(eccomerce);
+  const [actor_messages, setActor_Messages] = useState(messages);
+  const [actor_nft_venture, setActor_Nft_Venture] = useState(nft_venture)
+
   const [lastVisitedRoute, setLastVisitedRoute] = useState('/');
-  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
 
 
 
-  const login = async () => {
-    const local_ii_url = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:7070`;
-    let iiUrl;
-    if (process.env.DFX_NETWORK === "local") {
-      iiUrl = local_ii_url;
-    } else if (process.env.DFX_NETWORK === "ic") {
-      iiUrl = `https://identity.ic0.app`;
-    } else {
-      iiUrl = local_ii_url;
-    }
-
-    let mainnet = `http://br5f7-7uaaa-aaaaa-qaaca-cai.localhost:8000`;
+  const login = async (method) => {
 
     const newAuthClient = await AuthClient.create();
     setAuthClient(newAuthClient);
 
+    let identityProvider;
+    if (method === 'internetIdentity') {
+      identityProvider = process.env.DFX_NETWORK === "ic"
+        ? "https://identity.ic0.app"
+        : `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:8080`;
+    } else if (method === 'nfid') {
+      const APP_NAME = "Creativas";
+      const APP_LOGO = "https://nfid.one/icons/favicon-96x96.png";
+      const CONFIG_QUERY = `?applicationName=${APP_NAME}&applicationLogo=${APP_LOGO}`;
+      identityProvider = `https://nfid.one/authenticate${CONFIG_QUERY}`;
+    }
+
     await new Promise((resolve) => {
       newAuthClient.login({
-        identityProvider: mainnet,
+        identityProvider,
         onSuccess: resolve,
+        windowOpenerFeatures: `
+      left=${window.screen.width / 2 - 525 / 2},
+      top=${window.screen.height / 2 - 800 / 2},
+      toolbar=0,location=0,menubar=0,width=525,height=800
+    `,
         onError: () => {
           toast("Login error");
         },
@@ -65,34 +71,47 @@ export const AuthProvider = ({ children }) => {
     const identity = await newAuthClient.getIdentity();
     const agent = new HttpAgent({ identity });
 
-    const newActor = createActor(canister_id, { agent });
+    // Crear los tres actores
 
-    const principal = await newActor.whoami();
+    const newActorEccomerce = createEccomerceActor(canister_id_1, { agent });
+    const newActorMessages = createMessagesActor(canister_id_2, { agent });
+    const newActorNftVenture = createNftVentureActor(canister_id_3, { agent });
 
-    console.log(principal.toText())
+    const principalEccomerce = await newActorEccomerce.whoami();
+    const principalMessages = await newActorMessages.whoami();
+    const principalNftVenture = await newActorNftVenture.whoami();
 
-    setIsUserAuthenticated(await newAuthClient.isAuthenticated());
-    setWhoami(principal.toText());
-    setUserIdentity(identity);
-    setUserPrincipal(principal);
-    setActor(newActor);
-    const hasProfile = await newActor.has_profile();
-    if (!hasProfile) {
+
+    // Verifica si los principals son anónimos y si son iguales
+    if (!principalEccomerce.isAnonymous() && !principalMessages.isAnonymous() && !principalNftVenture.isAnonymous() &&
+      principalEccomerce.toText() === principalMessages.toText() && principalMessages.toText() === principalNftVenture.toText()) {
+
+      setIsUserAuthenticated(await newAuthClient.isAuthenticated());
+
+      setUserIdentity(identity);
+      setActor_Eccomerce(newActorEccomerce);
+      setActor_Messages(newActorMessages);
+      setActor_Nft_Venture(newActorNftVenture);
+      const hasProfile = await newActorMessages.has_profile();
+      if (!hasProfile) {
         setIsUserAuthenticated(false); // Establece isUserAuthenticated en false
         setShowForm(true); // Muestra el formulario
-    } else {
+      } else {
         setIsUserAuthenticated(true); // Establece isUserAuthenticated en true
         setShowForm(false); // Oculta el formulario
+      }
     }
-};
+  };
 
-const logout = async () => {
+
+  const logout = async () => {
     await authClient?.logout();
 
     setIsUserAuthenticated(false);
     setUserIdentity(null);
-    setUserPrincipal(null);
-    setActor(null);
+    setActor_Eccomerce(null);
+    setActor_Messages(null);
+    setActor_Nft_Venture(null);
 
     sessionStorage.clear();
     localStorage.clear();
@@ -102,61 +121,67 @@ const logout = async () => {
       window.indexedDB.deleteDatabase(db.name);
     });
     window.location.reload();
-};
-// En AuthProvider
-useEffect(() => {
-  const fetchData = async () => {
-    const newAuthClient = await AuthClient.create();
-    if (newAuthClient.isAuthenticated()) {
-      const identity = await newAuthClient.getIdentity();
-      const agent = new HttpAgent({ identity });
+  };
+  // En AuthProvider
+  useEffect(() => {
+    const fetchData = async () => {
+      const newAuthClient = await AuthClient.create();
+      if (newAuthClient.isAuthenticated()) {
+        const identity = await newAuthClient.getIdentity();
+        const agent = new HttpAgent({ identity });
 
-      const newActor = createActor(canister_id, { agent });
+        // Crear los tres actores
 
-      const principal = await newActor.whoami();
-      console.log(principal.toText())
-      // Verifica si el principal es anónimo
-      if (!principal.isAnonymous()) {
-        const hasProfile = await newActor.has_profile();
-        if (hasProfile) {
-          // Aquí es donde actualizas el estado
-          setIsUserAuthenticated(true);
-          setWhoami(principal.toText());
-          setUserIdentity(identity);
-          setUserPrincipal(principal);
-          setActor(newActor);
-        } else {
-          setIsUserAuthenticated(false);
-          setShowForm(true);
-        }
-      } // Aquí es donde faltaba una llave de cierre
+        const newActorEccomerce = createEccomerceActor(canister_id_1, { agent });
+        const newActorMessages = createMessagesActor(canister_id_2, { agent });
+        const newActorNftVenture = createNftVentureActor(canister_id_3, { agent });
+
+        const principalEccomerce = await newActorEccomerce.whoami();
+        const principalMessages = await newActorMessages.whoami();
+        const principalNftVenture = await newActorNftVenture.whoami();
+
+        // Verifica si los principals son anónimos y si son iguales
+        if (!principalEccomerce.isAnonymous() && !principalMessages.isAnonymous() && !principalNftVenture.isAnonymous() &&
+          principalEccomerce.toText() === principalMessages.toText() && principalMessages.toText() === principalNftVenture.toText()) {
+          const hasProfileMessages = await newActorMessages.has_profile();
+          if (hasProfileMessages) {
+            // Aquí es donde actualizas el estado
+            setIsUserAuthenticated(true);
+            setUserIdentity(identity);
+            setActor_Eccomerce(newActorEccomerce);
+            setActor_Messages(newActorMessages);
+            setActor_Nft_Venture(newActorNftVenture);
+          } else {
+            setIsUserAuthenticated(false);
+          }
+        } // Aquí es donde faltaba una llave de cierre
+      }
+    };
+    fetchData();
+  }, []); // Sin dependencias para que useEffect se ejecute solo una vez
+
+  const onIdle = async () => {
+    console.log("Usuario inactivo");
+    if (isUserAuthenticated) {
+      console.log("Desactivando perfil...");
+      await actor_messages.desactivate_profile();
     }
   };
-  fetchData();
-}, []); // Sin dependencias para que useEffect se ejecute solo una vez
 
-const onIdle = async () => {
-  console.log("Usuario inactivo");
-  if (isUserAuthenticated) {
-    console.log("Desactivando perfil...");
-    await actor.desactivate_profile();
-  }
-};
+  const onActive = async () => {
+    console.log("Usuario activo");
+    if (isUserAuthenticated) {
+      console.log("Activando perfil...");
+      await actor_messages.activate_profile();
+    }
+  };
 
-const onActive = async () => {
-  console.log("Usuario activo");
-  if (isUserAuthenticated) {
-    console.log("Activando perfil...");
-    await actor.activate_profile();
-  }
-};
-
-useIdleTimer({
-  onIdle,
-  onActive,
-  timeout: 1000 * 60 * 5, // 5 minutos
-  debounce: 500
-});
+  useIdleTimer({
+    onIdle,
+    onActive,
+    timeout: 1000 * 60 * 1, // 1 minutos
+    debounce: 500
+  });
 
 
   return (
@@ -164,20 +189,20 @@ useIdleTimer({
       isUserAuthenticated,
       setIsUserAuthenticated, // Añade esto
       userIdentity,
-      userPrincipal,
       login,
       logout,
       lastVisitedRoute,
       setLastVisitedRoute,
-      actor,
-      whoami,
+      actor_ecomerce,
+      actor_messages,
+      actor_nft_venture,
       setShowForm
     }}>
-       <Modal show={showForm} onClose={() => setShowForm(false)}>
-      <Formulario />
-    </Modal>
-    {children}
-      
+      <Modal show={showForm} onClose={() => setShowForm(false)}>
+        <Formulario />
+      </Modal>
+      {children}
+
     </AuthContext.Provider>
   );
 };

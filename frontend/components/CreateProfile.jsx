@@ -9,8 +9,8 @@ const Formulario = () => {
         profile_picture: null, // Inicializa a null
         about: null, // Inicializa a null
     });
-    const { whoami, actor, setIsUserAuthenticated, setShowForm } = useContext(AuthContext); // 
-    const navigate = useNavigate(); // Usa useNavigate aquí
+    const { actor_messages, setIsUserAuthenticated, setShowForm } = useContext(AuthContext); // 
+
 
     const handleChange = (e) => {
         if (e.target.name === 'profile_picture') {
@@ -70,8 +70,8 @@ const Formulario = () => {
 
 
         try {
-            await actor.create_profile(profile);
-            const hasProfile = await actor.has_profile();
+            await actor_messages.create_profile(profile);
+            const hasProfile = await actor_messages.has_profile();
             if (hasProfile) {
                 setIsUserAuthenticated(true); // Establece isUserAuthenticated en true
                 setShowForm(false); // Oculta el formulario

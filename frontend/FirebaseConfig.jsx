@@ -23,6 +23,7 @@ export const getOrRegisterServiceWorker = () => {
     ) {
         return window.navigator.serviceWorker
             .getRegistration('/')
+            .getRegistration('/')
             .then((serviceWorker) => {
                 if (serviceWorker) return serviceWorker;
                 return window.navigator.serviceWorker.register(

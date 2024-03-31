@@ -43,7 +43,6 @@ const ItemsUploader = () => {
   const [stock, setStock] = useState(0);
 
 
-  console.log(whoami)
 
   const handleFileChange = useCallback(async (event) => {
     const file = event.target.files[0];
@@ -58,10 +57,6 @@ const ItemsUploader = () => {
 
   const handleUpload = useCallback(async () => {
 
-    if (!whoami) {
-      setError('Invalid user. Please log in again.');
-      return;
-    }
 
     if (!file) {
       setError('Select a file before uploading an item.');
@@ -101,7 +96,7 @@ const ItemsUploader = () => {
         const contract_frac = await factory.deploy(defaultAccount);
         await contract_frac.deployed();
         console.log(`Contract deployed at ${contract_frac.address}`);
-        console.log(whoami)
+
 
 
         await actor.set_item({
@@ -175,11 +170,6 @@ const ItemsUploader = () => {
               <Input value={stock} onChange={e => setStock(e.target.value ? Number(e.target.value) : 0)} label="Stock" />
             </div>
 
-
-
-            <div>
-              <p>Principal: {whoami}</p>
-            </div>
           </Typography>
           {/* Here we show the error message if there is one */}
           {error && (

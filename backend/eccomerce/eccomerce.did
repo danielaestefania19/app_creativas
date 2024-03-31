@@ -19,63 +19,12 @@ type CreateReview = record {
     rating: nat64;
     review: text;
 };
-type Profile = record {
-    username: text;
-    profile_picture: text;
-    about: text;
-    active: bool;  // Nuevo campo para el estado de actividad
-    last_connection: opt nat64;  // Nuevo campo para la última conexión
-};
-
-type CreateProfile = record {
-    username: text;
-    profile_picture: text;
-    about: text;
-};
 
 type AddProfilePicture = record {
     profile_picture: text;
 };
 
-type MensajeStatus = variant {
-    Sent;
-    Read;
-};
 
-type Message = record {
-    sender: opt principal;
-    content: text;
-    addressee: opt principal;
-    time: nat64;
-    status: MensajeStatus;
-};
-
-type  UserMessages = record {
-    messages: vec Message;
-    last_checked: nat64; // Cambia a u64
-    unread: nat64; // Cambia a u64
-};
-
-type SendMessage = record {
-    content: text;
-    addressee: principal;
-};
-
-type SendMessage2 = record {
-    content: text;
-    addressee_text: text;
-};
-
-
-type LastChecked = record {
-    key: principal;
-};
-type Conversation = record {
-    other_user: principal;
-    last_message: Message;
-    unread: bool;
-    unread_count: nat64; 
-};
 type Address = record {
     country: text;
     state: text;
@@ -236,12 +185,9 @@ type ItemError = variant {
     NoVotes; // Agrega este error
     ItemNotFound; // Agrega este error
     InvalidRating;
+    OutOfStock;
 };
 
-type ResultSearch = record {
-    matches: bool;
-    users: vec record { text; principal};
-};
 
 type Result_get_category = variant {
     Ok: vec record { nat64; Item };
@@ -254,15 +200,16 @@ type Result = variant {
 };
 
 
+type Result_item = variant {
+    Ok: Item;
+    Err: ItemError;
+};
+
+
 type Result_get = variant {
     Ok: text;
     Err: ItemError;
 };
-type Result_get_tokens = variant {
-    Ok: vec text;
-    Err: ItemError;
-};
-
 
 type Result_get_owner = variant {
     Ok: principal;
@@ -285,29 +232,13 @@ type Result_get_address_by_id = variant {
     Err: ItemError;
 };
 
-type Result_get_profile = variant {
-    Ok: Profile;
-    Err: ItemError;
-};
+
 type Result_get_purchases = variant {
     Ok: vec Purchase;
     Err: ItemError
 };
 
-type InboxResult = record {
-    conversations: vec Conversation;
-    
-};
 
-type Result_get_private_chat = variant {
-    Ok: vec Message;
-    Err: ItemError
-};
-
-type Result_get_inbox = variant {
-    Ok: InboxResult;
-    Err: ItemError;
-};
 
 type Result_Bool = variant {
     Ok: bool;
@@ -325,7 +256,7 @@ type Result_get_len_card = variant {
 };
 
 
-service : (CreateProfile) -> {
+service : () -> {
     get_items : () -> (vec record { nat64; Item }) query;
     get_user_addresses : () -> (Result_get_address) query;
     set_item : (CreateItem) -> (Result);
@@ -345,28 +276,13 @@ service : (CreateProfile) -> {
     get_your_purchases : () -> (Result_get_purchases) query;
     get_item_billing_address : (nat64) -> (Result_get) query;
     get_item_owner : (nat64) -> (Result_get_owner);
-    has_profile : () -> (bool) query;
-    create_profile : (CreateProfile) -> (Result);
     add_review : (CreateReview) -> (Result); 
     add_picture : (nat64, AddProfilePicture) -> (Result);
-    get_user_profile : () -> (Result_get_profile) query;
-    get_profile_key_by_principal : (principal) -> (Result_get_profile) query;
     update_address : (nat64, UserAddressEdit) -> (Result);
     update_item : (nat64, UpdateItem) -> (Result);
     remove_item : (nat64) -> (Result);
+    get_item : (nat64) -> (Result_item) query;
     get_items_owner : () -> (ResultItems) query;
-    get_private_chat : (principal) -> (Result_get_private_chat) query;
-    mark_messages_as_read : (principal) -> (Result);
-    activate_profile : () -> (Result);
-    desactivate_profile : () -> (Result);
-    is_active : (principal) -> (Result_Bool) query;
-    send_message: (SendMessage) -> (Result);
-    send_message_by_canister: (SendMessage) -> (Result);
-    add_token_to_principal: (text) -> (Result);
-    get_tokens_for_principal: (text) -> (Result_get_tokens) query;
-    send_message_2 : (SendMessage2) -> (Result); 
-    get_inbox: () -> (Result_get_inbox) query;
-    autocomplete_search: (text) -> (ResultSearch) query;
     get_items_by_category: (text) -> (Result_get_category) query;
     whoami : () -> (principal) query;
     manager : () -> (principal) query;

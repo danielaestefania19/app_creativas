@@ -8,9 +8,27 @@
         "node_compatibility": true
       }
     },
+    "nft_venture": {
+      "type": "rust",
+      "candid": "backend/nft_venture/nft_venture.did",
+      "package": "nft_venture",
+      "declarations": {
+        "node_compatibility": true
+      }
+    },
+    "messages": {
+      "type": "rust",
+      "candid": "backend/messages/messages.did",
+      "package": "messages",
+      "declarations": {
+        "node_compatibility": true
+      }
+    },
     "assets": {
       "dependencies": [
         "eccomerce",
+        "nft_venture",
+        "messages",
         "internet_identity"
       ],
       "frontend": {
@@ -39,7 +57,7 @@
   },
   "networks": {
     "local": {
-      "bind": "127.0.0.1:8000",
+      "bind": "127.0.0.1:8080",
       "type": "ephemeral"
     },
     "ic": {

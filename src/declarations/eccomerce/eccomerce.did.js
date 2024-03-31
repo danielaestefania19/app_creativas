@@ -1,9 +1,5 @@
 export const idlFactory = ({ IDL }) => {
-  const CreateProfile = IDL.Record({
-    'about' : IDL.Text,
-    'username' : IDL.Text,
-    'profile_picture' : IDL.Text,
-  });
+  const AddItem = IDL.Record({ 'item' : IDL.Nat64, 'amount' : IDL.Nat64 });
   const ItemError = IDL.Variant({
     'AlreadyVoted' : IDL.Null,
     'InvalidRating' : IDL.Null,
@@ -11,6 +7,7 @@ export const idlFactory = ({ IDL }) => {
     'UpdateError' : IDL.Null,
     'AlreadyExist' : IDL.Null,
     'ItemNotFound' : IDL.Null,
+    'OutOfStock' : IDL.Null,
     'Unauthorized' : IDL.Null,
     'InvalidOwner' : IDL.Null,
     'NoVotes' : IDL.Null,
@@ -18,7 +15,6 @@ export const idlFactory = ({ IDL }) => {
     'NoItemsAssociated' : IDL.Null,
   });
   const Result = IDL.Variant({ 'Ok' : IDL.Null, 'Err' : ItemError });
-  const AddItem = IDL.Record({ 'item' : IDL.Nat64, 'amount' : IDL.Nat64 });
   const AddProfilePicture = IDL.Record({ 'profile_picture' : IDL.Text });
   const CreateReview = IDL.Record({
     'review' : IDL.Text,
@@ -34,10 +30,6 @@ export const idlFactory = ({ IDL }) => {
     'phone_number' : IDL.Text,
   });
   const CreateUserAddress = IDL.Record({ 'address' : Address });
-  const ResultSearch = IDL.Record({
-    'matches' : IDL.Bool,
-    'users' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Principal)),
-  });
   const CreatePurchase = IDL.Record({
     'id_shipping_address' : IDL.Nat64,
     'name' : IDL.Text,
@@ -52,29 +44,6 @@ export const idlFactory = ({ IDL }) => {
     'Err' : ItemError,
   });
   const Result_get = IDL.Variant({ 'Ok' : IDL.Text, 'Err' : ItemError });
-  const MensajeStatus = IDL.Variant({ 'Read' : IDL.Null, 'Sent' : IDL.Null });
-  const Message = IDL.Record({
-    'status' : MensajeStatus,
-    'content' : IDL.Text,
-    'time' : IDL.Nat64,
-    'sender' : IDL.Opt(IDL.Principal),
-    'addressee' : IDL.Opt(IDL.Principal),
-  });
-  const Conversation = IDL.Record({
-    'other_user' : IDL.Principal,
-    'last_message' : Message,
-    'unread' : IDL.Bool,
-    'unread_count' : IDL.Nat64,
-  });
-  const InboxResult = IDL.Record({ 'conversations' : IDL.Vec(Conversation) });
-  const Result_get_inbox = IDL.Variant({
-    'Ok' : InboxResult,
-    'Err' : ItemError,
-  });
-  const Result_get_owner = IDL.Variant({
-    'Ok' : IDL.Principal,
-    'Err' : ItemError,
-  });
   const Rating = IDL.Variant({
     'One' : IDL.Null,
     'Two' : IDL.Null,
@@ -112,28 +81,17 @@ export const idlFactory = ({ IDL }) => {
     'contract_address' : IDL.Text,
     'price' : IDL.Nat64,
   });
+  const Result_item = IDL.Variant({ 'Ok' : Item, 'Err' : ItemError });
+  const Result_get_owner = IDL.Variant({
+    'Ok' : IDL.Principal,
+    'Err' : ItemError,
+  });
   const Result_get_category = IDL.Variant({
     'Ok' : IDL.Vec(IDL.Tuple(IDL.Nat64, Item)),
     'Err' : ItemError,
   });
   const ResultItems = IDL.Variant({
     'Ok' : IDL.Vec(IDL.Tuple(IDL.Nat64, Item)),
-    'Err' : ItemError,
-  });
-  const Result_get_private_chat = IDL.Variant({
-    'Ok' : IDL.Vec(Message),
-    'Err' : ItemError,
-  });
-  const Profile = IDL.Record({
-    'active' : IDL.Bool,
-    'about' : IDL.Text,
-    'username' : IDL.Text,
-    'profile_picture' : IDL.Text,
-    'last_connection' : IDL.Opt(IDL.Nat64),
-  });
-  const Result_get_profile = IDL.Variant({ 'Ok' : Profile, 'Err' : ItemError });
-  const Result_get_tokens = IDL.Variant({
-    'Ok' : IDL.Vec(IDL.Text),
     'Err' : ItemError,
   });
   const Result_get_len_card = IDL.Variant({
@@ -184,15 +142,6 @@ export const idlFactory = ({ IDL }) => {
     'Ok' : IDL.Vec(Purchase),
     'Err' : ItemError,
   });
-  const Result_Bool = IDL.Variant({ 'Ok' : IDL.Bool, 'Err' : ItemError });
-  const SendMessage = IDL.Record({
-    'content' : IDL.Text,
-    'addressee' : IDL.Principal,
-  });
-  const SendMessage2 = IDL.Record({
-    'content' : IDL.Text,
-    'addressee_text' : IDL.Text,
-  });
   const CreateItem = IDL.Record({
     'billing_address' : IDL.Text,
     'item' : IDL.Text,
@@ -219,24 +168,19 @@ export const idlFactory = ({ IDL }) => {
     'price' : IDL.Opt(IDL.Nat64),
   });
   return IDL.Service({
-    'activate_profile' : IDL.Func([], [Result], []),
     'add_item_card' : IDL.Func([AddItem], [Result], []),
     'add_picture' : IDL.Func([IDL.Nat64, AddProfilePicture], [Result], []),
     'add_review' : IDL.Func([CreateReview], [Result], []),
-    'add_token_to_principal' : IDL.Func([IDL.Text], [Result], []),
     'associate_address' : IDL.Func([CreateUserAddress], [], []),
-    'autocomplete_search' : IDL.Func([IDL.Text], [ResultSearch], ['query']),
     'clear_cart' : IDL.Func([], [Result], []),
-    'create_profile' : IDL.Func([CreateProfile], [Result], []),
     'create_purchase' : IDL.Func([CreatePurchase], [Result], []),
-    'desactivate_profile' : IDL.Func([], [Result], []),
     'get_address_by_id' : IDL.Func(
         [IDL.Nat64],
         [Result_get_address_by_id],
         ['query'],
       ),
     'get_contract_address' : IDL.Func([IDL.Nat64], [Result_get], ['query']),
-    'get_inbox' : IDL.Func([], [Result_get_inbox], ['query']),
+    'get_item' : IDL.Func([IDL.Nat64], [Result_item], ['query']),
     'get_item_billing_address' : IDL.Func([IDL.Nat64], [Result_get], ['query']),
     'get_item_owner' : IDL.Func([IDL.Nat64], [Result_get_owner], []),
     'get_items' : IDL.Func(
@@ -250,42 +194,20 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'get_items_owner' : IDL.Func([], [ResultItems], ['query']),
-    'get_private_chat' : IDL.Func(
-        [IDL.Principal],
-        [Result_get_private_chat],
-        ['query'],
-      ),
-    'get_profile_key_by_principal' : IDL.Func(
-        [IDL.Principal],
-        [Result_get_profile],
-        ['query'],
-      ),
-    'get_tokens_for_principal' : IDL.Func(
-        [IDL.Text],
-        [Result_get_tokens],
-        ['query'],
-      ),
     'get_total_items_in_cart' : IDL.Func([], [Result_get_len_card], ['query']),
     'get_total_price' : IDL.Func([], [Result_get_len_card], ['query']),
     'get_user_addresses' : IDL.Func([], [Result_get_address], ['query']),
     'get_user_cart' : IDL.Func([], [Result_get_user_card], ['query']),
-    'get_user_profile' : IDL.Func([], [Result_get_profile], ['query']),
     'get_your_purchases' : IDL.Func([], [Result_get_purchases], ['query']),
     'get_your_sales' : IDL.Func([], [Result_get_purchases], ['query']),
-    'has_profile' : IDL.Func([], [IDL.Bool], ['query']),
-    'is_active' : IDL.Func([IDL.Principal], [Result_Bool], ['query']),
     'item_in_cart' : IDL.Func(
         [IDL.Principal, IDL.Nat64],
         [IDL.Bool],
         ['query'],
       ),
     'manager' : IDL.Func([], [IDL.Principal], ['query']),
-    'mark_messages_as_read' : IDL.Func([IDL.Principal], [Result], []),
     'remove_item' : IDL.Func([IDL.Nat64], [Result], []),
     'remove_item_from_cart' : IDL.Func([IDL.Nat64], [Result], []),
-    'send_message' : IDL.Func([SendMessage], [Result], []),
-    'send_message_2' : IDL.Func([SendMessage2], [Result], []),
-    'send_message_by_canister' : IDL.Func([SendMessage], [Result], []),
     'set_item' : IDL.Func([CreateItem], [Result], []),
     'update_address' : IDL.Func([IDL.Nat64, UserAddressEdit], [Result], []),
     'update_item' : IDL.Func([IDL.Nat64, UpdateItem], [Result], []),
@@ -293,11 +215,4 @@ export const idlFactory = ({ IDL }) => {
     'whoami' : IDL.Func([], [IDL.Principal], ['query']),
   });
 };
-export const init = ({ IDL }) => {
-  const CreateProfile = IDL.Record({
-    'about' : IDL.Text,
-    'username' : IDL.Text,
-    'profile_picture' : IDL.Text,
-  });
-  return [CreateProfile];
-};
+export const init = ({ IDL }) => { return []; };

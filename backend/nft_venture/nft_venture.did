@@ -1,0 +1,122 @@
+type KeyPrincipal = record{
+    key: principal;
+};
+
+type AssetError = variant {
+    AlreadyExist;
+    NotAllowed;
+    NotExist;
+    Unauthorized;
+    UpdateError;
+    NoAssetsAssociated;
+    InvalidOwner;
+    AlreadyVoted; // Agrega este error
+    NoVotes; // Agrega este error
+    InvalidRating;
+    OutOfStock;
+};
+
+
+
+type OwnertoAsset = record {
+    withaccounts: vec text;
+    assets_ids: vec nat64;
+};
+
+type AssetInvest = record {
+    investments: vec record { principal; text };
+};
+
+type PrincipalInvest = record {
+    investments: vec record { nat64; text };
+};
+type ProjectType = variant {
+   
+    Reward;
+    Donation;
+    Loan;
+    Equity;
+};
+
+type Asset = record {
+    asset_id: nat64;
+    price: nat64;
+    autor: vec principal;
+    titulo: text;
+    small_description: text; // Agrega este campo
+    project_start_date: nat64;
+    project_end_date: nat64;
+    nftfractional: nat64;
+    business_plan_hash: text;
+    token_hash: text;
+    proyect_type: ProjectType;
+     end_crowfunding: nat64;
+     reward: opt text;
+     profit_per_token_percentage: opt nat64;
+     equityamountbytoken: opt nat64;
+};
+
+type CreateAsset = record {
+    price: nat64;
+    autor: vec principal;
+    titulo: text;
+    small_description: text; // Agrega este campo
+    project_start_date: nat64;
+    project_end_date: nat64;
+    nftfractional: nat64;
+    business_plan_hash: text;
+   token_hash: text;
+    proyect_type: ProjectType;
+     end_crowfunding: nat64;
+     reward: opt text;
+     profit_per_token_percentage: opt nat64;
+     equityamountbytoken: opt nat64;
+};
+
+
+type Result = variant {
+    Ok;
+    Err: AssetError;
+};
+
+type Result_investments_asset = variant {
+    Ok: vec record { text; text};
+    Err: AssetError;
+};
+
+type Result_invest_principal = variant {
+    Ok: vec record { nat64; text};
+    Err: AssetError;
+};
+
+
+type Result_asset = variant {
+    Ok: Asset;
+    Err: AssetError;
+};
+
+type Result_asset_category = variant {
+    Ok: vec record { nat64; Asset};
+    Err: AssetError;
+};
+
+type Result_asset_owner = variant {
+    Ok: vec record { nat64; Asset; text};
+    Err: AssetError;
+};
+
+service: () -> {
+
+    get_assets : () -> (vec record { nat64; Asset }) query;
+    get_asset_by_id : (nat64) -> (Result_asset) query;
+    get_assets_by_type: (ProjectType) -> (Result_asset_category) query;
+    get_assets_owner: () -> (Result_asset_owner) query;
+    set_asset : (nat64, CreateAsset, text) -> (Result);
+    save_invest_user : (nat64, text) -> ();
+    get_investments_by_principal : () -> (Result_invest_principal) query;
+    save_invest_asset : (nat64, text) -> ();
+    get_investments_by_asset : (nat64) -> (Result_investments_asset) query;
+    whoami : () -> (principal) query;
+   
+    
+}

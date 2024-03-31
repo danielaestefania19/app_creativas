@@ -8,6 +8,7 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib"]
 
+
 [dependencies]
 candid = "0.9"
 ic-cdk = "0.11"
@@ -18,6 +19,6 @@ serde_derive = "1.0"
 b3_utils = { version = "0.8.0", features = ["ledger", "stable_memory"] }
 unicode-normalization = "0.1.19"
 strsim = "0.10.0"
-
+wasm-bindgen = "0.2"
 
 

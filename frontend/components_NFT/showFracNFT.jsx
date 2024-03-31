@@ -4,7 +4,6 @@ import RES4 from "../../utils/abi/RES4.json";
 import { contractAddressRES4 } from "../../utils/constans.js";
 import FractionalNFT from "../../utils/abi/FractionalNFT.json"
 import { WalletContext } from '../components/WalletContext.jsx'; // Asegúrate de ajustar la ruta de importación
-import { assert } from "chai";
 
 const PRIVATE_KEY_NFT = import.meta.env.VITE_PRIVATE_KEY_NFT;
 const API_URL = import.meta.env.VITE_BACKEND_URL;

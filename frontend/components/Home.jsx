@@ -10,6 +10,25 @@ import Metamask from '../assets/Metamask.png'
 import { onMessage } from "firebase/messaging";
 import { messaging } from "../FirebaseConfig.jsx";
 import { ToastContainer, toast } from "react-toastify"
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root') // Esto es necesario para la accesibilidad
+
+const LoginModal = ({ isOpen, onRequestClose, handleLogin }) => {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={onRequestClose}
+        contentLabel="Login Modal"
+      >
+        <h2>Iniciar sesión</h2>
+        <button onClick={() => handleLogin('internetIdentity')}>Iniciar sesión con Internet Identity</button>
+        <button onClick={() => handleLogin('nfid')}>Iniciar sesión con NFID</button>
+        <button onClick={onRequestClose}>Cerrar</button>
+      </Modal>
+    );
+  };
+  
 
 const Home = () => {
     const [nav, setNav] = useState(false);
@@ -17,6 +36,7 @@ const Home = () => {
     const [prevScrollPos, setPrevScrollPos] = useState(0);
     const [visible, setVisible] = useState(true);
     const { isUserAuthenticated, login, logout } = useContext(AuthContext);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         onMessage(messaging, message => {
@@ -29,9 +49,12 @@ const Home = () => {
     const handleNav = () => {
         setNav(!nav);
     };
-    const handleLogin = async () => {
-        await login();
+    const handleLogin = async (method) => {
+        console.log(method); // Esto imprimirá el método de inicio de sesión en la consola
+        // Aquí va tu lógica de inicio de sesión
+        await login(method);
     };
+    
 
     const handleLogout = async () => {
         await logout();
@@ -67,20 +90,28 @@ const Home = () => {
                 </h1>
                 {isUserAuthenticated ? (
                     <button className="inline-flex items-center justify-center rounded-xl bg-white border dark:border-gray-600 px-3 py-2 text-sm font-semibold text-pink-600 shadow-sm transition-all duration-150" onClick={handleLogout}>
-                        <div className="flex items-center">Logout <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
+                        Logout
                     </button>
                 ) : (
-                    <button className="inline-flex items-center justify-center rounded-xl bg-white  border dark:border-gray-600 px-3 py-2 text-sm font-semibold text-pink-600 shadow-sm transition-all duration-150" onClick={handleLogin}>
-                        <div className="flex items-center">Login <img src={favicon} alt="Icono" className="ml-2 w-6 h-6" /></div>
-                    </button>
+                    <>
+                        <button className="inline-flex items-center justify-center rounded-xl bg-white  border dark:border-gray-600 px-3 py-2 text-sm font-semibold text-pink-600 shadow-sm transition-all duration-150" onClick={() => setIsModalOpen(true)}>
+                            Login
+                        </button>
+                        <LoginModal
+                            isOpen={isModalOpen}
+                            onRequestClose={() => setIsModalOpen(false)}
+                            handleLogin={handleLogin}
+                        />
+                    </>
                 )}
+
                 <div onClick={handleNav} className="block md:hidden">
                     {nav ? <AiOutlineClose size={20} /> : <AiOutlineMenu size={20} />}
                 </div>
 
                 <div className='max-w-[800px] mt-[80px] w-full h-[500px] mx-auto text-center flex flex-col justify-center'>
                     <h1 className='text-white font-extrabold font-manrope md:text-5xl sm:text-4xl text-xl  p-2'>
-                    Let's build a freer and more creative world!
+                        Let's build a freer and more creative world!
                     </h1>
                     <div className='flex justify-center items-center'>
                         <p className='md:text-5xl sm:text-4xl text-xl font-bold py-4'>

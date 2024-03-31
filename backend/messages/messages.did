@@ -1,0 +1,143 @@
+type KeyPrincipal = record{
+    key: principal;
+};
+
+type Profile = record {
+    username: text;
+    profile_picture: text;
+    about: text;
+    active: bool;  // Nuevo campo para el estado de actividad
+    last_connection: opt nat64;  // Nuevo campo para la última conexión
+};
+
+type CreateProfile = record {
+    username: text;
+    profile_picture: text;
+    about: text;
+};
+
+type AddProfilePicture = record {
+    profile_picture: text;
+};
+
+type MensajeStatus = variant {
+    Sent;
+    Read;
+};
+
+
+type ItemError = variant {
+    AlreadyExist;
+    ItemNotAllowed;
+    NotExist;
+    Unauthorized;
+    UpdateError;
+    NoItemsAssociated;
+    InvalidOwner;
+    AlreadyVoted; // Agrega este error
+    NoVotes; // Agrega este error
+    ItemNotFound; // Agrega este error
+    InvalidRating;
+};
+
+
+
+type Message = record {
+    sender: opt principal;
+    content: text;
+    addressee: opt principal;
+    time: nat64;
+    status: MensajeStatus;
+};
+
+type  UserMessages = record {
+    messages: vec Message;
+    last_checked: nat64; // Cambia a u64
+    unread: nat64; // Cambia a u64
+};
+
+type SendMessage = record {
+    content: text;
+    addressee: principal;
+};
+
+type SendMessage2 = record {
+    content: text;
+    addressee_text: text;
+};
+
+
+type LastChecked = record {
+    key: principal;
+};
+type Conversation = record {
+    other_user: principal;
+    last_message: Message;
+    unread: bool;
+    unread_count: nat64; 
+};
+
+type ResultSearch = record {
+    matches: bool;
+    users: vec record { text; principal};
+};
+
+type Result = variant {
+    Ok;
+    Err: ItemError;
+};
+
+type Result_get_tokens = variant {
+    Ok: vec text;
+    Err: ItemError;
+};
+
+type Result_get_profile = variant {
+    Ok: Profile;
+    Err: ItemError;
+};
+
+type InboxResult = record {
+    conversations: vec Conversation;
+    
+};
+
+type Result_get_private_chat = variant {
+    Ok: vec Message;
+    Err: ItemError
+};
+
+type Result_get_inbox = variant {
+    Ok: InboxResult;
+    Err: ItemError;
+};
+
+type Result_Bool = variant {
+    Ok: bool;
+    Err: ItemError;
+};
+
+
+service: (CreateProfile) -> {
+
+    has_profile : () -> (bool) query;
+    create_profile : (CreateProfile) -> (Result);
+    add_picture : (nat64, AddProfilePicture) -> (Result);
+    get_user_profile : () -> (Result_get_profile) query;
+    get_profile_key_by_principal : (principal) -> (Result_get_profile) query;
+    get_private_chat : (principal) -> (Result_get_private_chat) query;
+    mark_messages_as_read : (principal) -> (Result);
+    activate_profile : () -> (Result);
+    desactivate_profile : () -> (Result);
+    is_active : (principal) -> (Result_Bool) query;
+    send_message: (SendMessage) -> (Result);
+    send_message_by_canister: (SendMessage) -> (Result);
+    add_token_to_principal: (text) -> (Result);
+    get_tokens_for_principal: (text) -> (Result_get_tokens) query;
+    send_message_2 : (SendMessage2) -> (Result); 
+    get_inbox: () -> (Result_get_inbox) query;
+    autocomplete_search: (text) -> (ResultSearch) query;
+    whoami : () -> (principal) query;
+    manager : () -> (principal) query;
+    
+}

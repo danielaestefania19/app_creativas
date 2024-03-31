@@ -10,11 +10,11 @@ export function DefaultSidebar() {
   const [profile, setProfile] = useState(null); // Estado para almacenar el perfil del usuario
   const [imageUrl, setImageUrl] = useState(profileicon); // Estado para almacenar la URL de la imagen
   const [isProfileLoaded, setIsProfileLoaded] = useState(false); // Nuevo estado para rastrear si el perfil se ha cargado
-  const { actor } = useContext(AuthContext); // Accede al actor aquí
+  const { actor, actor_messages } = useContext(AuthContext); // Accede al actor aquí
 
   useEffect(() => {
     const fetchProfile = () => {
-      actor.get_user_profile()
+      actor_messages.get_user_profile()
         .then(response => {
           if (response.Ok) {
             const userProfile = response.Ok; // Accede a la propiedad Ok de la respuesta
